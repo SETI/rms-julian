@@ -85,9 +85,9 @@ except ImportError as err:
 def _INT(arg):
     """Convert to int, works for scalar, array, or array-like."""
     if isinstance(arg, np.ndarray):
-        return arg.astype('int')
+        return arg.astype('int64')
     elif np.shape(arg):
-        return np.array(arg).astype('int')
+        return np.array(arg).astype('int64')
     else:
         return int(arg)
 
