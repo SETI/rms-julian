@@ -167,11 +167,4 @@ class Test_mjd_jd(unittest.TestCase):
                              0. if origin == 'MIDNIGHT' else -43200)
             self.assertEqual(day_sec_from_mjd(51544.0), (0,0))
 
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################

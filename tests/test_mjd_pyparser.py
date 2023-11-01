@@ -4,7 +4,6 @@
 
 import unittest
 
-from pyparsing import ParseException
 
 class Test_mjd_pyparser(unittest.TestCase):
 
@@ -76,12 +75,5 @@ class Test_mjd_pyparser(unittest.TestCase):
                                                     values=[('YEAR', yval),
                                                             ('TIMESYS', sval),
                                                             ('DAY', nval)])
-
-########################################
-# Execute from the command line...
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
 
 ##########################################################################################

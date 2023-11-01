@@ -999,11 +999,4 @@ class Test_date_pyparser(unittest.TestCase):
                                             extended=extended,
                                             padding=padding, embedded=embedded)
 
-########################################
-# Execute from the command line...
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################

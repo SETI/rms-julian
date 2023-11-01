@@ -299,12 +299,4 @@ class Test_calendar(unittest.TestCase):
 
         set_gregorian_start()
 
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################
-

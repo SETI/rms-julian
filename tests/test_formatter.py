@@ -746,11 +746,4 @@ class Test_formatter(unittest.TestCase):
         self.assertEqual(ydhms_format_from_day_sec(-200000, 44444, proleptic=False),
                          ydhms_format_from_day_sec(-200000, 44444, use_julian=True))
 
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################

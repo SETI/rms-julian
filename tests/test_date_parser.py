@@ -2,9 +2,6 @@
 # julian/test_date_parser.py
 ##########################################################################################
 
-import numpy as np
-import pathlib
-import sys
 import unittest
 
 from julian.date_parser import (
@@ -369,12 +366,5 @@ class Test_date_parser(unittest.TestCase):
                       (1726, '2004 September 22')]
 
         self.assertEqual(days_in_strings(strings, substrings=True), PCK_ANSWER)
-
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
 
 ##########################################################################################

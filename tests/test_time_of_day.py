@@ -77,11 +77,4 @@ class Test_time_of_day(unittest.TestCase):
         self.assertRaises(ValueError, sec_from_hms, 23, 59, 70, validate=True, leapsecs=True)
         self.assertRaises(ValueError, sec_from_hms, 23, 59, 60, validate=True, leapsecs=False)
 
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################

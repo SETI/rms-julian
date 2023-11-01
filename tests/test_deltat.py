@@ -7,8 +7,7 @@ import numpy as np
 import unittest
 
 from julian.calendar import day_from_ymd, ymd_from_day
-from julian.deltat   import FuncDeltaT, LeapDeltaT, MergedDeltaT, SplineDeltaT, \
-                            MIN_YEAR, MAX_YEAR
+from julian.deltat   import FuncDeltaT, LeapDeltaT, MergedDeltaT, SplineDeltaT, MAX_YEAR
 
 INFO = [(1972, 1, 10),
         (1972, 7, 11),
@@ -551,12 +550,5 @@ class Test_DeltaT(unittest.TestCase):
         dt2 = SplineDeltaT(info1, before=9, last=1990)
         dt3 = LeapDeltaT(INFO)
         self.assertRaises(ValueError, MergedDeltaT, dt1, dt2, dt3)
-
-########################################
-# Execute from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
 
 ##########################################################################################

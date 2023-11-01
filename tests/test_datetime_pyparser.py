@@ -140,11 +140,4 @@ class Test_datetime_pyparser(unittest.TestCase):
         Test_mjd_pyparser.my_mjd_tester(self, p, floating=True, timesys=False,
                                         padding=False, embedded=False)
 
-########################################
-# Execute from the command line...
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################

@@ -2,12 +2,14 @@
 # julian/utc_tai_tdb.py
 ##########################################################################################
 
+import numbers
+
 import numpy as np
 from julian              import leap_seconds
 from julian.calendar     import day_from_ymd, ymd_from_day
 from julian.leap_seconds import delta_t_from_ymd, leapsecs_from_day, leapsecs_from_ym, \
                                 seconds_on_day
-from julian.utils        import _int, _float, _number
+from julian.utils        import _int, _int64, _float, _number
 from julian.warning      import _warn
 
 LEAPSECS_ON_JAN_1_2000 = leapsecs_from_ym(2000,1)
@@ -146,6 +148,11 @@ def utc_from_day_sec(day, sec=0):
     """
 
     day = _number(day)
+    # Force to int64 for Windows so expression below doesn't overflow
+    if (isinstance(day, numbers.Integral) or
+        (isinstance(day, np.ndarray) and day.dtype.kind in 'ui')):
+            day = _int64(day)
+
     (y,m,d) = ymd_from_day(day)
     leapsecs = leapsecs_from_ym(y,m)
     return 86400 * day + leapsecs + (sec - (SECONDS_PAST_MIDNIGHT

@@ -9,6 +9,7 @@ import unittest
 from julian.utils import (
     _float,
     _int,
+    _int64,
     _is_float,
     _is_int,
     _number,
@@ -35,6 +36,25 @@ class Test_utils(unittest.TestCase):
         self.assertFalse(isinstance(test, np.ndarray))
 
         test = _int(np.array(7.))
+        self.assertFalse(isinstance(test, np.ndarray))
+
+        # _int64
+        self.assertEqual(_int64(3.14), 3)
+        self.assertTrue(isinstance(_int64(3.14), int)) # Python internal type
+
+        self.assertEqual(_int64(-3.14), -4)
+        self.assertTrue(isinstance(_int64(3.14), int)) # Python internal type
+
+        test = _int64([3.14, -3.14])
+        self.assertTrue(isinstance(test, np.ndarray))
+        self.assertEqual(test.dtype.kind, 'i')
+        self.assertEqual(test.dtype, 'int64')
+        self.assertEqual(list(test), [3, -4])
+
+        test = _int64(np.array(7))
+        self.assertFalse(isinstance(test, np.ndarray))
+
+        test = _int64(np.array(7.))
         self.assertFalse(isinstance(test, np.ndarray))
 
         # _float

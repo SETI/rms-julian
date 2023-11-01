@@ -462,11 +462,4 @@ class Test_utc_tai_tdb(unittest.TestCase):
             self.assertTrue(np.all(dtest == daylist))
             self.assertLess(np.abs(stest - 43200.).max(), 2.e-7)
 
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################

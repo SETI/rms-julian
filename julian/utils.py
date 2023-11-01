@@ -29,6 +29,20 @@ def _int(arg):
     return (arg // 1.).astype('int64')
 
 
+def _int64(arg):
+    """Convert to Python int or numpy int64; works for scalar, array, or array-like.
+    Floating-point numbers are always rounded downward. This is required for Windows
+    which has a 32-bit default int size in numpy."""
+
+    arg = _int(arg)
+    if not isinstance(arg, np.ndarray):
+        return arg
+
+    if arg.dtype.kind == 'i':
+        return arg.astype('int64')
+    return arg.astype('uint64')
+
+
 def _float(arg):
     """Convert to floating-point; works for scalar, array, or array-like."""
 

@@ -14,8 +14,10 @@
 # if given anything array-like, they return arrays.
 ##########################################################################################
 
+import numbers
+
 import numpy as np
-from julian.utils   import _int, _is_float, _number
+from julian.utils   import _int, _int64, _is_float, _number
 from julian.warning import _warn
 
 
@@ -147,9 +149,9 @@ def ymd_from_day(day, *, proleptic=False, use_julian=None):
     is_float = _is_float(day)
     if is_float:
         frac = day % 1
-        day = _int(day)
     else:
         frac = 0
+    day = _int64(day)
 
     # Execute the magic algorithm for the proleptic Gregorian calendar
     g = day + 730425                    # Elapsed days after March 1, 1 BCE, Gregorian

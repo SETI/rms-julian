@@ -49,12 +49,4 @@ class Test_init(unittest.TestCase):
         leftovers = {n for n in leftovers if n[:2] != '__'}     # ignore dunders
         self.assertEqual(leftovers, {'JulianDeprecationWarning'})
 
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################
-

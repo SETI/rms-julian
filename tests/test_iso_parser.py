@@ -1,6 +1,7 @@
 ##########################################################################################
 # julian/test_iso_parser.py
 ##########################################################################################
+
 import numpy as np
 import unittest
 
@@ -524,13 +525,5 @@ class Test_iso_parser(unittest.TestCase):
                          tt_from_tai(tai_from_day_sec(-366, 86400)))
         self.assertEqual(time_from_iso(' 1998-12-31 23:59:60', strip=True, timesys='TT'),
                          tt_from_tai(tai_from_day_sec(-366, 86400)))
-
-
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
 
 ##########################################################################################

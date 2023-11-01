@@ -111,11 +111,4 @@ class Test_time_parser(unittest.TestCase):
         self.assertEqual(times_in_string('End time is 23:59:69.000 and later'), [86409.0])
         self.assertEqual(times_in_string('Error 23:5z:00.000:0'), [])
 
-########################################
-# Executed from the command line
-########################################
-
-if __name__ == '__main__':
-    unittest.main()
-
 ##########################################################################################
