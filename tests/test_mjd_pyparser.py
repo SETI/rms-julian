@@ -23,7 +23,7 @@ class Test_mjd_pyparser(unittest.TestCase):
 
     def my_mjd_tester(self, parser, floating, timesys, padding=False, embedded=False):
 
-        from julian.tests.test_date_pyparser import Test_date_pyparser
+        from tests.test_date_pyparser import Test_date_pyparser
 
         NUMBERS = []
         for n in ['12345', '-12345', '1']:
@@ -85,4 +85,3 @@ if __name__ == '__main__':
     unittest.main()
 
 ##########################################################################################
-

@@ -686,7 +686,7 @@ class Test_time_pyparser(unittest.TestCase):
                              floating=False, timesys=False, iso_only=False,
                              padding=False, embedded=False, failure=False):
 
-        from julian.tests.test_date_pyparser import Test_date_pyparser
+        from tests.test_date_pyparser import Test_date_pyparser
 
         HOURS = []
         for h in [0, 1, 9, 23, 24]:
@@ -1000,4 +1000,3 @@ if __name__ == '__main__':
     unittest.main()
 
 ##########################################################################################
-

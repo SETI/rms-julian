@@ -4,9 +4,9 @@
 
 import unittest
 
-from pyparsing                      import ParseException
-from julian.datetime_pyparser       import datetime_pyparser
-from julian.tests.test_mjd_pyparser import Test_mjd_pyparser
+from pyparsing                import ParseException
+from julian.datetime_pyparser import datetime_pyparser
+from tests.test_mjd_pyparser  import Test_mjd_pyparser
 
 
 class Test_datetime_pyparser(unittest.TestCase):
@@ -148,4 +148,3 @@ if __name__ == '__main__':
     unittest.main()
 
 ##########################################################################################
-

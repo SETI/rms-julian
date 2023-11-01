@@ -972,7 +972,7 @@ class Test_date_pyparser(unittest.TestCase):
 
     def test_date_pyparser_mjd(self):
 
-        from julian.tests.test_mjd_pyparser import Test_mjd_pyparser
+        from tests.test_mjd_pyparser import Test_mjd_pyparser
 
         for padding in (True,):
           for embedded in (True,):

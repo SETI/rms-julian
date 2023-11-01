@@ -171,9 +171,8 @@ class Test_date_parser(unittest.TestCase):
                                        (366, ', not tomorrow'))
 
         # Real-world test
-        julian_root_dir = pathlib.Path(sys.modules['julian'].__file__).parent
-        test_path = julian_root_dir / 'test_files' / 'cpck15Dec2017.tpc'
-        with test_path.open() as f:
+        test_path = 'test_files/cpck15Dec2017.tpc'
+        with open(test_path, 'r') as f:
             strings = f.readlines()
         f.close()
 

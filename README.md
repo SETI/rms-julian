@@ -29,18 +29,15 @@ date/time libraries in Python, including CSPYCE, it has these features.
   system defined by the Earth's rotation, by more than ~ 1 second. Between 1958 and 1972,
   the UTC second was redefined as a "rubber second", which would stretch or shrink as
   necessary to ensure that every mean solar day contained exactly 86,400 UT seconds; see
-
-        https://hpiers.obspm.fr/eop-pc/index.php?index=TAI-UTC_tab
+  [https://hpiers.obspm.fr/eop-pc/index.php?index=TAI-UTC_tab](https://hpiers.obspm.fr/eop-pc/index.php?index=TAI-UTC_tab).
 
   Before 1958, we use UT1 in place of UTC, employing a model for the long-term variations
   in Earth's rotation as documented for the "Five Millennium Canon of Solar Eclipses:
   -1999 to +3000; see
-
-        https://eclipse.gsfc.nasa.gov/SEpubs/5MCSE.html
+  [https://eclipse.gsfc.nasa.gov/SEpubs/5MCSE.html](https://eclipse.gsfc.nasa.gov/SEpubs/5MCSE.html).
 
   The numerical details are here:
-
-        https://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html
+  [https://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html](https://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html).
 
   This model can also be applied to future dates.
 
