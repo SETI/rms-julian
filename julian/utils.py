@@ -26,7 +26,7 @@ def _int(arg):
     if arg.dtype.kind in 'ui':
         return arg
 
-    return (arg // 1.).astype('int')
+    return (arg // 1.).astype('int64')
 
 
 def _float(arg):
