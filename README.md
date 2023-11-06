@@ -1,6 +1,6 @@
 | PyPI Release | Test Status | Code Coverage |
 | ------------ | ----------- | ------------- |
-| [![PyPI version](https://badge.fury.io/py/julian.svg)](https://badge.fury.io/py/julian) | [![Build status](https://img.shields.io/github/actions/workflow/status/SETI/rms-julian/run-tests.yml?branch=master)](https://github.com/SETI/rms-julian/actions) | [![Code coverage](https://img.shields.io/codecov/c/github/SETI/rms-julian/main?logo=codecov)](https://codecov.io/gh/SETI/rms-julian) |
+| [![PyPI version](https://badge.fury.io/py/rms-julian.svg)](https://badge.fury.io/py/rms-julian) | [![Build status](https://img.shields.io/github/actions/workflow/status/SETI/rms-julian/run-tests.yml?branch=master)](https://github.com/SETI/rms-julian/actions) | [![Code coverage](https://img.shields.io/codecov/c/github/SETI/rms-julian/main?logo=codecov)](https://codecov.io/gh/SETI/rms-julian) |
 
 # rms-julian
 
@@ -10,7 +10,7 @@ Supported versions: Python >= 3.7
 # Julian Library, version 2.0
 
 This is a large set of routines for handing date and time conversions. Compared to other
-date/time libraries in Python, including CSPYCE, it has these features.
+date/time libraries in Python, including CSPYCE, it has these features:
 
 - It handles the time systems Coordinated Universal Time (UTC), International Atomic Time
   (TAI), Barycentric Dynamical Time (TDB), and Terrestrial Time (TT, previously called
