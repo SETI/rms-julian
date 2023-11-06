@@ -20,7 +20,7 @@ from julian.datetime_pyparser import datetime_pyparser
 # General date/time parser
 ##########################################################################################
 
-def day_sec_from_string(string, order='YMD', *, doy=True, mjd=False, weekdays=False,
+def day_sec_from_string(string, order='YMD', *, doy=True, mjd=True, weekdays=False,
                         extended=False, proleptic=False, treq=False, leapsecs=True,
                         ampm=True, timezones=False, timesys=False, floating=False):
     """Day and second values based on the parsing of a free-form string.
