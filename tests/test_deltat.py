@@ -7,7 +7,7 @@ import numpy as np
 import unittest
 
 from julian.calendar import day_from_ymd, ymd_from_day
-from julian.deltat   import FuncDeltaT, LeapDeltaT, MergedDeltaT, SplineDeltaT, MAX_YEAR
+from julian._deltat  import FuncDeltaT, LeapDeltaT, MergedDeltaT, SplineDeltaT, _MAX_YEAR
 
 INFO = [(1972, 1, 10),
         (1972, 7, 11),
@@ -49,7 +49,7 @@ class Test_DeltaT(unittest.TestCase):
 
         dt = LeapDeltaT(INFO, before=9)
         self.assertEqual(dt.first, 1972)
-        self.assertEqual(dt.last, MAX_YEAR)
+        self.assertEqual(dt.last, _MAX_YEAR)
         self.assertEqual(dt.before, 9)
         self.assertFalse(dt.is_float)
         self.assertIsInstance(dt.before, numbers.Real)
@@ -59,7 +59,7 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.delta_t_from_ymd(1971, 12),  9)
         self.assertEqual(dt.delta_t_from_ymd(1972,  1), 10)
         self.assertEqual(dt.delta_t_from_ymd(2017,  1), 37)
-        self.assertEqual(dt.delta_t_from_ymd(MAX_YEAR, 1), dt.delta_t_from_ymd(2017, 1))
+        self.assertEqual(dt.delta_t_from_ymd(_MAX_YEAR, 1), dt.delta_t_from_ymd(2017, 1))
 
         self.assertIsInstance(dt.delta_t_from_ymd(1971, 12), numbers.Real)
         self.assertIsInstance(dt.delta_t_from_ymd(1971, 12), numbers.Integral)
@@ -70,7 +70,7 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.leapsecs_from_ymd(1972,  1), 10)
         self.assertEqual(dt.leapsecs_from_ymd(2017,  1), 37)
         self.assertEqual(dt.leapsecs_from_ymd(9999,  1), 37)
-        self.assertEqual(dt.leapsecs_from_ymd(MAX_YEAR, 1), dt.leapsecs_from_ymd(2017, 1))
+        self.assertEqual(dt.leapsecs_from_ymd(_MAX_YEAR, 1), dt.leapsecs_from_ymd(2017, 1))
 
         years = [1971, 1972, 2017, 9999]
         answer = [9, 10, 37, 37]
@@ -84,7 +84,7 @@ class Test_DeltaT(unittest.TestCase):
         dt.insert_leap_second(2041, 2, offset=-2)
         self.assertEqual(dt.update_count, 3)
         self.assertEqual(dt.first, 1972)
-        self.assertEqual(dt.last, MAX_YEAR)
+        self.assertEqual(dt.last, _MAX_YEAR)
         self.assertEqual(dt.before, 9)
 
         self.assertEqual(dt.delta_t_from_ymd(1971, 12),  9)
@@ -96,7 +96,7 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.delta_t_from_ymd(2041,  2), 36)
         self.assertEqual(dt.delta_t_from_ymd(2042,  1), 36)
         self.assertEqual(dt.delta_t_from_ymd(9999,  1), 36)
-        self.assertEqual(dt.delta_t_from_ymd(MAX_YEAR, 1), dt.delta_t_from_ymd(2041, 2))
+        self.assertEqual(dt.delta_t_from_ymd(_MAX_YEAR, 1), dt.delta_t_from_ymd(2041, 2))
 
         self.assertEqual(dt.leapsecs_from_ymd(1971, 12),  9)
         self.assertEqual(dt.leapsecs_from_ymd(1972,  1), 10)
@@ -107,7 +107,7 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.leapsecs_from_ymd(2041,  2), 36)
         self.assertEqual(dt.leapsecs_from_ymd(2042,  1), 36)
         self.assertEqual(dt.leapsecs_from_ymd(9999,  1), 36)
-        self.assertEqual(dt.leapsecs_from_ymd(MAX_YEAR, 1), dt.leapsecs_from_ymd(2041, 2))
+        self.assertEqual(dt.leapsecs_from_ymd(_MAX_YEAR, 1), dt.leapsecs_from_ymd(2041, 2))
 
         years = [1971, 1972, 2017, 2040, 2041, 2042, 9999]
         answer = [9, 10, 37, 37, 38, 36, 36]
@@ -119,7 +119,7 @@ class Test_DeltaT(unittest.TestCase):
         # before=None
         dt = LeapDeltaT(INFO, before=None)
         self.assertEqual(dt.first, 1972)
-        self.assertEqual(dt.last, MAX_YEAR)
+        self.assertEqual(dt.last, _MAX_YEAR)
         self.assertEqual(dt.before, 10)
         self.assertFalse(dt.is_float)
 
@@ -138,7 +138,7 @@ class Test_DeltaT(unittest.TestCase):
         # set_last_year()
         dt = LeapDeltaT(INFO, before=None)
         self.assertEqual(dt.update_count, 1)
-        self.assertEqual(dt.last, MAX_YEAR)
+        self.assertEqual(dt.last, _MAX_YEAR)
 
         dt.set_last_year(2040)
         self.assertEqual(dt.update_count, 2)
@@ -146,14 +146,14 @@ class Test_DeltaT(unittest.TestCase):
 
         dt.set_last_year(np.inf)
         self.assertEqual(dt.update_count, 3)
-        self.assertEqual(dt.last, MAX_YEAR)
+        self.assertEqual(dt.last, _MAX_YEAR)
 
 
     def test_SplineDeltaT(self):
 
         dt = SplineDeltaT(INFO, before=9)
         self.assertEqual(dt.first, 1972)
-        self.assertEqual(dt.last, MAX_YEAR)
+        self.assertEqual(dt.last, _MAX_YEAR)
         self.assertEqual(dt.before, 9)
         self.assertTrue(dt.is_float)
         self.assertIsInstance(dt.before, numbers.Real)
@@ -163,14 +163,14 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.delta_t_from_ymd(1972,  1), 10)
         self.assertEqual(dt.delta_t_from_ymd(2017,  1), 37)
         self.assertEqual(dt.delta_t_from_ymd(2017,  2), 37)
-        self.assertEqual(dt.delta_t_from_ymd(MAX_YEAR, 1), dt.delta_t_from_ymd(2017, 1))
+        self.assertEqual(dt.delta_t_from_ymd(_MAX_YEAR, 1), dt.delta_t_from_ymd(2017, 1))
 
         self.assertEqual(dt.leapsecs_from_ymd(1971, 12), 0)
         self.assertEqual(dt.leapsecs_from_ymd(1972,  1), 0)
         self.assertEqual(dt.leapsecs_from_ymd(2017,  1), 0)
         self.assertEqual(dt.leapsecs_from_ymd(2017,  2), 0)
         self.assertEqual(dt.leapsecs_from_ymd(9999,  1), 0)
-        self.assertEqual(dt.leapsecs_from_ymd(MAX_YEAR, 1), 0)
+        self.assertEqual(dt.leapsecs_from_ymd(_MAX_YEAR, 1), 0)
 
         years = [1971, 1972, 2017, 9999]
         answer = [9, 10, 37, 37]
@@ -290,7 +290,7 @@ class Test_DeltaT(unittest.TestCase):
         dt = MergedDeltaT(dt1, dt2)         # let splines 1972-1990 take precedence
 
         self.assertEqual(dt.first, 1972)
-        self.assertEqual(dt.last, MAX_YEAR)
+        self.assertEqual(dt.last, _MAX_YEAR)
         self.assertEqual(dt.before, 7)
         self.assertTrue(dt.is_float)
         self.assertIsInstance(dt.before, numbers.Real)
@@ -301,14 +301,14 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.delta_t_from_ymd(2017,  1), 37)
         self.assertEqual(dt.delta_t_from_ymd(2017,  2), 37)
         self.assertEqual(dt.delta_t_from_ymd(9999,  1), 37)
-        self.assertEqual(dt.delta_t_from_ymd(MAX_YEAR, 1), dt.delta_t_from_ymd(2017, 1))
+        self.assertEqual(dt.delta_t_from_ymd(_MAX_YEAR, 1), dt.delta_t_from_ymd(2017, 1))
 
         self.assertEqual(dt.leapsecs_from_ymd(1971, 12),  5)    # defined by LeapDeltaT
         self.assertEqual(dt.leapsecs_from_ymd(1972,  1), 10)
         self.assertEqual(dt.leapsecs_from_ymd(2017,  1), 37)
         self.assertEqual(dt.leapsecs_from_ymd(2017,  2), 37)
         self.assertEqual(dt.leapsecs_from_ymd(9999,  1), 37)
-        self.assertEqual(dt.leapsecs_from_ymd(MAX_YEAR, 1), dt.leapsecs_from_ymd(2017, 1))
+        self.assertEqual(dt.leapsecs_from_ymd(_MAX_YEAR, 1), dt.leapsecs_from_ymd(2017, 1))
 
         years = [1971, 1972, 2017, 9999]
         answer = [7, 10, 37, 37]
@@ -346,11 +346,11 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.leapsecs_from_ymd(2041,  2), 38)
         self.assertEqual(dt.leapsecs_from_ymd(2042,  1), 38)
         self.assertEqual(dt.leapsecs_from_ymd(9999,  1), 38)
-        self.assertEqual(dt.leapsecs_from_ymd(MAX_YEAR, 1), dt.leapsecs_from_ymd(2041, 2))
+        self.assertEqual(dt.leapsecs_from_ymd(_MAX_YEAR, 1), dt.leapsecs_from_ymd(2041, 2))
 
         dt2.insert_leap_second(2041, 2, offset=-2)
         self.assertEqual(dt.first, 1972)
-        self.assertEqual(dt.last, MAX_YEAR)
+        self.assertEqual(dt.last, _MAX_YEAR)
         self.assertEqual(dt.before, 7)
 
         self.assertEqual(dt.delta_t_from_ymd(1971, 12),  7)
@@ -362,7 +362,7 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.delta_t_from_ymd(2041,  2), 36)
         self.assertEqual(dt.delta_t_from_ymd(2042,  1), 36)
         self.assertEqual(dt.delta_t_from_ymd(9999,  1), 36)
-        self.assertEqual(dt.delta_t_from_ymd(MAX_YEAR, 1), dt.delta_t_from_ymd(2041, 2))
+        self.assertEqual(dt.delta_t_from_ymd(_MAX_YEAR, 1), dt.delta_t_from_ymd(2041, 2))
 
         self.assertEqual(dt.leapsecs_from_ymd(1971, 12),  5)
         self.assertEqual(dt.leapsecs_from_ymd(1972,  1), 10)
@@ -373,7 +373,7 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.leapsecs_from_ymd(2041,  2), 36)
         self.assertEqual(dt.leapsecs_from_ymd(2042,  1), 36)
         self.assertEqual(dt.leapsecs_from_ymd(9999,  1), 36)
-        self.assertEqual(dt.leapsecs_from_ymd(MAX_YEAR, 1), dt.leapsecs_from_ymd(2041, 2))
+        self.assertEqual(dt.leapsecs_from_ymd(_MAX_YEAR, 1), dt.leapsecs_from_ymd(2041, 2))
 
         years = [1971, 1972, 2017, 2040, 2041, 2042, 9999]
         answer = [7, 10, 37, 37, 38, 36, 36]
@@ -550,5 +550,12 @@ class Test_DeltaT(unittest.TestCase):
         dt2 = SplineDeltaT(info1, before=9, last=1990)
         dt3 = LeapDeltaT(INFO)
         self.assertRaises(ValueError, MergedDeltaT, dt1, dt2, dt3)
+
+############################################
+# Execute from command line...
+############################################
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

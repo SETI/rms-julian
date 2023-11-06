@@ -6,9 +6,10 @@ import numbers
 import numpy as np
 import unittest
 
-from julian            import leap_seconds
-from julian.calendar   import day_from_ymd
-from julian.iso_parser import tai_from_iso
+from julian             import leap_seconds
+from julian.calendar    import day_from_ymd
+from julian.iso_parsers import tai_from_iso
+from julian._exceptions import JulianValidateFailure
 
 from julian.leap_seconds import (
     delta_t_from_day,
@@ -152,8 +153,8 @@ class Test_leap_seconds(unittest.TestCase):
         # Restore without added leap seconds
         load_lsk()
         self.assertEqual(leapsecs_from_ym(2021,1), count)
-        self.assertEqual(leap_seconds.SELECTED_UT_MODEL, 'LEAPS')
-        self.assertIs(leap_seconds.SELECTED_DELTA_T, leap_seconds.DELTA_T_DICT['LEAPS'])
+        self.assertEqual(leap_seconds._SELECTED_UT_MODEL, 'LEAPS')
+        self.assertIs(leap_seconds._SELECTED_DELTA_T, leap_seconds._DELTA_T_DICT['LEAPS'])
 
         # A large number of dates, spanning > 200 years
         daylist = range(-40001, 40000, 83)
@@ -173,7 +174,7 @@ class Test_leap_seconds(unittest.TestCase):
             self.assertEqual(seconds_on_day(day_from_ymd(1998,12,31), leapsecs=False),
                                             86400)
 
-            for secs, y, mon, d in leap_seconds.DELTET_DELTA_AT[1:]:
+            for secs, y, mon, d in leap_seconds._DELTET_DELTA_AT[1:]:
                 day = day_from_ymd(int(y), 1 if mon == 'JAN' else 7, int(d))
                 self.assertEqual(leapsecs_from_day(day), int(secs))
                 self.assertEqual(leapsecs_from_day(day-1), int(secs)-1)
@@ -223,16 +224,23 @@ class Test_leap_seconds(unittest.TestCase):
         tai = tai_from_iso('2030-01-01T00:00:00')
         self.assertEqual(tai_from_iso('2029-12-31T23:59:58', validate=True), tai-1)
         self.assertEqual(tai_from_iso('2029-12-31T23:59:59', validate=False), tai)
-        self.assertRaises(ValueError, tai_from_iso, '2029-12-31T23:59:59',
-                                                    validate=True)
+        self.assertRaises(JulianValidateFailure,
+                          tai_from_iso, '2029-12-31T23:59:59', validate=True)
 
         tai = tai_from_iso('2031-01-01T00:00:00')
         self.assertEqual(tai_from_iso('2030-12-31T23:59:57', validate=True), tai-1)
-        self.assertRaises(ValueError, tai_from_iso, '2030-12-31T23:59:58',
-                                                    validate=True)
-        self.assertRaises(ValueError, tai_from_iso, '2030-12-31T23:59:59',
-                                                    validate=True)
+        self.assertRaises(JulianValidateFailure,
+                          tai_from_iso, '2030-12-31T23:59:58', validate=True)
+        self.assertRaises(JulianValidateFailure,
+                          tai_from_iso, '2030-12-31T23:59:59', validate=True)
 
         load_lsk()
+
+############################################
+# Execute from command line...
+############################################
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

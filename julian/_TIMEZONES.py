@@ -1,5 +1,13 @@
-# Excerpted from https://en.wikipedia.org/wiki/List_of_time_zone_abbreviations
-# on June 7, 2023
+##########################################################################################
+# julian/_TIMEZONES.py
+##########################################################################################
+"""Dictionary of time zone abbreviations and their meanings.
+
+Content excerpted from
+    https://en.wikipedia.org/wiki/List_of_time_zone_abbreviations
+on June 7, 2023.
+"""
+##########################################################################################
 
 TIMEZONES = {
     "ACDT": "+10:30",
@@ -150,8 +158,8 @@ TIMEZONES = {
     "SLST": "+05:30",
     "SRET": "+11",
     "SRT" : "-03",
-    "SST" : "-11",
-    "SST" : "+08",
+#     "SST" : "-11",
+#     "SST" : "+08",
     "SYOT": "+03",
     "TAHT": "-10",
     "THA" : "+07",
@@ -189,3 +197,6 @@ TIMEZONES = {
     "YEKT": "+05",
     "Z"   : "+00",
 }
+
+##########################################################################################
+

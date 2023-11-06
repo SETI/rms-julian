@@ -1,23 +1,29 @@
 ##########################################################################################
-# julian/warning.py
+# julian/_warnings.py
+##########################################################################################
+"""Definition of class JulianDeprecationWarning
+"""
 ##########################################################################################
 
 import warnings
 
+
 class JulianDeprecationWarning(DeprecationWarning):
     pass
 
-WARNING_MESSAGES = set()
+
+_WARNING_MESSAGES = set()
+
 
 def _warn(message):
     """Raise this DeprecationWarning message, but only once."""
 
-    global WARNING_MESSAGES
+    global _WARNING_MESSAGES
 
-    if message in WARNING_MESSAGES:
+    if message in _WARNING_MESSAGES:
         return
 
     warnings.warn(message, category=JulianDeprecationWarning)
-    WARNING_MESSAGES.add(message)
+    _WARNING_MESSAGES.add(message)
 
 ##########################################################################################

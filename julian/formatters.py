@@ -1,23 +1,25 @@
 ##########################################################################################
-# julian/formatter.py
+# julian/formatters.py
+##########################################################################################
+"""Functions to format date/time strings in ISO-standard formats
+"""
 ##########################################################################################
 
 import numpy as np
-from julian.calendar     import ymd_from_day, yd_from_day
-from julian.leap_seconds import seconds_on_day
-from julian.utc_tai_tdb  import day_sec_from_tai
-from julian.time_of_day  import hms_from_sec
-from julian.utils        import _float, _int, _is_float, _number
-from julian.warning      import _warn
+from julian.calendar       import ymd_from_day, yd_from_day
+from julian.leap_seconds   import seconds_on_day
+from julian.utc_tai_tdb_tt import day_sec_from_tai
+from julian.time_of_day    import hms_from_sec
+from julian._utils         import _float, _int, _is_float, _number
 
-DIGITS1 = np.array(['%d' % i for i in range(10)])
-BDIGITS1 = DIGITS1.astype('S')
+_DIGITS1 = np.array(['%d' % i for i in range(10)])
+_BDIGITS1 = _DIGITS1.astype('S')
 
-DIGITS2 = np.array(['%02d' % i for i in range(100)])
-BDIGITS2 = DIGITS2.astype('S')
+_DIGITS2 = np.array(['%02d' % i for i in range(100)])
+_BDIGITS2 = _DIGITS2.astype('S')
 
-DIGITS3 = np.array(['%03d' % i for i in range(367)])
-BDIGITS3 = DIGITS3.astype('S')
+_DIGITS3 = np.array(['%03d' % i for i in range(367)])
+_BDIGITS3 = _DIGITS3.astype('S')
 
 ##########################################################################################
 # Date formatting
@@ -95,17 +97,17 @@ def format_day(day, order='YMD', *, ydigits=4, dash='-', ddigits=None, proleptic
         null = ''           # content of an empty cell
         dot = '.'           # representation for a period
         dash_ = dash        # representation for the field separator
-        vals1 = DIGITS1     # representations of numbers 0-9
-        vals2 = DIGITS2     # representations of numbers 0-99
-        vals3 = DIGITS3     # representations of numbers 0-366
+        vals1 = _DIGITS1    # representations of numbers 0-9
+        vals2 = _DIGITS2    # representations of numbers 0-99
+        vals3 = _DIGITS3    # representations of numbers 0-366
     else:
         w = 1
         null = b'\0'
         dot = b'.'
         dash_ = dash.encode('latin8')
-        vals1 = BDIGITS1
-        vals2 = BDIGITS2
-        vals3 = BDIGITS3
+        vals1 = _BDIGITS1
+        vals2 = _BDIGITS2
+        vals3 = _BDIGITS3
 
     # Translate the days; determine the string format and dtype
     fmt_list = []
@@ -285,15 +287,15 @@ def format_sec(sec, digits=None, *, colon=':', suffix='', buffer=None, kind='U')
         null = ''           # content of an empty cell
         dot = '.'           # representation of a period
         colon_ = colon      # representation for the field separator
-        vals1 = DIGITS1     # representations of numbers 0-9
-        vals2 = DIGITS2     # representations of numbers 0-99
+        vals1 = _DIGITS1    # representations of numbers 0-9
+        vals2 = _DIGITS2    # representations of numbers 0-99
     else:
         w = 1
         null = b'\0'
         dot = b'.'
         colon_ = colon.encode('latin8')
-        vals1 = BDIGITS1
-        vals2 = BDIGITS2
+        vals1 = _BDIGITS1
+        vals2 = _BDIGITS2
 
     # Determine the string format and dtype
     lcolon = len(colon)
@@ -587,7 +589,7 @@ def format_tai(tai, order='YMDT', *, ydigits=4, dash='-', sep='T', colon=':', di
 
 
 def iso_from_tai(tai, ymd=True, digits=None, *, suffix='', proleptic=False,
-                 use_julian=None, buffer=None, kind='U'):
+                 buffer=None, kind='U'):
     """Date and time in ISO format given seconds TAI.
 
     This function supports scalar or array-like inputs. If array-like inputs are provided,
@@ -610,16 +612,11 @@ def iso_from_tai(tai, ymd=True, digits=None, *, suffix='', proleptic=False,
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
         buffer      an optional array of strings or byte strings into which to write the
                     results. Must have sufficient dimensions.
         kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
                     provided.
     """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
 
     if ymd:
         return format_tai(tai, order='YMDT', sep='T', digits=digits, suffix=suffix,
@@ -627,273 +624,6 @@ def iso_from_tai(tai, ymd=True, digits=None, *, suffix='', proleptic=False,
     else:
         return format_tai(tai, order='YDT', sep='T', digits=digits, suffix=suffix,
                           proleptic=proleptic, buffer=buffer, kind=kind)
-
-##########################################################################################
-# DEPRECATED
-##########################################################################################
-
-def ymd_format_from_day(day, *, ydigits=4, dash='-', ddigits=None, proleptic=False,
-                        use_julian=None, buffer=None, kind="U"):
-    """Date in "yyyy-mm-dd" format.
-
-    This function supports scalar or array-like inputs. If array-like inputs are provided,
-    an array of strings or ASCII byte strings is returned.
-
-    DEPRECATED name. This function is a variant of format_day() but with a reduced set of
-    options.
-
-    Input:
-        day         integer or arbitrary array of integers defining day numbers relative
-                    to January 1, 2000.
-        ydigits     number of year digits to include, 2 or 4; default 4.
-        dash        character(s) to include between fields, if any. Default is "-". Use ""
-                    for no separators; any other string can also be used in place of
-                    the dashes.
-        ddigits     decimal digits to include in day values; use -1 or None to suppress
-                    the decimal point; ignored if day values are integers.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
-    """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
-
-    return format_day(day, order='YMD', ydigits=ydigits, dash=dash,  ddigits=ddigits,
-                      proleptic=proleptic, buffer=buffer, kind=kind)
-
-
-def yd_format_from_day(day, *, ydigits=4, dash='-', ddigits=None, proleptic=False,
-                       buffer=None, use_julian=None, kind="U"):
-    """Date in "yyyy-ddd" format. Supports scalars or array-like arguments.
-
-    This function supports scalar or array-like inputs. If array-like inputs are provided,
-    an array of strings or ASCII byte strings is returned.
-
-    DEPRECATED name. This function is a variant of format_day() but with a reduced set of
-    options.
-
-    Input:
-        day         integer or arbitrary array of integers defining day numbers relative
-                    to January 1, 2000.
-        ydigits     number of year digits to include, 2 or 4; default 4.
-        dash        character(s) to include between fields, if any. Default is "-". Use ""
-                    for no separators; any other string can also be used in place of
-                    the dashes.
-        ddigits     decimal digits to include in day values; use -1 or None to suppress
-                    the decimal point; ignored if day values are integers.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
-    """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
-
-    return format_day(day, order='YD', ydigits=ydigits, dash=dash, ddigits=ddigits,
-                      proleptic=proleptic, buffer=buffer, kind=kind)
-
-
-def hms_format_from_sec(sec, digits=None, suffix='', *, colon=':', buffer=None, kind='U'):
-    """Time in "hh:mm:ss[.fff][Z]" format.
-
-    This function supports scalar or array-like inputs. If array-like inputs are provided,
-    an array of strings or ASCII byte strings is returned.
-
-    DEPRECATED name. This function is a variant of format_sec() with a reduced set of
-    options.
-
-    Input:
-        sec         the number of seconds into a day, or an arbitrary array thereof;
-                    each value should be >= 0 and < 86410.
-        digits      the number of digits to include after the decimal point; use a
-                    negative value or None for seconds to be rounded to integer.
-        suffix      "Z" to include the Zulu time zone indicator.
-        colon       character(s) to include between fields, if any. Default is ":". Use
-                    "" for no separators; any other string can also be used in place of
-                    the colons.
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
-    """
-
-    return format_sec(sec, digits=digits, colon=colon, suffix=suffix, buffer=buffer,
-                      kind=kind)
-
-
-def ymdhms_format_from_day_sec(day, sec, sep='T', digits=None, suffix='',
-                               proleptic=False, use_julian=None, buffer=None, kind='U'):
-    """Date and time in ISO format "yyyy-mm-ddThh:mm:ss....".
-
-    This function supports scalar or array-like inputs. If array-like inputs are provided,
-    an array of strings or ASCII byte strings is returned.
-
-    DEPRECATED name. This function is a variant of format_day_sec() with a reduced set of
-    options.
-
-    Input:
-        day         integer or arbitrary array of integers defining day numbers relative
-                    to January 1, 2000.
-        sec         the number of seconds into a day; should be less than the number of
-                    seconds on the associated day. Note that day and sec need not have the
-                    same shape, but must be broadcastable to the same shape.
-        sep         the character to separate the date from the time. Default is "T" but
-                    " " is also allowed.
-        digits      the number of digits to include after the decimal point; use a
-                    negative value or None for seconds to be rounded to integer.
-        suffix      "Z" to include the Zulu time zone indicator.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
-        buffer      an optional byte array into which to write the results.
-                    Only used if day/sec are arrays. If the buffer is provided,
-                    the elements must have sufficient length.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
-    """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
-
-    return format_day_sec(day, sec, order='YMDT', ydigits=4, dash='-', sep=sep, colon=':',
-                          digits=digits, suffix=suffix, proleptic=proleptic,
-                          buffer=buffer, kind=kind)
-
-
-def ydhms_format_from_day_sec(day, sec, *, sep='T', digits=None, suffix='',
-                              proleptic=False, use_julian=None, buffer=None, kind='U'):
-    """Date and time in ISO format "yyyy-dddThh:mm:ss....".
-
-    This function supports scalar or array-like inputs. If array-like inputs are provided,
-    an array of strings or ASCII byte strings is returned.
-
-    DEPRECATED name. This function is a variant of format_day_sec() with a reduced set of
-    options.
-
-    Input:
-        day         integer or arbitrary array of integers defining day numbers relative
-                    to January 1, 2000.
-        sec         the number of seconds into a day; should be less than the number of
-                    seconds on the associated day. Note that day and sec need not have the
-                    same shape, but must be broadcastable to the same shape.
-        sep         the character to separate the date from the time. Default is "T" but
-                    " " is also allowed.
-        digits      the number of digits to include after the decimal point; use a
-                    negative value or None for seconds to be rounded to integer.
-        suffix      "Z" to include the Zulu time zone indicator.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
-        buffer      an optional byte array into which to write the results. Only used if
-                    day/sec are arrays. If the buffer is provided, the elements must have
-                    sufficient length.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
-    """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
-
-    return format_day_sec(day, sec, order='YDT', ydigits=4, dash='-', sep=sep, colon=':',
-                          digits=digits, suffix=suffix, proleptic=proleptic,
-                          buffer=buffer, kind=kind)
-
-
-def ymdhms_format_from_tai(tai, *, sep='T', digits=None, suffix='', proleptic=False,
-                           use_julian=None, buffer=None, kind='U'):
-    """Date and time in ISO format "yyyy-mm-ddThh:mm:ss...." given seconds TAI.
-
-    This function supports scalar or array-like inputs. If array-like inputs are provided,
-    an array of strings or ASCII byte strings is returned.
-
-    Note that the optional output buffer can be either strings (dtype "U") or bytes
-    (dtype "S"). If the latter, you can define it as a NumPy memmap and write content
-    directly into an ASCII table file.
-
-    DEPRECATED name. This function is a variant of format_tai() but with a reduced set of
-    options.
-
-    Input:
-        tai         time value in seconds TAI or an array of time values.
-        sep         the character to separate the date from the time. Default is "T" but
-                    " " is also allowed.
-        digits      the number of digits to include after the decimal point; use a
-                    negative value or None for seconds to be rounded to integer.
-        suffix      "Z" to include the Zulu time zone indicator.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
-    """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
-
-    return format_tai(tai, order='YMDT', ydigits=4, dash='-', sep=sep, colon=':',
-                      digits=digits, suffix=suffix, proleptic=proleptic, buffer=buffer,
-                      kind=kind)
-
-
-def ydhms_format_from_tai(tai, *, sep='T', digits=None, suffix='', proleptic=False,
-                          use_julian=None, buffer=None, kind='U'):
-    """Date and time in ISO format "yyyy-dddThh:mm:ss...." given seconds TAI.
-
-    This function supports scalar or array-like inputs. If array-like inputs are provided,
-    an array of strings or ASCII byte strings is returned.
-
-    Note that the optional output buffer can be either strings (dtype "U") or bytes
-    (dtype "S"). If the latter, you can define it as a NumPy memmap and write content
-    directly into an ASCII table file.
-
-    DEPRECATED name. This function is a variant of format_tai() but with a reduced set of
-    options.
-
-    Input:
-        tai         time value in seconds TAI or an array of time values.
-        sep         the character to separate the date from the time. Default is "T" but
-                    " " is also allowed.
-        digits      the number of digits to include after the decimal point; use a
-                    negative value or None for seconds to be rounded to integer.
-        suffix      "Z" to include the Zulu time zone indicator.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
-    """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
-
-    return format_tai(tai, order='YDT', ydigits=4, dash='-', sep=sep, colon=':',
-                      digits=digits, suffix=suffix, proleptic=proleptic, buffer=buffer,
-                      kind=kind)
 
 ##########################################################################################
 

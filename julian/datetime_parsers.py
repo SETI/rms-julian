@@ -1,15 +1,18 @@
 ##########################################################################################
-# julian/datetime_parser.py
+# julian/datetime_parsers.py
+##########################################################################################
+"""Functions to parse date/time strings given in arbitrary formats
+"""
 ##########################################################################################
 
 import numbers
 import pyparsing
 
-from julian.date_parser  import _date_pattern_filter, _day_from_dict, _search_in_string
+from julian.date_parsers import _date_pattern_filter, _day_from_dict, _search_in_string
 from julian.leap_seconds import seconds_on_day
-from julian.mjd_jd       import day_from_mjd, JD_MINUS_MJD
-from julian.time_parser  import _sec_from_dict, _time_pattern_filter
-from julian.warning      import _warn
+from julian.mjd_jd       import day_from_mjd, _JD_MINUS_MJD
+from julian.time_parsers import _sec_from_dict, _time_pattern_filter
+from julian._exceptions  import JulianParseException
 
 from julian.datetime_pyparser import datetime_pyparser
 
@@ -17,9 +20,9 @@ from julian.datetime_pyparser import datetime_pyparser
 # General date/time parser
 ##########################################################################################
 
-def day_sec_from_string(string, order='YMD', *, doy=True, mjd=False, proleptic=False,
-                        treq=False, leapsecs=True, ampm=True, timezones=False,
-                        timesys=False, floating=False):
+def day_sec_from_string(string, order='YMD', *, doy=True, mjd=False, weekdays=False,
+                        extended=False, proleptic=False, treq=False, leapsecs=True,
+                        ampm=True, timezones=False, timesys=False, floating=False):
     """Day and second values based on the parsing of a free-form string.
 
     Input:
@@ -28,6 +31,9 @@ def day_sec_from_string(string, order='YMD', *, doy=True, mjd=False, proleptic=F
                     date, month, and year in situations where it might be ambiguous.
         doy         True to recognize dates specified as year and day-of-year.
         mjd         True to recognize dates expressed as MJD, JD, MJED, JED, etc.
+        weekdays    True to allow dates including weekdays.
+        extended    True to support extended year values: signed (with at least four
+                    digits) and those involving "CE", "BCE", "AD", "BC".
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
@@ -49,13 +55,13 @@ def day_sec_from_string(string, order='YMD', *, doy=True, mjd=False, proleptic=F
     """
 
     parser = datetime_pyparser(order=order, treq=treq, strict=False, doy=doy, mjd=mjd,
-                      weekdays=True, leapsecs=leapsecs, ampm=ampm, timezones=timezones,
-                      floating=floating, timesys=timesys, iso_only=False, padding=True,
-                      embedded=False)
+                      weekdays=weekdays, extended=extended, leapsecs=leapsecs, ampm=ampm,
+                      timezones=timezones, floating=floating, timesys=timesys,
+                      iso_only=False, padding=True, embedded=False)
     try:
         parse_list = parser.parse_string(string).as_list()
     except pyparsing.ParseException:
-        raise ValueError(f'unrecognized date/time format: "{string}"')
+        raise JulianParseException(f'unrecognized date/time format: "{string}"')
 
     parse_dict = {key:value for key, value in parse_list}
     (day, sec, tsys) = _day_sec_timesys_from_dict(parse_dict, proleptic=proleptic,
@@ -70,10 +76,10 @@ def day_sec_from_string(string, order='YMD', *, doy=True, mjd=False, proleptic=F
 # Date/time scrapers
 ##########################################################################################
 
-def day_sec_in_strings(strings, order='YMD', *, doy=False, mjd=False, proleptic=False,
-                       treq=False, leapsecs=True, ampm=False, timezones=False,
-                       timesys=False, floating=False, validate=True, substrings=False,
-                       first=False):
+def day_sec_in_strings(strings, order='YMD', *, doy=False, mjd=False, weekdays=False,
+                       extended=False, proleptic=False, treq=False, leapsecs=True,
+                       ampm=False, timezones=False, timesys=False, floating=False,
+                       validate=True, substrings=False, first=False):
     """List of day and second values representing date/time strings found by searching one
     or more strings for patterns that look like formatted dates and times.
 
@@ -83,6 +89,9 @@ def day_sec_in_strings(strings, order='YMD', *, doy=False, mjd=False, proleptic=
                     date, month, and year in situations where it might be ambiguous.
         doy         True to allow dates specified as year and day-of-year.
         mjd         True to allow dates expressed as MJD, JD, MJED, JED, etc.
+        weekdays    True to allow dates including weekdays.
+        extended    True to support extended year values: signed (with at least four
+                    digits) and those involving "CE", "BCE", "AD", "BC".
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
@@ -118,9 +127,10 @@ def day_sec_in_strings(strings, order='YMD', *, doy=False, mjd=False, proleptic=
         strings = [strings]
 
     parser = datetime_pyparser(order=order, treq=treq, strict=True, doy=doy, mjd=mjd,
-                               weekdays=True, leapsecs=leapsecs, ampm=ampm,
-                               timezones=timezones, timesys=timesys, floating=floating,
-                               iso_only=False, padding=True, embedded=True)
+                               weekdays=weekdays, extended=extended, leapsecs=leapsecs,
+                               ampm=ampm, timezones=timezones, timesys=timesys,
+                               floating=floating, iso_only=False, padding=True,
+                               embedded=True)
 
     day_sec_list = []
     for string in strings:
@@ -186,7 +196,7 @@ def _day_sec_timesys_from_dict(parse_dict, leapsecs=True, proleptic=False, valid
 
     # Convert to day number and fraction
     if year == 'JD':
-        day = day - JD_MINUS_MJD
+        day = day - _JD_MINUS_MJD
         year = 'MJD'
 
     frac = day % 1
@@ -205,87 +215,5 @@ def _day_sec_timesys_from_dict(parse_dict, leapsecs=True, proleptic=False, valid
     sec = frac * seconds_on_day(day, leapsecs=leapsecs)
 
     return (day, sec, timesys_or_utc)
-
-##########################################################################################
-# DEPRECATED
-##########################################################################################
-
-def day_sec_type_from_string(string, order="YMD", validate=True, use_julian=True):
-    """Day, second, and time system based on the parsing of the string.
-
-    DEPRECATED. Use day_sec_from_string() with timesys=True.
-
-    Input:
-        string          String to interpret.
-        order           One of 'YMD', 'MDY', or 'DMY'; this defines the default
-                        order for date, month, and year in situations where it
-                        might be ambiguous.
-        validate        True to check the syntax and values more carefully. *IGNORED*
-        use_julian      True to interpret dates prior to the adoption of the
-                        Gregorian calendar as dates in the Julian calendar.
-    """
-
-    _warn('day_sec_type_from_string() is deprecated; '
-          'use day_sec_from_string() with timesys=True')
-
-    return day_sec_from_string(string, order=order, timesys=True, timezones=False,
-                               mjd=True, floating=True, proleptic=(not use_julian))
-
-
-def day_sec_type_in_string(string, order='YMD', *, remainder=False, use_julian=True):
-    """Day, second, and time system based on the first occurrence of a date within a
-    string.
-
-    None if no date was found.
-
-    DEPRECATED. Use day_sec_in_strings() with timesys=True.
-
-    Input:
-        string      string to interpret.
-        order       One of "YMD", "MDY", or "DMY"; this defines the default order for
-                    date, month, and year in situations where it might be ambiguous.
-        remainder   If True and a date was found, return a 4-element tuple:
-                        (day, sec, time system, remainder of string).
-                    Otherwise, just return the 3-element tuple:
-                        (day, sec, time system).
-        use_julian  True to interpret dates prior to the adoption of the Gregorian
-                    calendar as dates in the Julian calendar.
-    """
-
-    _warn('day_sec_type_in_string() is deprecated; '
-          'use day_sec_in_strings() with timesys=True')
-
-    result = day_sec_in_strings([string], order=order, doy=True, mjd=False,
-                                proleptic=(not use_julian), treq=False, leapsecs=True,
-                                ampm=True, timezones=False, timesys=True, floating=False,
-                                validate=True, substrings=True, first=True)
-    if result is None:
-        return None
-
-    day, sec, tsys, substring = result
-    if remainder:
-        return (day, sec, tsys, string.partition(substring)[2])
-    else:
-        return (day, sec, tsys)
-
-
-def dates_in_string(string, order='YMD', *, use_julian=True):
-    """List of the dates found in this string, represented by tuples (day, sec, time
-    system).
-
-    DEPRECATED. Use day_sec_in_strings().
-
-    Input:
-        string      string to interpret.
-        order       One of "YMD", "MDY", or "DMY"; this defines the default order for
-                    date, month, and year in situations where it might be ambiguous.
-        use_julian  True to interpret dates prior to the adoption of the Gregorian
-                    calendar as dates in the Julian calendar.
-    """
-
-    return day_sec_in_strings([string], order=order, doy=True, mjd=True,
-                              proleptic=(not use_julian), treq=False, leapsecs=True,
-                              ampm=True, timezones=False, floating=True, timesys=True,
-                              validate=True, substrings=False, first=False)
 
 ##########################################################################################

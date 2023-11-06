@@ -1,5 +1,8 @@
 ##########################################################################################
-# julian/deltat.py
+# julian/_deltat.py
+##########################################################################################
+"""Internal classes for managing offset seconds vs. date.
+"""
 ##########################################################################################
 
 import numpy as np
@@ -7,8 +10,8 @@ from julian.calendar import day_from_ymd
 
 # Use the min and max int64 values for unlimited year ranges
 # ...but divide by 14 to ensures that 13*year does not overflow.
-MIN_YEAR = np.ma.maximum_fill_value(np.dtype('int64')) // 14     # -658812288346769701
-MAX_YEAR = np.ma.minimum_fill_value(np.dtype('int64')) // 14     #  658812288346769700
+_MIN_YEAR = np.ma.maximum_fill_value(np.dtype('int64')) // 14     # -658812288346769701
+_MAX_YEAR = np.ma.minimum_fill_value(np.dtype('int64')) // 14     #  658812288346769700
 
 
 class DeltaT(object):
@@ -21,7 +24,7 @@ class DeltaT(object):
     Required attributes are:
         first       the first year covered by this object.
         last        the last year (inclusive) to which this object applies. Its value is
-                    MAX_YEAR if the object applies to all future years. This value is only
+                    _MAX_YEAR if the object applies to all future years. This value is only
                     relevant if this object is part of a MergedDeltaT object, in which
                     case a lower-precedence object will be used for later years.
         before      the value of delta-T to return for times before the earliest date.
@@ -52,7 +55,7 @@ class DeltaT(object):
         of the input arrays.
         """
 
-        pass        # defined by subclass       pragma: no cover
+        pass        # defined by subclass       # pragma: no cover
 
     def leapsecs_from_ymd(self, y, m, d=1):
         """The cumulative number of leap seconds on the given date, where the date is
@@ -124,7 +127,7 @@ class LeapDeltaT(DeltaT):
         seconds = np.array([rec[2] for rec in info])
 
         self.first = years[0]
-        self.last = MAX_YEAR if last in (None, np.inf) else max(years[-1], last)
+        self.last = _MAX_YEAR if last in (None, np.inf) else max(years[-1], last)
         self.max_year = years[-1] + 1
 
         indx = 13 * (years - self.first) + months
@@ -270,7 +273,7 @@ class SplineDeltaT(DeltaT):
         offsets = np.array([rec[2] for rec in info])
 
         self.first = years[0]
-        self.last = MAX_YEAR if last in (None, np.inf) else max(years[-1], last)
+        self.last = _MAX_YEAR if last in (None, np.inf) else max(years[-1], last)
         self.max_year = years[-1] + 1
 
         days = day_from_ymd(years, months, 1)
@@ -374,7 +377,7 @@ class FuncDeltaT(DeltaT):
                         object, in which case a lower-precedence object will be used for
                         later years.
             before      the value to return for years before first; default is the
-                        value at the beginning of first.
+                        value at the beginning of the first year.
             after       the value to return for years after last; default is the value at
                         the end of last.
         """
@@ -382,8 +385,8 @@ class FuncDeltaT(DeltaT):
         self.func = func
 
         # Use the min and max int64 values in place of infinite years
-        self.first = MIN_YEAR if first in (None, -np.inf) else first
-        self.last  = MAX_YEAR if last  in (None,  np.inf) else last
+        self.first = _MIN_YEAR if first in (None, -np.inf) else first
+        self.last  = _MAX_YEAR if last  in (None,  np.inf) else last
 
         self.before = func(self.first, 1,1) if before is None else float(before)
         self.after  = func(self.last+1,1,1) if after  is None else float(after)
@@ -419,10 +422,10 @@ class FuncDeltaT(DeltaT):
                 return self.func(y, m, d)
 
         results = self.func(y, m, d)
-        if self.first != MIN_YEAR:
+        if self.first != _MIN_YEAR:
             results[y < self.first] = self.before
 
-        if self.last != MAX_YEAR:
+        if self.last != _MAX_YEAR:
             results[y > self.last] = self.after
 
         return results
@@ -442,7 +445,7 @@ class MergedDeltaT(DeltaT):
         self._update(*models)
 
     def _update(self, *models):
-        """Internal method update the object; needed for when a new leap second is
+        """Internal method to update the object; needed for when a new leap second is
         inserted into an internal LeapDeltaT object.
         """
 
@@ -466,7 +469,7 @@ class MergedDeltaT(DeltaT):
                     # defines whether leap_seconds_from_ymd() returns a nonzero value
 
         self.before = self.earliest_model.before
-        if self.is_float and self.before is not None:
+        if self.is_float:           # pragma: no branch
             self.before = float(self.before)
 
         # Identify the internal LeapDeltaT if any

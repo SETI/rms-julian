@@ -11,6 +11,7 @@ from julian.time_of_day import (
     sec_from_hms,
 )
 
+from julian._exceptions import JulianValidateFailure as jvf
 
 class Test_time_of_day(unittest.TestCase):
 
@@ -21,8 +22,8 @@ class Test_time_of_day(unittest.TestCase):
         self.assertEqual(hms_from_sec(86400), (23, 59, 60))
         small = 2.**-20
         self.assertEqual(hms_from_sec(86410 - small), (23, 59, 70 - small))
-        self.assertRaises(ValueError, hms_from_sec, 86410)
-        self.assertRaises(ValueError, hms_from_sec, -1.e-30)
+        self.assertRaises(jvf, hms_from_sec, 86410)
+        self.assertRaises(jvf, hms_from_sec, -1.e-30)
 
         # Check sec_from_hms
         self.assertEqual(sec_from_hms(0, 0, 0), 0)
@@ -60,21 +61,32 @@ class Test_time_of_day(unittest.TestCase):
         self.assertEqual(sec_from_hms(0, 0, [10.,10]).dtype.kind, 'f')
 
         # Check errors
-        self.assertRaises(ValueError, sec_from_hms, -1,  0,  0, validate=True)
-        self.assertRaises(ValueError, sec_from_hms, 24,  0,  0, validate=True)
-        self.assertRaises(ValueError, sec_from_hms,  1, -1,  0, validate=True)
-        self.assertRaises(ValueError, sec_from_hms,  1, 60,  0, validate=True)
-        self.assertRaises(ValueError, sec_from_hms,  1,  1, -1, validate=True)
-        self.assertRaises(ValueError, sec_from_hms,  1,  1, 60, validate=True)
+        self.assertRaises(jvf, sec_from_hms, -1,  0,  0, validate=True)
+        self.assertRaises(jvf, sec_from_hms, 24,  0,  0, validate=True)
+        self.assertRaises(jvf, sec_from_hms,  1, -1,  0, validate=True)
+        self.assertRaises(jvf, sec_from_hms,  1, 60,  0, validate=True)
+        self.assertRaises(jvf, sec_from_hms,  1,  1, -1, validate=True)
+        self.assertRaises(jvf, sec_from_hms,  1,  1, 60, validate=True)
 
-        self.assertRaises(ValueError, sec_from_hms, -0.001,  0,  0, validate=True)
-        self.assertRaises(ValueError, sec_from_hms, 24.000,  0,  0, validate=True)
-        self.assertRaises(ValueError, sec_from_hms,  1, -0.001,  0, validate=True)
-        self.assertRaises(ValueError, sec_from_hms,  1, 60.000,  0, validate=True)
-        self.assertRaises(ValueError, sec_from_hms,  1,  1, -0.001, validate=True)
-        self.assertRaises(ValueError, sec_from_hms,  1,  1, 60.000, validate=True)
+        self.assertRaises(jvf, sec_from_hms, -0.001,  0,  0, validate=True)
+        self.assertRaises(jvf, sec_from_hms, 24.000,  0,  0, validate=True)
+        self.assertRaises(jvf, sec_from_hms,  1, -0.001,  0, validate=True)
+        self.assertRaises(jvf, sec_from_hms,  1, 60.000,  0, validate=True)
+        self.assertRaises(jvf, sec_from_hms,  1,  1, -0.001, validate=True)
+        self.assertRaises(jvf, sec_from_hms,  1,  1, 60.000, validate=True)
 
-        self.assertRaises(ValueError, sec_from_hms, 23, 59, 70, validate=True, leapsecs=True)
-        self.assertRaises(ValueError, sec_from_hms, 23, 59, 60, validate=True, leapsecs=False)
+        self.assertRaises(jvf, sec_from_hms, 23, 59, 70, validate=True, leapsecs=True)
+        self.assertRaises(jvf, sec_from_hms, 23, 59, 60, validate=True, leapsecs=False)
+
+        # ...but these should be fine
+        _ = sec_from_hms(23, 59, 59, validate=True, leapsecs=True)
+        _ = sec_from_hms(23, 59, 59, validate=True, leapsecs=False)
+
+############################################
+# Execute from command line...
+############################################
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

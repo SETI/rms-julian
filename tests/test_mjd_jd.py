@@ -6,7 +6,7 @@ import numbers
 import numpy as np
 import unittest
 
-from julian.utc_tai_tdb import set_tai_origin
+from julian.utc_tai_tdb_tt import set_tai_origin
 
 from julian.mjd_jd import (
     day_from_mjd,
@@ -15,33 +15,35 @@ from julian.mjd_jd import (
     jd_from_day_sec,
     jd_from_tai,
     jd_from_time,
-    jed_from_tai,
-    jed_from_tdb,
     mjd_from_day,
     mjd_from_day_sec,
     mjd_from_tai,
     mjd_from_time,
+    tai_from_jd,
+    tai_from_mjd,
+    time_from_jd,
+    time_from_mjd,
+    _MJD_OF_JAN_1_2000,
+    _JD_OF_JAN_1_2000,
+)
+
+from julian.DEPRECATED import (
+    jed_from_tai,
+    jed_from_tdb,
     mjed_from_tai,
     mjed_from_tdb,
-    tai_from_jd,
     tai_from_jed,
-    tai_from_mjd,
     tai_from_mjed,
     tdb_from_jed,
     tdb_from_mjed,
-    time_from_jd,
-    time_from_mjd,
-    MJD_OF_JAN_1_2000,
-    JD_OF_JAN_1_2000,
 )
-
 
 class Test_mjd_jd(unittest.TestCase):
 
     def runTest(self):
 
         import warnings
-        from julian.warning import JulianDeprecationWarning
+        from julian._warnings import JulianDeprecationWarning
         warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
 
         # Test integer conversions...
@@ -79,7 +81,7 @@ class Test_mjd_jd(unittest.TestCase):
 
         # Test MJD floating-point conversions spanning 1000 years
         span = 1000. * 365.25
-        mjdlist = np.arange(-span, span, 5*np.pi) + MJD_OF_JAN_1_2000
+        mjdlist = np.arange(-span, span, 5*np.pi) + _MJD_OF_JAN_1_2000
 
         for origin in ('MIDNIGHT', 'NOON'):
             set_tai_origin(origin)
@@ -105,7 +107,7 @@ class Test_mjd_jd(unittest.TestCase):
 
         # Test JD floating-point conversions spanning 100 years
         span = 100. * 365.25
-        jdlist = np.arange(-span, span, np.pi) + JD_OF_JAN_1_2000
+        jdlist = np.arange(-span, span, np.pi) + _JD_OF_JAN_1_2000
 
         for origin in ('MIDNIGHT', 'NOON'):
             set_tai_origin(origin)
@@ -166,5 +168,12 @@ class Test_mjd_jd(unittest.TestCase):
             self.assertEqual(time_from_mjd(51544.0, timesys='UTC'),
                              0. if origin == 'MIDNIGHT' else -43200)
             self.assertEqual(day_sec_from_mjd(51544.0), (0,0))
+
+############################################
+# Execute from command line...
+############################################
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

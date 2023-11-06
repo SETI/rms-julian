@@ -1,6 +1,9 @@
 ##########################################################################################
 # julian/datetime_pyparser.py
 ##########################################################################################
+"""Function to generate a PyParsing grammar for arbitrary date/time strings
+"""
+##########################################################################################
 
 from julian.mjd_pyparser  import mjd_pyparser
 from julian.date_pyparser import date_pyparser

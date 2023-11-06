@@ -1,5 +1,8 @@
 ##########################################################################################
-# julian/utils.py
+# julian/_utils.py
+##########################################################################################
+"""Internal utility functions
+"""
 ##########################################################################################
 
 import numbers
@@ -7,8 +10,11 @@ import numpy as np
 
 
 def _int(arg):
-    """Convert to int; works for scalar, array, or array-like. Floating-point numbers are
-    always rounded downward.
+    """Convert to integer type; works for scalar, array, or array-like.
+
+    Floating-point numbers are always rounded downward. Integer arrays are converted to
+    signed 64-bit if necessary. Scalars and arrays of shape () are returned as Python
+    ints.
     """
 
     if isinstance(arg, numbers.Integral):
@@ -17,30 +23,19 @@ def _int(arg):
     if isinstance(arg, numbers.Real):
         return int(arg // 1.)
 
-    if not isinstance(arg, np.ndarray):
-        arg = np.array(arg)
+    array = np.asarray(arg)                     # if already an array, don't copy
 
-    if not arg.shape:
-        return _int(arg[()])
+    if array.dtype.kind == 'f':
+        array = (array // 1.).astype('int64')
 
-    if arg.dtype.kind in 'ui':
-        return arg
+    if not array.shape:
+        return int(array[()])
 
-    return (arg // 1.).astype('int64')
+    # If not now int64, re-convert from the original arg
+    if array.dtype != np.dtype('int64'):
+        array = np.asarray(arg, dtype='int64')
 
-
-def _int64(arg):
-    """Convert to Python int or numpy int64; works for scalar, array, or array-like.
-    Floating-point numbers are always rounded downward. This is required for Windows
-    which has a 32-bit default int size in numpy."""
-
-    arg = _int(arg)
-    if not isinstance(arg, np.ndarray):
-        return arg
-
-    if arg.dtype.kind == 'i':
-        return arg.astype('int64')
-    return arg.astype('uint64')
+    return array
 
 
 def _float(arg):
@@ -56,15 +51,28 @@ def _float(arg):
 
 
 def _number(arg):
-    """Convert to array if array-like, but preserve data type."""
+    """Convert to array if array-like, but preserve data kind.
+
+    Scalar inputs are always returned as Python ints or floats, never a NumPy data type.
+
+    Ints are converted to signed 64-bit if necessary.
+    """
+
+    if isinstance(arg, numbers.Integral):
+        return int(arg)
 
     if isinstance(arg, numbers.Real):
-        return arg
+        return float(arg)
 
     if isinstance(arg, np.ndarray) and not arg.shape:
-        return arg[()]
+        return _number(arg[()])
 
-    return np.array(arg)
+    arg = np.asarray(arg)                       # if already an array, don't copy
+
+    if arg.dtype.kind in 'ui':
+        return np.asarray(arg, dtype='int64')   # convert only if necessary; don't copy
+
+    return arg
 
 
 def _is_int(arg):

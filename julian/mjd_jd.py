@@ -1,19 +1,21 @@
 ##########################################################################################
 # julian/mjd_jd.py
 ##########################################################################################
+"""Functions to convert to/from Julian Date and Modified Julian Date
+"""
+##########################################################################################
 
-from julian              import utc_tai_tdb
-from julian.leap_seconds import seconds_on_day
-from julian.utc_tai_tdb  import day_sec_from_tai, day_sec_from_time, day_sec_from_utc, \
-                                tai_from_day_sec, time_from_day_sec, time_from_time, \
-                                utc_from_day_sec
-from julian.utils        import _float, _int, _number
-from julian.warning      import _warn
+from julian                import utc_tai_tdb_tt
+from julian.leap_seconds   import seconds_on_day
+from julian.utc_tai_tdb_tt import day_sec_from_tai, day_sec_from_time, day_sec_from_utc, \
+                                  tai_from_day_sec, time_from_day_sec, time_from_time, \
+                                  utc_from_day_sec
+from julian._utils         import _float, _int, _number
 
 # JD and MJD definitions
-MJD_OF_JAN_1_2000 = 51544
-JD_OF_JAN_1_2000 = 2451544.5
-JD_MINUS_MJD = 2400000.5
+_MJD_OF_JAN_1_2000 = 51544
+_JD_OF_JAN_1_2000 = 2451544.5
+_JD_MINUS_MJD = 2400000.5
 
 ##########################################################################################
 # MJD/JD functions supporting integer days, UTC, and leap seconds.
@@ -30,7 +32,7 @@ def mjd_from_day(day):
                     integral, integers are returned.
     """
 
-    return _number(day) + MJD_OF_JAN_1_2000
+    return _number(day) + _MJD_OF_JAN_1_2000
 
 
 def day_from_mjd(mjd):
@@ -43,7 +45,7 @@ def day_from_mjd(mjd):
                     2000 UTC. If the mjd input is integral, integers are returned.
     """
 
-    return _number(mjd) - MJD_OF_JAN_1_2000
+    return _number(mjd) - _MJD_OF_JAN_1_2000
 
 
 def mjd_from_day_sec(day, sec=0):
@@ -65,7 +67,7 @@ def mjd_from_day_sec(day, sec=0):
     """
 
     day = _int(day)
-    return day + _number(sec)/seconds_on_day(day) + MJD_OF_JAN_1_2000
+    return day + _number(sec)/seconds_on_day(day) + _MJD_OF_JAN_1_2000
 
 
 def day_sec_from_mjd(mjd):
@@ -90,7 +92,7 @@ def day_sec_from_mjd(mjd):
     mjd = _number(mjd)
     int_mjd = _int(mjd)
 
-    day = int_mjd - MJD_OF_JAN_1_2000
+    day = int_mjd - _MJD_OF_JAN_1_2000
     sec = seconds_on_day(day) * (mjd - int_mjd)
     return (day, sec)
 
@@ -113,7 +115,7 @@ def jd_from_day_sec(day, sec=0):
     contain leap seconds, the fractional rate must therefore be a bit slower.
     """
 
-    return mjd_from_day_sec(day, sec) + JD_MINUS_MJD
+    return mjd_from_day_sec(day, sec) + _JD_MINUS_MJD
 
 
 def day_sec_from_jd(jd):
@@ -135,7 +137,7 @@ def day_sec_from_jd(jd):
     contain leap seconds, the fractional rate must therefore be a bit slower.
     """
 
-    return day_sec_from_mjd(jd - JD_MINUS_MJD)
+    return day_sec_from_mjd(jd - _JD_MINUS_MJD)
 
 ##########################################################################################
 # General versions supporting time conversions, selectively handling leap seconds
@@ -159,10 +161,10 @@ def mjd_from_time(time, timesys='TAI', mjdsys=None):
         if timesys == 'UTC':
             mjdsys = 'UTC'
         else:
-            if utc_tai_tdb.TAI_MIDNIGHT_ORIGIN and timesys == 'TAI':
-                origin = MJD_OF_JAN_1_2000
+            if utc_tai_tdb_tt._TAI_MIDNIGHT_ORIGIN and timesys == 'TAI':
+                origin = _MJD_OF_JAN_1_2000
             else:
-                origin = MJD_OF_JAN_1_2000 + 0.5
+                origin = _MJD_OF_JAN_1_2000 + 0.5
 
             return _float(time)/86400. + origin
 
@@ -172,7 +174,7 @@ def mjd_from_time(time, timesys='TAI', mjdsys=None):
         return mjd_from_day_sec(*day_sec_from_utc(time))
 
     day, sec = day_sec_from_time(time, timesys=mjdsys, leapsecs=(mjdsys=='UTC'))
-    return day + sec/86400. + MJD_OF_JAN_1_2000
+    return day + sec/86400. + _MJD_OF_JAN_1_2000
 
 
 def time_from_mjd(mjd, timesys='TAI', mjdsys=None):
@@ -193,17 +195,17 @@ def time_from_mjd(mjd, timesys='TAI', mjdsys=None):
         if timesys == 'UTC':
             mjdsys = 'UTC'
         else:
-            if utc_tai_tdb.TAI_MIDNIGHT_ORIGIN and timesys == 'TAI':
-                offset = MJD_OF_JAN_1_2000
+            if utc_tai_tdb_tt._TAI_MIDNIGHT_ORIGIN and timesys == 'TAI':
+                offset = _MJD_OF_JAN_1_2000
             else:
-                offset = MJD_OF_JAN_1_2000 + 0.5
+                offset = _MJD_OF_JAN_1_2000 + 0.5
 
             return (mjd - offset) * 86400.
 
     if mjdsys == 'UTC':
         time = utc_from_day_sec(*day_sec_from_mjd(mjd))
     else:
-        day = _number(mjd) - MJD_OF_JAN_1_2000
+        day = _number(mjd) - _MJD_OF_JAN_1_2000
         time = time_from_day_sec(day, 0, timesys=mjdsys, leapsecs=(mjdsys=='UTC'))
 
     return time_from_time(time, timesys=mjdsys, newsys=timesys)
@@ -222,7 +224,7 @@ def jd_from_time(time, timesys='TAI', jdsys=None):
     Return          the Julian Date, as a scalar or array.
     """
 
-    return mjd_from_time(time, timesys=timesys, mjdsys=jdsys) + JD_MINUS_MJD
+    return mjd_from_time(time, timesys=timesys, mjdsys=jdsys) + _JD_MINUS_MJD
 
 
 def time_from_jd(jd, timesys='TAI', jdsys=None):
@@ -238,153 +240,31 @@ def time_from_jd(jd, timesys='TAI', jdsys=None):
     Return          time in seconds in the specified time system, as a scalar or array.
     """
 
-    return time_from_mjd(jd - JD_MINUS_MJD, mjdsys=jdsys, timesys=timesys)
+    return time_from_mjd(jd - _JD_MINUS_MJD, mjdsys=jdsys, timesys=timesys)
 
-##########################################################################################
-# DEPRECATED
-##########################################################################################
+# Shortcuts for TAI
 
 def mjd_from_tai(tai):
-    """Modified Julian Date from TAI seconds.
-
-    DEPRECATED. Use mjd_from_time() with timesys='TAI', mjdsys='UTC'.
-    """
-
-    _warn('mjd_from_tai() is deprecated; '
-          'use mjd_from_time() with timesys="TAI", mjdsys="UTC"')
+    """Modified Julian Date from TAI seconds."""
 
     return mjd_from_day_sec(*day_sec_from_tai(tai))
 
 
 def jd_from_tai(tai):
-    """Julian Date fram TAI seconds.
-
-    DEPRECATED. Use jd_from_time() with timesys='TAI', jdsys='UTC'.
-    """
-
-    _warn('jd_from_tai() is deprecated; '
-          'use jd_from_time() with timesys="TAI", jdsys="UTC"')
+    """Julian Date fram TAI seconds."""
 
     return jd_from_day_sec(*day_sec_from_tai(tai))
 
+
 def tai_from_mjd(mjd):
-    """TAI seconds from Modified Julian Date.
-
-    DEPRECATED. Use time_from_mjd() with timesys='TAI', mjdsys='UTC'.
-    """
-
-    _warn('tai_from_mjd() is deprecated; '
-          'use time_from_mjd() with timesys="TAI", mjdsys="UTC"')
+    """TAI seconds from Modified Julian Date."""
 
     return tai_from_day_sec(*day_sec_from_mjd(mjd))
 
+
 def tai_from_jd(jd):
-    """TAI seconds from Modified Julian Date.
-
-    DEPRECATED. Use time_from_jd() with timesys='TAI', jdsys='UTC'.
-    """
-
-    _warn('tai_from_jd() is deprecated; '
-          'use time_from_jd() with timesys="TAI", jdsys="UTC"')
+    """TAI seconds from Modified Julian Date."""
 
     return tai_from_day_sec(*day_sec_from_jd(jd))
 
-
-def mjed_from_tdb(tdb):
-    """Modified Julian Ephemeris Date from TDB seconds.
-
-    DEPRECATED. Use mjd_from_time() with timesys='TDB', mjdsys='TDB'.
-    """
-
-    _warn('mjed_from_tdb() is deprecated; '
-          'use mjd_from_time() with timesys="TDB", mjdsys="TDB"')
-
-    return mjd_from_time(tdb, timesys='TDB', mjdsys='TDB')
-
-
-def jed_from_tdb(tdb):
-    """Julian Ephemeris Date from TDB seconds.
-
-    DEPRECATED. Use jd_from_time() with timesys='TDB', jdsys='TDB'.
-    """
-
-    _warn('jed_from_tdb() is deprecated; '
-          'use jd_from_time() with timesys="TDB", jdsys="TDB"')
-
-    return jd_from_time(tdb, timesys='TDB', jdsys='TDB')
-
-
-def tdb_from_mjed(mjed):
-    """TDB seconds from Modified Julian Ephemeris Date.
-
-    DEPRECATED. Use time_from_mjd() with timesys='TDB', mjdsys='TDB'.
-    """
-
-    _warn('tdb_from_mjed() is deprecated; '
-          'use jd_from_time() with timesys="TDB", mjdsys="TDB"')
-
-    return time_from_mjd(mjed, timesys='TDB', mjdsys='TDB')
-
-
-def tdb_from_jed(jed):
-    """TDB seconds from Modified Julian Ephemeris Date.
-
-    DEPRECATED. Use time_from_jd() with timesys='TDB', jdsys='TDB'.
-    """
-
-    _warn('tdb_from_jed() is deprecated; '
-          'use time_from_jd() with timesys="TDB", jdsys="TDB"')
-
-    return time_from_jd(jed, timesys='TDB', jdsys='TDB')
-
-
-def mjed_from_tai(tai):
-    """Modified Julian Ephemeris Date from TAI seconds.
-
-    DEPRECATED. Use mjd_from_time() with timesys='TAI', mjdsys='TDB'.
-    """
-
-    _warn('mjed_from_tai() is deprecated; '
-          'use mjd_from_time() with timesys="TAI", mjdsys="TDB"')
-
-    return mjd_from_time(tai, timesys='TAI', mjdsys='TDB')
-
-
-def jed_from_tai(tai):
-    """Julian Ephemeris Date from TAI seconds.
-
-    DEPRECATED. Use jd_from_time() with timesys='TAI', jdsys='TDB'.
-    """
-
-    _warn('jed_from_tai() is deprecated; '
-          'use jd_from_time() with timesys="TAI", jdsys="TDB"')
-
-    return jd_from_time(tai, timesys='TAI', jdsys='TDB')
-
-
-def tai_from_mjed(mjed):
-    """TAI seconds from Modified Julian Ephemeris Date.
-
-    DEPRECATED. Use time_from_mjd() with timesys='TAI', mjdsys='TDB'.
-    """
-
-    _warn('tai_from_mjed() is deprecated; '
-          'use time_from_mjd() with timesys="TAI", mjdsys="TDB"')
-
-    return time_from_mjd(mjed, timesys='TAI', mjdsys='TDB')
-
-
-def tai_from_jed(jed):
-    """TDB seconds from Modified Julian Ephemeris Date.
-
-    DEPRECATED. Use time_from_jd() with timesys='TAI', jdsys='TDB'.
-    """
-
-    _warn('tai_from_jed() is deprecated; '
-          'use time_from_jd() with timesys="TAI", jdsys="TDB"')
-
-    return time_from_jd(jed, timesys='TAI', jdsys='TDB')
-
 ##########################################################################################
-
-

@@ -1,26 +1,30 @@
 ##########################################################################################
-# julian/test_time_parser.py
+# julian/test_time_parsers.py
 ##########################################################################################
 
 import numpy as np
 import unittest
 
-from julian.time_parser import (
+from julian.time_parsers import (
     sec_from_string,
-    sec_in_strings,
+    secs_in_strings,
+)
+
+from julian.DEPRECATED import (
     time_in_string,
     times_in_string,
 )
 
-from julian.calendar    import day_from_ymd
-from julian.utc_tai_tdb import day_sec_from_tai, tai_from_tdt
+from julian.calendar       import day_from_ymd
+from julian.utc_tai_tdb_tt import day_sec_from_tai, tai_from_tdt
+from julian._exceptions    import JulianParseException, JulianValidateFailure
 
-class Test_time_parser(unittest.TestCase):
+class Test_time_parsers(unittest.TestCase):
 
     def runTest(self):
 
         import warnings
-        from julian.warning import JulianDeprecationWarning
+        from julian._warnings import JulianDeprecationWarning
         warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
 
         # Note: test_time_pyparser.py has more extensive unit tests
@@ -34,8 +38,9 @@ class Test_time_parser(unittest.TestCase):
         # sec_from_string, leapsecs
         self.assertEqual(sec_from_string('23:59:60.000'), 86400.0)
         self.assertEqual(sec_from_string('23:59:69.000'), 86409.0)
-        self.assertRaises(ValueError, sec_from_string, '23:59:70.000')
-        self.assertRaises(ValueError, sec_from_string, '23:59:60', leapsecs=False)
+        self.assertRaises(JulianParseException, sec_from_string, '23:59:70.000')
+        self.assertRaises(JulianParseException,
+                          sec_from_string, '23:59:60', leapsecs=False)
 
         # sec_from_string, am/pm
         self.assertEqual(sec_from_string('12:00:00 am', ampm=True),     0)
@@ -45,9 +50,9 @@ class Test_time_parser(unittest.TestCase):
         self.assertEqual(sec_from_string(' 1:00:00 pm', ampm=True), 43200 + 3600)
         self.assertEqual(sec_from_string('11:59:59 pm', ampm=True), 86399)
         self.assertEqual(sec_from_string('11:59:60 pm', ampm=True, leapsecs=True), 86400)
-        self.assertRaises(ValueError, sec_from_string, '11:59:60 pm', ampm=True,
-                                                                      leapsecs=False)
-        self.assertRaises(ValueError, sec_from_string, '23:00:00 am', ampm=True)
+        self.assertRaises(JulianParseException,
+                          sec_from_string, '11:59:60 pm', ampm=True, leapsecs=False)
+        self.assertRaises(JulianParseException, sec_from_string, '23:00:00 am', ampm=True)
 
         # sec_from_string, floating
         self.assertEqual(sec_from_string('12h',    floating=True), 43200)
@@ -57,7 +62,7 @@ class Test_time_parser(unittest.TestCase):
         self.assertEqual(sec_from_string('1:10.5', floating=True), 70.5 * 60)
         self.assertEqual(sec_from_string('60 M',   floating=True), 60 * 60)
 
-        self.assertRaises(ValueError, sec_from_string, '86400s', floating=True,
+        self.assertRaises(JulianParseException, sec_from_string, '86400s', floating=True,
                                                                  leapsecs=False)
 
         # sec_from_string, timezones, am/pm, leapsecs
@@ -72,18 +77,27 @@ class Test_time_parser(unittest.TestCase):
         self.assertEqual(sec_from_string('6:59:60 pm est', timezones=True, leapsecs=True),
                                          (86400, 0))
 
-        self.assertRaises(ValueError, sec_from_string, '10:59:60 pm bst', timezones=True)
+        self.assertRaises(JulianParseException,
+                          sec_from_string, '10:59:59 pm', ampm=False)
+        self.assertRaises(JulianParseException,
+                          sec_from_string, '7:59:59 pm est', ampm=True, timezones=False)
+        self.assertRaises(JulianParseException,
+                          sec_from_string, '6:59:60 pm est', ampm=True, timezones=True,
+                                                             leapsecs=False)
+        self.assertRaises(JulianValidateFailure,
+                          sec_from_string, '7:59:60 pm est', ampm=True, timezones=True,
+                                                             leapsecs=True)
 
-        # sec_in_strings
-        self.assertEqual(sec_in_strings('t=00:00:00.000', first=True), 0.0)
-        self.assertEqual(sec_in_strings(['...', 't=00:00:00.000'], first=True), 0.0)
-        self.assertEqual(sec_in_strings(['...', 't=00:00:00.000']), [0.])
-        self.assertEqual(sec_in_strings(['25:00', 't=00:00:00.000']), [0.])
-        self.assertEqual(sec_in_strings('after midnight, 1:00 am bst or later',
-                                        timezones=True),
+        # secs_in_strings
+        self.assertEqual(secs_in_strings('t=00:00:00.000', first=True), 0.0)
+        self.assertEqual(secs_in_strings(['...', 't=00:00:00.000'], first=True), 0.0)
+        self.assertEqual(secs_in_strings(['...', 't=00:00:00.000']), [0.])
+        self.assertEqual(secs_in_strings(['25:00', 't=00:00:00.000']), [0.])
+        self.assertEqual(secs_in_strings('after midnight, 1:00 am bst or later',
+                                         timezones=True),
                          [(0, 0)])
-        self.assertEqual(sec_in_strings('after midnight, 1:00 am bst or later',
-                                        timezones=True, substrings=True),
+        self.assertEqual(secs_in_strings('after midnight, 1:00 am bst or later',
+                                         timezones=True, substrings=True),
                          [(0, 0, '1:00 am bst')])
 
         #### DEPRECATED
@@ -110,5 +124,12 @@ class Test_time_parser(unittest.TestCase):
         self.assertEqual(times_in_string('End time[23:59:60.000]'), [86400.0])
         self.assertEqual(times_in_string('End time is 23:59:69.000 and later'), [86409.0])
         self.assertEqual(times_in_string('Error 23:5z:00.000:0'), [])
+
+############################################
+# Execute from command line...
+############################################
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

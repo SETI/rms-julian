@@ -1,9 +1,12 @@
 ##########################################################################################
-# julian/time_grammar.py
+# julian/time_pyparser.py
+##########################################################################################
+"""Function to generate a PyParsing grammar for arbitrary time strings
+"""
 ##########################################################################################
 
 import numpy as np
-from julian.TIMEZONES import TIMEZONES
+from julian._TIMEZONES import TIMEZONES
 
 from pyparsing import (
     CaselessLiteral,
@@ -130,14 +133,6 @@ minute_float.set_parse_action(lambda s,l,t: _action('MINUTE', float(t[0]), s,l,t
 
 minute_float_strict = Combine(zero_59_2digits + Literal('.') + Optional(Word(nums)))
 minute_float_strict.set_parse_action(lambda s,l,t: _action('MINUTE', float(t[0]), s,l,t))
-
-# An exact value of 59
-minute59 = Literal('59')
-minute59.set_parse_action(lambda s,l,t: _action('MINUTE', 59, s,l,t))
-
-# A minute value of 14, 29, 44, or 59
-minute14 = one_of(['14', '29', '44', '59'])
-minute14.set_parse_action(lambda s,l,t: _action('MINUTE', int(t[0]), s,l,t))
 
 # A number 0-1439, no leading zeros or white space
 zero_1439 = (

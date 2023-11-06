@@ -1,6 +1,6 @@
-################################################################################
+##########################################################################################
 # UNIT TESTS
-################################################################################
+##########################################################################################
 
 import julian as j
 import numpy as np
@@ -15,7 +15,7 @@ class Test_Calendar_v1(unittest.TestCase):
     def runTest(self):
 
         import warnings
-        from julian.warning import JulianDeprecationWarning
+        from julian._warnings import JulianDeprecationWarning
         warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
 
         # day_from_ymd()
@@ -110,37 +110,37 @@ class Test_Calendar_v1(unittest.TestCase):
 
         # Julian vs. Gregorian calendars around 1 CE
         for use_julian in (False, True):
-          start_day = j.day_from_ymd(-10, 1, 1, use_julian=use_julian)
-          stop_day  = j.day_from_ymd( 11, 1, 1, use_julian=use_julian)
+          start_day = j.day_from_ymd(-10, 1, 1, proleptic=(not use_julian))
+          stop_day  = j.day_from_ymd( 11, 1, 1, proleptic=(not use_julian))
           for day in range(start_day, stop_day+1):
-            (y, m, d) = j.ymd_from_day(day, use_julian=use_julian)
-            day2 = j.day_from_ymd(y, m, d, use_julian=use_julian)
+            (y, m, d) = j.ymd_from_day(day, proleptic=(not use_julian))
+            day2 = j.day_from_ymd(y, m, d, proleptic=(not use_julian))
             self.assertEqual(day, day2)
 
         # Julian vs. Gregorian calendars around 1582
         for use_julian in (False, True):
-          start_day = j.day_from_ymd(1572, 1, 1, use_julian=use_julian)
-          stop_day  = j.day_from_ymd(1593, 1, 1, use_julian=use_julian)
+          start_day = j.day_from_ymd(1572, 1, 1, proleptic=(not use_julian))
+          stop_day  = j.day_from_ymd(1593, 1, 1, proleptic=(not use_julian))
           for day in range(start_day, stop_day+1):
-            (y, m, d) = j.ymd_from_day(day, use_julian=use_julian)
-            day2 = j.day_from_ymd(y, m, d, use_julian=use_julian)
+            (y, m, d) = j.ymd_from_day(day, proleptic=(not use_julian))
+            day2 = j.day_from_ymd(y, m, d, proleptic=(not use_julian))
             self.assertEqual(day, day2)
 
         # Reality checks, set_gregorian_start
-        self.assertEqual(j.day_from_ymd(-4712, 1, 1, use_julian=True),  -2451545)
-        self.assertEqual(j.day_from_ymd(-4713,11,24, use_julian=False), -2451545)
-        self.assertEqual(j.days_in_year(1582, use_julian=True),  355)
-        self.assertEqual(j.days_in_year(1582, use_julian=False), 365)
+        self.assertEqual(j.day_from_ymd(-4712, 1, 1, proleptic=False), -2451545)
+        self.assertEqual(j.day_from_ymd(-4713,11,24, proleptic=True),  -2451545)
+        self.assertEqual(j.days_in_year(1582, proleptic=False), 355)
+        self.assertEqual(j.days_in_year(1582, proleptic=True),  365)
 
         j.set_gregorian_start(None)
-        self.assertEqual(j.day_from_ymd(-4713,11,24, use_julian=False), -2451545)
-        self.assertEqual(j.day_from_ymd(-4713,11,24, use_julian=True),  -2451545)
+        self.assertEqual(j.day_from_ymd(-4713,11,24, proleptic=True),  -2451545)
+        self.assertEqual(j.day_from_ymd(-4713,11,24, proleptic=False), -2451545)
 
         j.set_gregorian_start(1752, 9, 14)
-        self.assertEqual(j.days_in_year(1582, use_julian=True),  365)
-        self.assertEqual(j.days_in_year(1582, use_julian=False), 365)
-        self.assertEqual(j.days_in_year(1752, use_julian=True),  355)
-        self.assertEqual(j.days_in_year(1752, use_julian=False), 366)
+        self.assertEqual(j.days_in_year(1582, proleptic=False), 365)
+        self.assertEqual(j.days_in_year(1582, proleptic=True),  365)
+        self.assertEqual(j.days_in_year(1752, proleptic=False), 355)
+        self.assertEqual(j.days_in_year(1752, proleptic=True),  366)
 
         j.set_gregorian_start()
 
@@ -315,7 +315,7 @@ class Test_JD_MJD_v1(unittest.TestCase):
 
         # Test MJD floating-point conversions spanning 1000 years
         span = 1000. * 365.25
-        mjdlist = np.arange(-span, span, np.pi) + j.mjd_jd.MJD_OF_JAN_1_2000
+        mjdlist = np.arange(-span, span, np.pi) + j.mjd_jd._MJD_OF_JAN_1_2000
 
         test = j.mjd_from_time(j.time_from_mjd(mjdlist))
         error = np.max(np.abs(test - mjdlist))
@@ -337,11 +337,11 @@ class Test_JD_MJD_v1(unittest.TestCase):
 
         # Test JD floating-point conversions spanning 100 years
         span = 100. * 365.25
-        jdlist = np.arange(-span, span, np.pi/10.) + j.mjd_jd.JD_OF_JAN_1_2000
+        jdlist = np.arange(-span, span, np.pi/10.) + j.mjd_jd._JD_OF_JAN_1_2000
 
         test = j.jd_from_time(j.time_from_jd(jdlist))
         error = np.max(np.abs(test - jdlist))
-        self.assertTrue(np.max(np.abs(test - jdlist)) < j.mjd_jd.JD_OF_JAN_1_2000*1.e-15)
+        self.assertTrue(np.max(np.abs(test - jdlist)) < j.mjd_jd._JD_OF_JAN_1_2000*1.e-15)
 
         for jd in jdlist[:100]:
             error = abs(j.jd_from_time(j.time_from_jd(jd)) - jd)
@@ -350,7 +350,7 @@ class Test_JD_MJD_v1(unittest.TestCase):
         (day,sec) = j.day_sec_from_jd(jdlist)
         test = j.jd_from_day_sec(day,sec)
         error = np.abs(test - jdlist)
-        self.assertTrue(np.max(np.abs(test - jdlist)) < j.mjd_jd.JD_OF_JAN_1_2000*1.e-15)
+        self.assertTrue(np.max(np.abs(test - jdlist)) < j.mjd_jd._JD_OF_JAN_1_2000*1.e-15)
 
         for jd in jdlist[:100]:
             (day,sec) = j.day_sec_from_jd(jd)
@@ -789,11 +789,11 @@ class Test_General_Parsing_v1(unittest.TestCase):
         self.assertEqual(j.dates_in_string("Today is [[200z-01-01 0z:00:0z.00 TDB]]"),
                          [])
 
-################################################################################
-# Perform unit testing if executed from the command line
-################################################################################
+############################################
+# Execute from command line...
+############################################
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
 
-################################################################################
+##########################################################################################

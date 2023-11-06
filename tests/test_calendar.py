@@ -1,30 +1,34 @@
-################################################################################
+##########################################################################################
 # julian/test_calendar.py
-################################################################################
+##########################################################################################
 
 import numpy as np
 import unittest
 
-from julian import (
+from julian.calendar import (
     day_from_yd,
     day_from_ymd,
-    days_in_month,
     days_in_year,
     days_in_ym,
-    month_from_ym,
     set_gregorian_start,
     yd_from_day,
     ymd_from_day,
+)
+
+from julian.DEPRECATED import (
+    days_in_month,
+    month_from_ym,
     ym_from_month,
 )
 
+from julian._exceptions import JulianValidateFailure as jvf
 
 class Test_calendar(unittest.TestCase):
 
     def runTest(self):
 
         import warnings
-        from julian.warning import JulianDeprecationWarning
+        from julian._warnings import JulianDeprecationWarning
         warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
 
         # day_from_ymd()
@@ -33,30 +37,37 @@ class Test_calendar(unittest.TestCase):
         self.assertEqual(day_from_ymd(2000,[1,2,3],1).tolist(),       [ 0,31,60])
         self.assertEqual(day_from_ymd([2000,2001,2002],1,1).tolist(), [0,366,731])
 
-        self.assertRaises(ValueError, day_from_ymd, 2000, 1,  0, validate=True)
-        self.assertRaises(ValueError, day_from_ymd, 2000, 2, 30, validate=True)
-        self.assertRaises(ValueError, day_from_ymd, 2000, 0,  1, validate=True)
-        self.assertRaises(ValueError, day_from_ymd, 2000, 13, 1, validate=True)
+        self.assertRaises(jvf, day_from_ymd, 2000, 1,  0, validate=True)
+        self.assertRaises(jvf, day_from_ymd, 2000, 2, 30, validate=True)
+        self.assertRaises(jvf, day_from_ymd, 2000, 0,  1, validate=True)
+        self.assertRaises(jvf, day_from_ymd, 2000, 13, 1, validate=True)
 
-        self.assertRaises(ValueError, day_from_ymd, [2000,2000], [1, 1], [ 1, 0],
-                                      validate=True)
-        self.assertRaises(ValueError, day_from_ymd, [2000,2000], [2, 2], [28,30],
-                                      validate=True)
-        self.assertRaises(ValueError, day_from_ymd, [2000,2000], [1, 0], [ 1, 1],
-                                      validate=True)
-        self.assertRaises(ValueError, day_from_ymd, [2000,2000], [1,13], [ 1, 1],
-                                      validate=True)
+        self.assertRaises(jvf, day_from_ymd, [2000,2000], [1, 1], [ 1, 0],
+                                             validate=True)
+        self.assertRaises(jvf, day_from_ymd, [2000,2000], [2, 2], [28,30],
+                                             validate=True)
+        self.assertRaises(jvf, day_from_ymd, [2000,2000], [1, 0], [ 1, 1],
+                                             validate=True)
+        self.assertRaises(jvf, day_from_ymd, [2000,2000], [1,13], [ 1, 1],
+                                             validate=True)
 
         self.assertEqual(day_from_ymd(1582, 10, 15,), -152384)
         self.assertEqual(day_from_ymd(1582, 10, 14, proleptic=True), -152385)
-        self.assertRaises(ValueError, day_from_ymd, 1582, 10, 14,
-                                      proleptic=False, validate=True)
-        self.assertRaises(ValueError, day_from_ymd, [1582,1582], [10,10], [15,14],
-                                      proleptic=False, validate=True)
+        self.assertRaises(jvf, day_from_ymd, 1582, 10, 14, proleptic=False, validate=True)
+        self.assertRaises(jvf, day_from_ymd, [1582,1582], [10,10], [15,14],
+                                             proleptic=False, validate=True)
         self.assertEqual(day_from_ymd([1582,1582],[10,10],[15,4],
                                       proleptic=True).tolist(), [-152384,-152395])
         self.assertEqual(day_from_ymd([1582,1582],[10,10],[15,4],
                                        proleptic=False).tolist(),[-152384,-152385])
+        self.assertEqual(day_from_ymd([1582,1582],[10,10],[3,4],
+                                       proleptic=False).tolist(),[-152386,-152385])
+
+        _ = day_from_ymd(1582, 10, 7, validate=False)
+        self.assertRaises(jvf, day_from_ymd, 1582, 10, 7, validate=True)
+
+        _ = day_from_ymd(1582, 10, np.arange(1,32), validate=False)
+        self.assertRaises(jvf, day_from_ymd, 1582, 10, np.arange(1,32), validate=True)
 
         # ymd_from_day()
         self.assertEqual(ymd_from_day(  0), (2000, 1, 1))
@@ -90,19 +101,23 @@ class Test_calendar(unittest.TestCase):
             day2 = day_from_ymd(y, m, d, proleptic=proleptic)
             self.assertTrue(np.all(day == day2))
 
+            for dd in day:
+                (y, m, d) = ymd_from_day(dd, proleptic=proleptic)
+                day2 = day_from_ymd(y, m, d, proleptic=proleptic)
+                self.assertEqual(dd, day2)
+
         # day_from_yd()
         self.assertEqual(day_from_yd(2000,1), 0)
         self.assertEqual(day_from_yd(2001,[2,3,4]).tolist(),  [367,368,369])
         self.assertEqual(day_from_yd([2000,2001],1).tolist(), [ 0,366])
         self.assertEqual(day_from_yd([2000,2001,2002],[1,2,3]).tolist(), [0,367,733])
 
-        self.assertRaises(ValueError, day_from_yd, 2000,  0, validate=True)
+        self.assertRaises(jvf, day_from_yd, 2000,  0, validate=True)
         self.assertEqual(day_from_yd(2000, 366, validate=True), 365)
-        self.assertRaises(ValueError, day_from_yd, 2000, 367, validate=True)
-        self.assertRaises(ValueError, day_from_yd, 1582, 360,
-                                      validate=True, proleptic=False)
-        self.assertRaises(ValueError, day_from_yd, 1582, [300,355,360],
-                                      validate=True, proleptic=False)
+        self.assertRaises(jvf, day_from_yd, 2000, 367, validate=True)
+        self.assertRaises(jvf, day_from_yd, 1582, 360, validate=True, proleptic=False)
+        self.assertRaises(jvf, day_from_yd, 1582, [300,355,360], validate=True,
+                                            proleptic=False)
 
         # In 1582, not a leap year, October 4 was day of year 277
         self.assertEqual(day_from_yd(1582, 277, proleptic=False), -152385)
@@ -117,20 +132,30 @@ class Test_calendar(unittest.TestCase):
         self.assertEqual(yd_from_day(365), (2000,366))
 
         # month_from_ym()
-        self.assertRaises(ValueError, month_from_ym, 2000, 0, validate=True)
-        self.assertRaises(ValueError, month_from_ym, 2000, 13, validate=True)
-        self.assertRaises(ValueError, month_from_ym, 2000, [12,14], validate=True)
-        self.assertRaises(ValueError, month_from_ym, [2000, 2001], [12,14], validate=True)
+        self.assertEqual(month_from_ym(2000, 1, validate=False), 0)
+        self.assertEqual(month_from_ym(2000, 1, validate=True),  0)
+        self.assertRaises(jvf, month_from_ym, 2000, 0, validate=True)
+        self.assertRaises(jvf, month_from_ym, 2000, 13, validate=True)
+        self.assertRaises(jvf, month_from_ym, 2000, [12,14], validate=True)
+        self.assertRaises(jvf, month_from_ym, [2000, 2001], [12,14], validate=True)
 
         # days_in_ym()
-        self.assertEqual(days_in_ym(2000, 2), 29)
-        self.assertEqual(days_in_ym(1999, 2), 28)
+        for proleptic in (False, True):
+            self.assertEqual(days_in_ym(2000, 2, proleptic=proleptic), 29)
+            self.assertEqual(type(days_in_ym(2000, 2, proleptic=proleptic)), int)
+            self.assertEqual(days_in_ym(1999, 2, proleptic=proleptic), 28)
+
+            self.assertRaises(jvf, days_in_ym, 2000, 0, proleptic=proleptic,
+                                                        validate=True)
+
+            self.assertTrue(np.all(days_in_ym(np.arange(2000,2012), 2, proleptic=proleptic)
+                                   == 3*[29,28,28,28]))
+            self.assertTrue(np.all(days_in_ym(np.arange(2000,2012), 3, proleptic=proleptic)
+                                   == 31))
+
         self.assertEqual(days_in_ym(1582, 10, proleptic=True), 31)
         self.assertEqual(days_in_ym(1582, 10, proleptic=False), 21)
-        self.assertEqual(days_in_ym(1582, [10,11], use_julian=True).tolist(), [21,30])
-        self.assertEqual(days_in_ym(1582, 10, use_julian=False), 31)
-        self.assertEqual(days_in_ym(1582, 10, use_julian=True), 21)
-        self.assertEqual(days_in_ym(1582, [10,11], use_julian=True).tolist(), [21,30])
+        self.assertEqual(days_in_ym(1582, [10,11], proleptic=False).tolist(), [21,30])
 
         # days_in_month()
         self.assertEqual(days_in_month(1), 29)
@@ -140,10 +165,16 @@ class Test_calendar(unittest.TestCase):
         self.assertEqual(days_in_month(month, proleptic=False), 21)
         self.assertEqual(days_in_month([month,month+1], proleptic=False).tolist(),
                          [21,30])
-        self.assertEqual(days_in_month(month, use_julian=False), 31)
-        self.assertEqual(days_in_month(month, use_julian=True), 21)
-        self.assertEqual(days_in_month([month,month+1], use_julian=True).tolist(),
-                         [21,30])
+
+        # days_in_year()
+        for proleptic in (False, True):
+            self.assertEqual(days_in_year(2000, proleptic=proleptic), 366)
+            self.assertEqual(type(days_in_year(2000, proleptic=proleptic)), int)
+            self.assertTrue(np.all(days_in_year(np.arange(2000,2012), proleptic=proleptic)
+                                   == 3*[366,365,365,365]))
+
+        self.assertEqual(days_in_year(1582, proleptic=False), 355)
+        self.assertEqual(days_in_year(1582, proleptic=True),  365)
 
         # A large number of dates, spanning > 200 years
         daylist = np.arange(-40000,40000,83)
@@ -153,7 +184,7 @@ class Test_calendar(unittest.TestCase):
         test_daylist = day_from_ymd(ylist, mlist, dlist)
 
         self.assertTrue(np.all(test_daylist == daylist),
-            'Large-scale conversion from day to YMD and back failed')
+                        'Large-scale conversion from day to YMD and back failed')
 
         # Make sure every month is in range
         self.assertTrue(np.all(mlist >= 1), 'Month-of-year < 1 found')
@@ -208,78 +239,87 @@ class Test_calendar(unittest.TestCase):
         # Every leap year is a multiple of four
         select = np.where(dlist == 366)
         self.assertTrue(np.all(ylist[select]%4 == 0),
-            'Not every leapyear is a multiple of four')
+                        'Not every leapyear is a multiple of four')
 
         # February always has 29 days in a leapyear
-        self.assertTrue(np.all(days_in_month(month_from_ym(ylist[select],2))
-            == 29), 'Not every leap year February has 29 days')
+        self.assertTrue(np.all(days_in_month(month_from_ym(ylist[select],2)) == 29),
+                        'Not every leap year February has 29 days')
 
         # February always has 28 days otherwise
         select = np.where(dlist == 365)
-        self.assertTrue(np.all(days_in_month(month_from_ym(ylist[select],2))
-            == 28), 'Not every non-leap year February has 28 days')
+        self.assertTrue(np.all(days_in_month(month_from_ym(ylist[select],2)) == 28),
+                        'Not every non-leap year February has 28 days')
 
         # Julian vs. Gregorian calendars around 1 CE
         for proleptic in (False, True):
             start_day = day_from_ymd(-10, 1, 1, proleptic=proleptic)
             stop_day  = day_from_ymd( 11, 1, 1, proleptic=proleptic)
+            days = []
             for day in range(start_day, stop_day+1):
+                days.append(day)
+
                 (y, m, d) = ymd_from_day(day, proleptic=proleptic)
                 day2 = day_from_ymd(y, m, d, proleptic=proleptic)
                 self.assertEqual(day, day2)
 
-            start_day = day_from_yd(-10, 1, proleptic=proleptic)
-            stop_day  = day_from_yd( 11, 1, proleptic=proleptic)
-            for day in range(start_day, stop_day+1):
                 (y, d) = yd_from_day(day, proleptic=proleptic)
                 day2 = day_from_yd(y, d, proleptic=proleptic)
                 self.assertEqual(day, day2)
 
-        for use_julian in (False, True):
-            start_day = day_from_ymd(-10, 1, 1, use_julian=use_julian)
-            stop_day  = day_from_ymd( 11, 1, 1, use_julian=use_julian)
-            for day in range(start_day, stop_day+1):
-                (y, m, d) = ymd_from_day(day, use_julian=use_julian)
-                day2 = day_from_ymd(y, m, d, use_julian=use_julian)
-                self.assertEqual(day, day2)
+            (y, m, d) = ymd_from_day(days, proleptic=proleptic)
+            days2 = day_from_ymd(y, m, d, proleptic=proleptic)
+            self.assertTrue(np.all(days2 == days))
 
-            start_day = day_from_yd(-10, 1, use_julian=use_julian)
-            stop_day  = day_from_yd( 11, 1, use_julian=use_julian)
-            for day in range(start_day, stop_day+1):
-                (y, d) = yd_from_day(day, use_julian=use_julian)
-                day2 = day_from_yd(y, d, use_julian=use_julian)
-                self.assertEqual(day, day2)
+            (y, d) = yd_from_day(days, proleptic=proleptic)
+            days2 = day_from_yd(y, d, proleptic=proleptic)
+            self.assertTrue(np.all(days2 == days))
 
         # Julian vs. Gregorian calendars around 1582
         for proleptic in (False, True):
             start_day = day_from_ymd(1572, 1, 1, proleptic=proleptic)
             stop_day  = day_from_ymd(1593, 1, 1, proleptic=proleptic)
+            days = []
             for day in range(start_day, stop_day+1):
+                days.append(day)
+
                 (y, m, d) = ymd_from_day(day, proleptic=proleptic)
                 day2 = day_from_ymd(y, m, d, proleptic=proleptic)
                 self.assertEqual(day, day2)
 
-            start_day = day_from_yd(-10, 1, proleptic=proleptic)
-            stop_day  = day_from_yd( 11, 1, proleptic=proleptic)
-            for day in range(start_day, stop_day+1):
                 (y, d) = yd_from_day(day, proleptic=proleptic)
                 day2 = day_from_yd(y, d, proleptic=proleptic)
                 self.assertEqual(day, day2)
 
-        for use_julian in (False, True):
-            start_day = day_from_ymd(1572, 1, 1, use_julian=use_julian)
-            stop_day  = day_from_ymd(1593, 1, 1, use_julian=use_julian)
-            for day in range(start_day, stop_day+1):
-                (y, m, d) = ymd_from_day(day, use_julian=use_julian)
-                day2 = day_from_ymd(y, m, d, use_julian=use_julian)
-                self.assertEqual(day, day2)
+            (y, m, d) = ymd_from_day(days, proleptic=proleptic)
+            days2 = day_from_ymd(y, m, d, proleptic=proleptic)
+            self.assertTrue(np.all(days2 == days))
 
-            start_day = day_from_yd(1572, 1, use_julian=use_julian)
-            stop_day  = day_from_yd(1593, 1, use_julian=use_julian)
-            for day in range(start_day, stop_day+1):
-                (y, d) = yd_from_day(day, use_julian=use_julian)
-                day2 = day_from_yd(y, d, use_julian=use_julian)
-                self.assertEqual(day, day2)
+            (y, d) = yd_from_day(days, proleptic=proleptic)
+            days2 = day_from_yd(y, d, proleptic=proleptic)
+            self.assertTrue(np.all(days2 == days))
+
+        # Dates between calendars
+        _ = day_from_ymd(1582, 10, np.arange(1,32), validate=False, proleptic=False)
+        _ = day_from_ymd(1582, 10, np.arange(1,32), validate=True, proleptic=True)
+        self.assertRaises(jvf, day_from_ymd, 1582, 10, np.arange(1,32), validate=True,
+                                             proleptic=False)
+        _ = day_from_ymd(1582,  9, np.arange(1,31), validate=True, proleptic=False)
+        _ = day_from_ymd(1582, 11, np.arange(1,31), validate=True, proleptic=False)
+
+        # Math jump on March 1 in leap years before 200
+        days = day_from_ymd(np.arange(192,205), 3, 1)
+        for day in days:
+            (y,m,d) = ymd_from_day(day)
+            self.assertEqual(m, 3)
+            self.assertEqual(d, 1)
+
+            (y,m,d) = ymd_from_day(day+1)
+            self.assertEqual(m, 3)
+            self.assertEqual(d, 2)
+
+        (y,m,d) = ymd_from_day(days)
+        self.assertTrue(np.all(m == 3))
+        self.assertTrue(np.all(d == 1))
 
         # Reality checks, set_gregorian_start
         self.assertEqual(day_from_ymd(-4712, 1, 1, proleptic=False), -2451545)
@@ -298,5 +338,12 @@ class Test_calendar(unittest.TestCase):
         self.assertEqual(days_in_year(1752, proleptic=True),  366)
 
         set_gregorian_start()
+
+############################################
+# Execute from command line...
+############################################
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

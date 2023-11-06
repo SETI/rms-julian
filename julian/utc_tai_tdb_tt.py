@@ -1,31 +1,31 @@
 ##########################################################################################
-# julian/utc_tai_tdb.py
+# julian/utc_tai_tdb_tt.py
 ##########################################################################################
-
-import numbers
+"""Conversions between time systems: UTC, TAI, TDB, and TT
+"""
+##########################################################################################
 
 import numpy as np
 from julian              import leap_seconds
 from julian.calendar     import day_from_ymd, ymd_from_day
 from julian.leap_seconds import delta_t_from_ymd, leapsecs_from_day, leapsecs_from_ym, \
                                 seconds_on_day
-from julian.utils        import _int, _int64, _float, _number
-from julian.warning      import _warn
+from julian._utils       import _int, _float, _number
 
-LEAPSECS_ON_JAN_1_2000 = leapsecs_from_ym(2000,1)
-LEAPSECS_ON_JAN_1_1972 = leapsecs_from_ym(1972,1)
-DAY_OF_JAN_1_1972 = day_from_ymd(1972,1,1)
-LEAPSECS_1972_to_2000 = LEAPSECS_ON_JAN_1_2000 - LEAPSECS_ON_JAN_1_1972
+_LEAPSECS_ON_JAN_1_2000 = leapsecs_from_ym(2000,1)
+_LEAPSECS_ON_JAN_1_1972 = leapsecs_from_ym(1972,1)
+_DAY_OF_JAN_1_1972 = day_from_ymd(1972,1,1)
+_LEAPSECS_1972_to_2000 = _LEAPSECS_ON_JAN_1_2000 - _LEAPSECS_ON_JAN_1_1972
 
 ##########################################################################################
 # Support for old TAI/UTC origin of midnight, not noon
 ##########################################################################################
 
-TAI_MIDNIGHT_ORIGIN = False     # Filled in by first call to set_tai_origin()
-SECONDS_PAST_MIDNIGHT = 0
-TAI_OF_JAN_1_2000 = 0           # tai value at UTC midnight
-TAI_OF_JAN_1_1972 = 0
-TT_MINUS_TAI = 0.
+_TAI_MIDNIGHT_ORIGIN = False    # Filled in by first call to set_tai_origin()
+_SECONDS_PAST_MIDNIGHT = 0
+_TAI_OF_JAN_1_2000 = 0          # tai value at UTC midnight
+_TAI_OF_JAN_1_1972 = 0
+_TT_MINUS_TAI = 0.
 
 
 def set_tai_origin(origin='NOON'):
@@ -47,26 +47,26 @@ def set_tai_origin(origin='NOON'):
     Note that the TDB and TT time systems have always use the "NOON" origin exclusively.
     """
 
-    global TAI_MIDNIGHT_ORIGIN, SECONDS_PAST_MIDNIGHT
-    global TAI_OF_JAN_1_2000, TAI_OF_JAN_1_1972, TT_MINUS_TAI
-    global UTC_OF_JAN_1_2000, UTC_OF_JAN_1_1972
+    global _TAI_MIDNIGHT_ORIGIN, _SECONDS_PAST_MIDNIGHT
+    global _TAI_OF_JAN_1_2000, _TAI_OF_JAN_1_1972, _TT_MINUS_TAI
+    global _UTC_OF_JAN_1_2000, _UTC_OF_JAN_1_1972
 
     if origin == 'NOON':
-        TAI_MIDNIGHT_ORIGIN = False
-        SECONDS_PAST_MIDNIGHT = 43200
-        TT_MINUS_TAI = 32.184
+        _TAI_MIDNIGHT_ORIGIN = False
+        _SECONDS_PAST_MIDNIGHT = 43200
+        _TT_MINUS_TAI = 32.184
 
     elif origin == 'MIDNIGHT':
-        TAI_MIDNIGHT_ORIGIN = True
-        SECONDS_PAST_MIDNIGHT = 0
-        TT_MINUS_TAI = 32.184 - 43200
+        _TAI_MIDNIGHT_ORIGIN = True
+        _SECONDS_PAST_MIDNIGHT = 0
+        _TT_MINUS_TAI = 32.184 - 43200
 
     else:
         raise ValueError('invalid origin: ' + repr(origin))     # pragma: no cover
 
-    TAI_OF_JAN_1_2000 =  LEAPSECS_ON_JAN_1_2000 - SECONDS_PAST_MIDNIGHT
-    TAI_OF_JAN_1_1972 = (LEAPSECS_ON_JAN_1_1972 - SECONDS_PAST_MIDNIGHT
-                         + 86400 * DAY_OF_JAN_1_1972)
+    _TAI_OF_JAN_1_2000 =  _LEAPSECS_ON_JAN_1_2000 - _SECONDS_PAST_MIDNIGHT
+    _TAI_OF_JAN_1_1972 = (_LEAPSECS_ON_JAN_1_1972 - _SECONDS_PAST_MIDNIGHT
+                          + 86400 * _DAY_OF_JAN_1_1972)
 
 
 # Intialize globals
@@ -97,7 +97,7 @@ def day_sec_from_utc(utc):
     """
 
     # Reference the time to TAI midnight on January 1, 2000
-    tai = _number(utc) + (SECONDS_PAST_MIDNIGHT + LEAPSECS_ON_JAN_1_2000)
+    tai = _number(utc) + (_SECONDS_PAST_MIDNIGHT + _LEAPSECS_ON_JAN_1_2000)
 
     # Guess the day. By adding 100 seconds here, this could be one day late but it cannot
     # be early unless the number of leap seconds ever drops below -100, which seems
@@ -148,15 +148,10 @@ def utc_from_day_sec(day, sec=0):
     """
 
     day = _number(day)
-    # Force to int64 for Windows so expression below doesn't overflow
-    if (isinstance(day, numbers.Integral) or
-        (isinstance(day, np.ndarray) and day.dtype.kind in 'ui')):
-            day = _int64(day)
-
     (y,m,d) = ymd_from_day(day)
     leapsecs = leapsecs_from_ym(y,m)
-    return 86400 * day + leapsecs + (sec - (SECONDS_PAST_MIDNIGHT
-                                            + LEAPSECS_ON_JAN_1_2000))
+    return 86400 * day + leapsecs + (sec - (_SECONDS_PAST_MIDNIGHT
+                                            + _LEAPSECS_ON_JAN_1_2000))
         # the groupings inside parentheses eliminate an array op if day is an array but
         # sec is not
 
@@ -206,32 +201,32 @@ def tai_from_utc(utc):
     """
 
     utc = _number(utc)
-    tai = utc + LEAPSECS_ON_JAN_1_2000
-    if not leap_seconds.RUBBER:
+    tai = utc + _LEAPSECS_ON_JAN_1_2000
+    if not leap_seconds._RUBBER:
         return tai
 
     if np.isscalar(tai):
-        if tai >= TAI_OF_JAN_1_1972:
+        if tai >= _TAI_OF_JAN_1_1972:
             return tai
 
         # All days before 1972 contain 86,400 UTC "rubber seconds"
-        utc_offset = tai - TAI_OF_JAN_1_1972
+        utc_offset = tai - _TAI_OF_JAN_1_1972
         day_wrt_1972 = utc_offset // 86400
         sec = utc_offset - 86400 * day_wrt_1972
-        day = DAY_OF_JAN_1_1972 + day_wrt_1972
+        day = _DAY_OF_JAN_1_1972 + day_wrt_1972
         (y, m, d) = ymd_from_day(day)
         return tai + delta_t_from_ymd(y, m, d + sec/86400.) - 22 + 12
 
-    mask = tai < TAI_OF_JAN_1_1972
+    mask = tai < _TAI_OF_JAN_1_1972
     if not np.any(mask):
         return tai
 
     tai = np.asfarray(tai)
     tai1 = tai[mask]
-    utc_offset = tai1 - TAI_OF_JAN_1_1972
+    utc_offset = tai1 - _TAI_OF_JAN_1_1972
     day_wrt_1972 = utc_offset // 86400
     sec = utc_offset - 86400 * day_wrt_1972
-    day = DAY_OF_JAN_1_1972 + day_wrt_1972
+    day = _DAY_OF_JAN_1_1972 + day_wrt_1972
     (y, m, d) = ymd_from_day(day)
     tai[mask] = tai1 + delta_t_from_ymd(y, m, d + sec/86400.) - 22 + 12
 
@@ -256,37 +251,37 @@ def utc_from_tai(tai):
     """
 
     tai = _number(tai)
-    utc = tai - LEAPSECS_ON_JAN_1_2000
-    if not leap_seconds.RUBBER:
+    utc = tai - _LEAPSECS_ON_JAN_1_2000
+    if not leap_seconds._RUBBER:
         return utc
 
     if np.isscalar(tai):
-        if tai >= TAI_OF_JAN_1_1972:
+        if tai >= _TAI_OF_JAN_1_1972:
             return utc
 
         y_prev = 0
         m_prev = -99    # impossible value
-        day = int((tai - SECONDS_PAST_MIDNIGHT) // 86400)   # initial guess
+        day = int((tai - _SECONDS_PAST_MIDNIGHT) // 86400)   # initial guess
         sec = 0.
         while True:
             (y, m, d) = ymd_from_day(day)
-            utc = tai - delta_t_from_ymd(y, m, d+sec/86400.) - LEAPSECS_1972_to_2000
+            utc = tai - delta_t_from_ymd(y, m, d+sec/86400.) - _LEAPSECS_1972_to_2000
             if y == y_prev and m == m_prev:
                 return utc
             day, sec = day_sec_from_utc(utc)
             y_prev = y
             m_prev = m
 
-    mask = tai < TAI_OF_JAN_1_1972
+    mask = tai < _TAI_OF_JAN_1_1972
     if np.any(mask):
         tai1 = tai[mask]
         y_prev = 0
         m_prev = -99    # impossible value
-        day = ((tai1 - SECONDS_PAST_MIDNIGHT) // 86400).astype('int')
+        day = ((tai1 - _SECONDS_PAST_MIDNIGHT) // 86400).astype('int')
         sec = 0.
         while True:
             (y, m, d) = ymd_from_day(day)
-            utc1 = tai1 - delta_t_from_ymd(y, m, d+sec/86400.) - LEAPSECS_1972_to_2000
+            utc1 = tai1 - delta_t_from_ymd(y, m, d+sec/86400.) - _LEAPSECS_1972_to_2000
             if np.all(y == y_prev) and np.all(m == m_prev):
                 utc[mask] = utc1
                 break
@@ -385,13 +380,13 @@ def tdb_from_tai(tai, *, iters=2):
     #   E = M + DELTET_EB sin(M)
     #   M = DELTET_M0 + DELTET_M1 * tdb
 
-    tt = _float(tai) + TT_MINUS_TAI
+    tt = _float(tai) + _TT_MINUS_TAI
 
     tdb = tt
     for iter in range(iters):
-        m = leap_seconds.DELTET_M0 + leap_seconds.DELTET_M1 * tdb
-        e = m + leap_seconds.DELTET_EB * np.sin(m)
-        tdb = tt + leap_seconds.DELTET_K * np.sin(e)
+        m = leap_seconds._DELTET_M0 + leap_seconds._DELTET_M1 * tdb
+        e = m + leap_seconds._DELTET_EB * np.sin(m)
+        tdb = tt + leap_seconds._DELTET_K * np.sin(e)
 
     return tdb
 
@@ -411,10 +406,10 @@ def tai_from_tdb(tdb):
     # tai = tdb - DELTA_T_A - DELTET_K sin(E)
 
     tdb = _float(tdb)
-    m = leap_seconds.DELTET_M0 + leap_seconds.DELTET_M1 * tdb
-    e = m + leap_seconds.DELTET_EB * np.sin(m)
-    tt = tdb - leap_seconds.DELTET_K * np.sin(e)
-    tai = tt - TT_MINUS_TAI
+    m = leap_seconds._DELTET_M0 + leap_seconds._DELTET_M1 * tdb
+    e = m + leap_seconds._DELTET_EB * np.sin(m)
+    tt = tdb - leap_seconds._DELTET_K * np.sin(e)
+    tai = tt - _TT_MINUS_TAI
     return tai
 
 ########################################
@@ -430,7 +425,7 @@ def tt_from_tai(tai):
     Return:         time in seconds TT, as a scalar or array.
     """
 
-    return _float(tai) + TT_MINUS_TAI
+    return _float(tai) + _TT_MINUS_TAI
 
 
 def tai_from_tt(tt):
@@ -442,7 +437,7 @@ def tai_from_tt(tt):
     Return:         time in seconds TAI, as a scalar or array.
     """
 
-    return _float(tt) - TT_MINUS_TAI
+    return _float(tt) - _TT_MINUS_TAI
 
 
 def tdt_from_tai(tai):
@@ -454,9 +449,7 @@ def tdt_from_tai(tai):
     Return:         time in seconds TT, as a scalar or array.
     """
 
-    _warn('tdt_from_tai() is deprecated; use tt_from_tai()')
-
-    return _float(tai) + TT_MINUS_TAI
+    return _float(tai) + _TT_MINUS_TAI
 
 
 def tai_from_tdt(tt):
@@ -468,15 +461,13 @@ def tai_from_tdt(tt):
     Return:         time in seconds TAI, as a scalar or array.
     """
 
-    _warn('tai_from_tdt() is deprecated; use tai_from_tt()')
-
-    return _float(tt) - TT_MINUS_TAI
+    return _float(tt) - _TT_MINUS_TAI
 
 ##########################################################################################
 # General conversions between UTC, TAI, TDB, and TT
 ##########################################################################################
 
-TIME_CONVERSION_FUNCS = {
+_TIME_CONVERSION_FUNCS = {
     ('TAI', 'TDB'): tdb_from_tai,
     ('TAI', 'TDT'): tt_from_tai,
     ('TAI', 'TT' ): tt_from_tai,
@@ -503,11 +494,11 @@ def time_from_time(time, timesys, newsys='TAI'):
         return _number(time)
 
     key = (timesys, newsys)
-    if key in TIME_CONVERSION_FUNCS:
-        return TIME_CONVERSION_FUNCS[key](time)
+    if key in _TIME_CONVERSION_FUNCS:
+        return _TIME_CONVERSION_FUNCS[key](time)
 
-    tai = TIME_CONVERSION_FUNCS[(timesys, 'TAI')](time)
-    return TIME_CONVERSION_FUNCS[('TAI', newsys)](tai)
+    tai = _TIME_CONVERSION_FUNCS[(timesys, 'TAI')](time)
+    return _TIME_CONVERSION_FUNCS[('TAI', newsys)](tai)
 
 
 def day_sec_from_time(time, timesys='TAI', *, leapsecs=True):
@@ -531,7 +522,7 @@ def day_sec_from_time(time, timesys='TAI', *, leapsecs=True):
     if not leapsecs:
         # Determine whether the zero-value of the time system is midnight or noon on
         # January 1, 2000.
-        if TAI_MIDNIGHT_ORIGIN and timesys in ('TAI', 'UTC'):
+        if _TAI_MIDNIGHT_ORIGIN and timesys in ('TAI', 'UTC'):
             time = _number(time)
         else:
             time = _number(time) + 43200
@@ -566,7 +557,7 @@ def time_from_day_sec(day, sec, timesys='TAI', *, leapsecs=True):
     if not leapsecs:
         # Determine whether the zero-value of the time system is midnight or noon on
         # January 1, 2000.
-        if TAI_MIDNIGHT_ORIGIN and timesys in ('TAI', 'UTC'):
+        if _TAI_MIDNIGHT_ORIGIN and timesys in ('TAI', 'UTC'):
             time_zero = 0
         else:
             time_zero = 43200
@@ -575,34 +566,5 @@ def time_from_day_sec(day, sec, timesys='TAI', *, leapsecs=True):
 
     tai = tai_from_day_sec(day, sec)
     return time_from_time(tai, 'TAI', timesys)
-
-##########################################################################################
-# DEPRECATED
-##########################################################################################
-
-def utc_from_day_sec_as_type(day, sec, time_type='UTC'):
-    """DEPRECATED. Retained for backward compatibility.
-
-    Use day_sec_from_time() with leapsecs=True.
-    """
-
-    _warn('utc_from_day_sec_as_type() is deprecated; '
-          'use day_sec_from_time() with leapsecs=True')
-
-    time = time_from_day_sec(day, sec, time_type, leapsecs=(time_type == 'UTC'))
-    return day_sec_from_time(time, time_type, leapsecs=True)
-
-
-def day_sec_as_type_from_utc(day, sec, time_type='UTC'):
-    """DEPRECATED. Retained for backward compatibility.
-
-    Use day_sec_from_time() with leapsecs = (time_type == 'UTC').
-    """
-
-    _warn('day_sec_as_type_from_utc() is deprecated; '
-          'use day_sec_from_time() with leapsecs=(time_type == "UTC")')
-
-    time = time_from_day_sec(day, sec, time_type, leapsecs=True)
-    return day_sec_from_time(time, time_type, leapsecs=(time_type == 'UTC'))
 
 ##########################################################################################

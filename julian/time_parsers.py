@@ -1,17 +1,20 @@
 ##########################################################################################
-# julian/time_parser.py
+# julian/time_parsers.py
+##########################################################################################
+"""Functions to parse time strings given in arbitrary formats
+"""
 ##########################################################################################
 
 import pyparsing
 import re
 
-from julian.date_parser   import _search_in_string
+from julian.date_parsers  import _search_in_string
 from julian.time_pyparser import time_pyparser
-from julian.formatter     import format_day, format_sec
+from julian.formatters    import format_day, format_sec
 from julian.leap_seconds  import seconds_on_day
-from julian.warning       import _warn
+from julian._exceptions   import JulianParseException, JulianValidateFailure
 
-PRE_FILTER = True       # set False for some performance tests
+_PRE_FILTER = True      # set False for some performance tests
 
 ##########################################################################################
 # General parser
@@ -40,7 +43,7 @@ def sec_from_string(string, leapsecs=True, ampm=True, timezones=False, floating=
     try:
         parse_list = parser.parse_string(string).as_list()
     except pyparsing.ParseException:
-        raise ValueError(f'unrecognized time format: "{string}"')
+        raise JulianParseException(f'unrecognized time format: "{string}"')
 
     parse_dict = {key:value for key, value in parse_list}
     (sec, dday, _) = _sec_from_dict(parse_dict, leapsecs=leapsecs, validate=True)
@@ -54,8 +57,8 @@ def sec_from_string(string, leapsecs=True, ampm=True, timezones=False, floating=
 # Time scrapers
 ##########################################################################################
 
-def sec_in_strings(strings, leapsecs=True, ampm=True, timezones=False, floating=False,
-                   validate=True, substrings=False, first=False):
+def secs_in_strings(strings, leapsecs=True, ampm=True, timezones=False, floating=False,
+                    validate=True, substrings=False, first=False):
     """List of second counts representing times of day, obtained by searching one or more
     strings for patterns that look like formatted times.
 
@@ -143,9 +146,10 @@ def _sec_from_dict(parse_dict, day=None, leapsecs=True, validate=True):
     is_leap = parse_dict.get('LEAPSEC', False)
     if is_leap and validate:
         if timesys != 'UTC':        # pragma: no cover
-            raise ValueError(f'leap seconds are disallowed in time system {timesys}')
+            raise JulianValidateFailure('leap seconds are disallowed in time system '
+                                        + timesys)
         if not leapsecs:            # pragma: no cover
-            raise ValueError('leap seconds are disallowed')
+            raise JulianValidateFailure('leap seconds are disallowed')
 
     if tzmin:
         if is_leap:
@@ -166,74 +170,32 @@ def _sec_from_dict(parse_dict, day=None, leapsecs=True, validate=True):
 
         if is_leap:
             sec += leaps
-            if validate:
+            if validate:            # pragma: no branch
                 if (sec >= 86400 and not leapsecs) or sec < 86400:
-                    raise ValueError('invalid leap second at %s UTC, time zone %s'
-                                     % (format_sec(sec), parse_dict['TZ']))
+                    raise JulianValidateFailure('invalid leap second at '
+                                                '%s UTC, time zone %s'
+                                                % (format_sec(sec), parse_dict['TZ']))
 
     else:
         sec = 3600 * h + 60 * m + s
 
     if is_leap and validate and day is not None and sec >= seconds_on_day(day + dday):
-        raise ValueError('invalid leap seconds on ' + format_day(day + dday))
+        raise JulianValidateFailure('invalid leap seconds on ' + format_day(day + dday))
 
     return (sec, dday, timesys)
 
 
-HH_COLON_MM = re.compile(r'(?<!\d)[012]?\d:[ 0-5]\d(?!\d)')
+_HH_COLON_MM = re.compile(r'(?<!\d)[012]?\d:[ 0-5]\d(?!\d)')
 
 def _time_pattern_filter(string):
     """Quick regular expression tests to determine if this string might contain a time."""
 
-    if not PRE_FILTER:
+    if not _PRE_FILTER:
         return True         # pragma: no cover
 
-    if HH_COLON_MM.search(string):
+    if _HH_COLON_MM.search(string):
         return True
 
     return False
-
-##########################################################################################
-# DEPRECATED
-##########################################################################################
-
-def time_in_string(string, remainder=False):
-    """Second value based on the first identified time in a string.
-
-    Returns None if no time was found.
-
-    DEPRECATED. Use secs_in_strings().
-
-    Input:
-        string          string to interpret.
-        remainder       If True and a date was found, return a tuple:
-                            (seconds, remainder of string).
-                        Otherwise, just return the day number.
-    """
-
-    _warn('time_in_string() is deprecated; use sec_in_strings()')
-
-    result = sec_in_strings([string], leapsecs=True, ampm=True, timezones=False,
-                            floating=False, validate=True, substrings=True, first=True)
-    if result is None:
-        return None
-
-    sec, substring = result
-    if remainder:
-        return (sec, string.partition(substring)[2])
-    else:
-        return sec
-
-
-def times_in_string(string):
-    """List of seconds values found in this string.
-
-    DEPRECATED. Use sec_in_strings().
-    """
-
-    _warn('times_in_string() is deprecated; use sec_in_strings()')
-
-    return sec_in_strings([string], leapsecs=True, ampm=True, timezones=False,
-                          floating=True, validate=True)
 
 ##########################################################################################

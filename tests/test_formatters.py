@@ -1,18 +1,19 @@
 ##########################################################################################
-# julian/test_formatter.py
+# julian/test_formatters.py
 ##########################################################################################
 
 import numpy as np
 import unittest
 
-from julian.calendar import day_from_ymd
-
-from julian.formatter import (
+from julian.formatters import (
     format_day,
     format_day_sec,
     format_sec,
-    hms_format_from_sec,
     iso_from_tai,
+)
+
+from julian.DEPRECATED import (
+    hms_format_from_sec,
     yd_format_from_day,
     ydhms_format_from_day_sec,
     ydhms_format_from_tai,
@@ -20,6 +21,9 @@ from julian.formatter import (
     ymdhms_format_from_day_sec,
     ymdhms_format_from_tai,
 )
+
+from julian.calendar    import day_from_ymd
+from julian._exceptions import JulianParseException, JulianValidateFailure
 
 DAY_TESTS = [0, 100000, -200000]
 
@@ -202,12 +206,12 @@ FTIME_ANSWERS = {
 }
 
 
-class Test_formatter(unittest.TestCase):
+class Test_formatters(unittest.TestCase):
 
     def test_format_day(self):
 
         import warnings
-        from julian.warning import JulianDeprecationWarning
+        from julian._warnings import JulianDeprecationWarning
         warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
 
         for key, answers in DAY_ANSWERS.items():
@@ -382,16 +386,6 @@ class Test_formatter(unittest.TestCase):
         self.assertRaises(ValueError, format_day, [[0,0],[0,0]],
                                                   buffer=np.empty((3,3), dtype='U40'))
 
-        self.assertEqual(ymd_format_from_day(-200000, proleptic=True),
-                         ymd_format_from_day(-200000, use_julian=False))
-        self.assertEqual(ymd_format_from_day(-200000, proleptic=False),
-                         ymd_format_from_day(-200000, use_julian=True))
-
-        self.assertEqual(yd_format_from_day(-200000, proleptic=True),
-                         yd_format_from_day(-200000, use_julian=False))
-        self.assertEqual(yd_format_from_day(-200000, proleptic=False),
-                         yd_format_from_day(-200000, use_julian=True))
-
     def test_format_sec(self):
 
         for key, answers in TIME_ANSWERS.items():
@@ -501,7 +495,7 @@ class Test_formatter(unittest.TestCase):
         self.assertEqual(hms_format_from_sec(0., digits=3, suffix='Z'), '00:00:00.000Z')
 
         # Check if hms_format_from_sec accepts seconds over 86410
-        self.assertRaises(ValueError, hms_format_from_sec, 86411) #!!!
+        self.assertRaises(JulianValidateFailure, hms_format_from_sec, 86411) #!!!
 
         # Errors
         self.assertRaises(ValueError, format_sec, 0, kind='X')
@@ -624,6 +618,17 @@ class Test_formatter(unittest.TestCase):
                                       proleptic=proleptic, colon=colon, suffix=suffix,
                                       buffer=buffer)
 
+            # Check a case with the exact right buffer size so no "extra"
+            result = format_day_sec(0, 43201, buffer=None)
+            self.assertEqual(result, '2000-01-01T12:00:01')
+
+            for l in (len(result), len(result)+1):
+                result = format_day_sec(0, 43201, buffer=np.empty((), 'U' + str(l)))
+                self.assertEqual(result, '2000-01-01T12:00:01')
+
+                result = format_day_sec(0, 43201, buffer=np.empty((), 'S' + str(l)))
+                self.assertEqual(result, b'2000-01-01T12:00:01')
+
         #### old tests...
 
         # Check if ymdhms_format_from_day_sec returns the correct format.
@@ -662,21 +667,6 @@ class Test_formatter(unittest.TestCase):
                          ymdhms_format_from_tai(23456789012.345, digits=3, suffix='Z'))
         self.assertEqual(iso_from_tai(-23456789012.345, ymd=False, digits=3, suffix='Z'),
                          ydhms_format_from_tai(-23456789012.345, digits=3, suffix='Z'))
-
-        self.assertEqual(iso_from_tai(-23456789012.345, proleptic=True),
-                         iso_from_tai(-23456789012.345, use_julian=False))
-        self.assertEqual(iso_from_tai(-23456789012.345, proleptic=False),
-                         iso_from_tai(-23456789012.345, use_julian=True))
-
-        self.assertEqual(ymdhms_format_from_tai(-23456789012.345, proleptic=True),
-                         ymdhms_format_from_tai(-23456789012.345, use_julian=False))
-        self.assertEqual(ymdhms_format_from_tai(-23456789012.345, proleptic=False),
-                         ymdhms_format_from_tai(-23456789012.345, use_julian=True))
-
-        self.assertEqual(ydhms_format_from_tai(-23456789012.345, proleptic=True),
-                         ydhms_format_from_tai(-23456789012.345, use_julian=False))
-        self.assertEqual(ydhms_format_from_tai(-23456789012.345, proleptic=False),
-                         ydhms_format_from_tai(-23456789012.345, use_julian=True))
 
         ymdhms = ymdhms_format_from_day_sec([0,366],[0,43200])
         self.assertTrue(np.all(ymdhms == ('2000-01-01T00:00:00', '2001-01-01T12:00:00')))
@@ -736,14 +726,11 @@ class Test_formatter(unittest.TestCase):
         self.assertRaises(ValueError, format_day_sec, [[0,0],[0,0]], 0.,
                                                       buffer=np.empty((3,3), dtype='U40'))
 
-        self.assertEqual(ymdhms_format_from_day_sec(-200000, 44444, proleptic=True),
-                         ymdhms_format_from_day_sec(-200000, 44444, use_julian=False))
-        self.assertEqual(ymdhms_format_from_day_sec(-200000, 44444, proleptic=False),
-                         ymdhms_format_from_day_sec(-200000, 44444, use_julian=True))
+############################################
+# Execute from command line...
+############################################
 
-        self.assertEqual(ydhms_format_from_day_sec(-200000, 44444, proleptic=True),
-                         ydhms_format_from_day_sec(-200000, 44444, use_julian=False))
-        self.assertEqual(ydhms_format_from_day_sec(-200000, 44444, proleptic=False),
-                         ydhms_format_from_day_sec(-200000, 44444, use_julian=True))
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

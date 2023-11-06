@@ -8,8 +8,7 @@ import os
 import sys
 import unittest
 
-from julian.utc_tai_tdb import (
-    day_sec_as_type_from_utc,
+from julian.utc_tai_tdb_tt import (
     day_sec_from_tai,
     day_sec_from_time,
     day_sec_from_utc,
@@ -27,22 +26,26 @@ from julian.utc_tai_tdb import (
     tt_from_tai,
     utc_from_day,
     utc_from_day_sec,
-    utc_from_day_sec_as_type,
     utc_from_tai,
+)
+
+from julian.DEPRECATED import (
+    day_sec_as_type_from_utc,
+    utc_from_day_sec_as_type,
 )
 
 from julian              import leap_seconds
 from julian.calendar     import day_from_ymd, ymd_from_day
-from julian.formatter    import iso_from_tai
+from julian.formatters   import iso_from_tai
 from julian.leap_seconds import set_ut_model
 
 
-class Test_utc_tai_tdb(unittest.TestCase):
+class Test_utc_tai_tdb_tt(unittest.TestCase):
 
     def runTest(self):
 
         import warnings
-        from julian.warning import JulianDeprecationWarning
+        from julian._warnings import JulianDeprecationWarning
         warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
 
         ################################################################
@@ -52,8 +55,8 @@ class Test_utc_tai_tdb(unittest.TestCase):
         import cspyce
 
         julian_root_dir = os.path.split(sys.modules['julian'].__file__)[0]
-        lsk_path = os.path.join(julian_root_dir, 'documents',
-                                leap_seconds.LATEST_LSK_NAME)
+        lsk_path = os.path.join(julian_root_dir, 'assets',
+                                leap_seconds._LATEST_LSK_NAME)
         cspyce.furnsh(lsk_path)
 
         set_ut_model('SPICE')
@@ -461,5 +464,12 @@ class Test_utc_tai_tdb(unittest.TestCase):
             (dtest, stest) = day_sec_from_time(tdb2, 'TDB', leapsecs=False)
             self.assertTrue(np.all(dtest == daylist))
             self.assertLess(np.abs(stest - 43200.).max(), 2.e-7)
+
+############################################
+# Execute from command line...
+############################################
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

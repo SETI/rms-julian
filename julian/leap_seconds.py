@@ -1,6 +1,9 @@
 ##########################################################################################
 # julian/leap_seconds.py
 ##########################################################################################
+"""Functions for managing and tracking leap seconds and "rubber second" offsets.
+"""
+##########################################################################################
 
 import numpy as np
 import pathlib
@@ -8,9 +11,9 @@ import os
 import re
 import sys
 
-from julian.deltat   import FuncDeltaT, LeapDeltaT, MergedDeltaT, SplineDeltaT
 from julian.calendar import day_from_ymd, days_in_year, ymd_from_day
-from julian.utils    import _int, _number
+from julian._deltat  import FuncDeltaT, LeapDeltaT, MergedDeltaT, SplineDeltaT
+from julian._utils   import _int, _number
 
 ##########################################################################################
 # LEAPS_DELTA_T and SPICE_DELTA_T: baseline models for leap seconds and TAI-UTC.
@@ -18,27 +21,27 @@ from julian.utils    import _int, _number
 # They are always initialized at startup or by calling _initialize_leap_seconds().
 ##########################################################################################
 
-LEAPS_DELTA_T = None
-SPICE_DELTA_T = None
+_LEAPS_DELTA_T = None
+_SPICE_DELTA_T = None
 
 # At load time, this file looks for an environment variable SPICE_LSK_FILEPATH. If found,
 # this file is used to initialize the module. Otherwise, the local copy of the latest
 # LSK is read.
-LATEST_LSK_NAME = 'naif0012.tls'        # possibly overridden by _default_lsk_path()
+_LATEST_LSK_NAME = 'naif0012.tls'       # possibly overridden by _default_lsk_path()
 
 # Global variables needed for TAI-UTC conversions, from a SPICE leap seconds kernel
-DELTET_DELTA_T_A = 0.
-DELTET_K  = 0.
-DELTET_EB = 0.
-DELTET_M0 = 0.
-DELTET_M1 = 0.
-DELTET_DELTA_AT = []
+_DELTET_DELTA_T_A = 0.
+_DELTET_K  = 0.
+_DELTET_EB = 0.
+_DELTET_M0 = 0.
+_DELTET_M1 = 0.
+_DELTET_DELTA_AT = []
 
 
 def _default_lsk_path():
     """The default LSK path as a Path object."""
 
-    global LATEST_LSK_NAME
+    global _LATEST_LSK_NAME
 
     try:
         lsk_path = os.environ['SPICE_LSK_FILEPATH']
@@ -46,11 +49,11 @@ def _default_lsk_path():
     # If the environment variable is not defined, identify the latest local copy
     except KeyError:
         julian_root_dir = pathlib.Path(sys.modules['julian'].__file__).parent
-        julian_docs_dir = julian_root_dir / 'documents'
+        julian_docs_dir = julian_root_dir / 'assets'
         lsk_paths = list(julian_docs_dir.glob('naif00*.tls'))
         lsk_paths.sort()
         lsk_path = lsk_paths[-1]
-        LATEST_LSK_NAME = lsk_path.name
+        _LATEST_LSK_NAME = lsk_path.name
 
     return lsk_path
 
@@ -60,7 +63,8 @@ def _leaps_from_lsk(lsk_path):
     represented by a string or Path.
     """
 
-    global DELTET_DELTA_T_A, DELTET_K, DELTET_EB, DELTET_M0, DELTET_M1, DELTET_DELTA_AT
+    global _DELTET_DELTA_T_A, _DELTET_K, _DELTET_EB, _DELTET_M0, _DELTET_M1, \
+           _DELTET_DELTA_AT
 
     _MONTHNO = {'JAN':1, 'FEB':2, 'MAR':3, 'APR':4, 'MAY':5, 'JUN':6, 'JUL':7, 'AUG':8,
                 'SEP':9, 'OCT':10, 'NOV':11, 'DEC':12}
@@ -92,7 +96,7 @@ def _leaps_from_lsk(lsk_path):
     deltet_dict = {}            # a dictionary name -> value from lsk_regex1
     deltet_delta_at = []        # a list of (leap seconds, year, month, day)
     with open(lsk_path, 'r', encoding='latin8') as f:
-        for rec in f:
+        for rec in f:           # pragma: no branch
             if rec.startswith('\\begindata'):
                 break
 
@@ -106,22 +110,22 @@ def _leaps_from_lsk(lsk_path):
                 deltet_delta_at.append(value)
 
     # Extract the global values
-    DELTET_DELTA_T_A = get_float(deltet_dict['DELTA_T_A'])
-    DELTET_K         = get_float(deltet_dict['K'])
-    DELTET_EB        = get_float(deltet_dict['EB'])
+    _DELTET_DELTA_T_A = get_float(deltet_dict['DELTA_T_A'])
+    _DELTET_K         = get_float(deltet_dict['K'])
+    _DELTET_EB        = get_float(deltet_dict['EB'])
 
     # Extract the two DELTET/M values
     parts = deltet_dict['M'].split()                # split by spaces; ignore parentheses
-    DELTET_M0 = get_float(parts[1])
-    DELTET_M1 = get_float(parts[2])
+    _DELTET_M0 = get_float(parts[1])
+    _DELTET_M1 = get_float(parts[2])
 
     # Put the first DELTET/DELTA_AT value back at the top of the list
     delta_at = deltet_dict['DELTA_AT'].strip()[1:]  # skip left parenthesis
-    DELTET_DELTA_AT = [lsk_regex2.match(delta_at).groups(0)] + deltet_delta_at
+    _DELTET_DELTA_AT = [lsk_regex2.match(delta_at).groups(0)] + deltet_delta_at
 
     # Convert the list of DELTET/DELTA_AT values
     leaps = []
-    for (count, year, month, day) in DELTET_DELTA_AT:
+    for (count, year, month, day) in _DELTET_DELTA_AT:
         if day != '1':
             raise ValueError('leap second day is not the first '    # pragma: no cover
                              f' of a month: {year}-{month:02d}-{day:02d}')
@@ -134,13 +138,13 @@ def _leaps_from_lsk(lsk_path):
 def _initialize_leap_seconds(lsk_path=None):
     """Initialize the LEAPS and SPICE models for TAI-UT."""
 
-    global LEAPS_DELTA_T, SPICE_DELTA_T
+    global _LEAPS_DELTA_T, _SPICE_DELTA_T
 
     lsk_path = lsk_path or _default_lsk_path()
     info = _leaps_from_lsk(lsk_path)
 
-    LEAPS_DELTA_T = LeapDeltaT(info)
-    SPICE_DELTA_T = LeapDeltaT(list(LEAPS_DELTA_T.info), before=9)
+    _LEAPS_DELTA_T = LeapDeltaT(info)
+    _SPICE_DELTA_T = LeapDeltaT(list(_LEAPS_DELTA_T.info), before=9)
 
 
 # Initialize at startup
@@ -155,10 +159,10 @@ _initialize_leap_seconds()
 # See https://www.ucolick.org/~sla/leapsecs/amsci.html
 # Also https://hpiers.obspm.fr/eop-pc/index.php?index=TAI-UTC_tab
 
-DELTA_T_1958_1972 = None
+_DELTA_T_1958_1972 = None
 
 # Table from https://hpiers.obspm.fr/eop-pc/index.php?index=TAI-UTC_tab
-TAI_MINUS_UTC_1958_1972_TEXT = """\
+_TAI_MINUS_UTC_1958_1972_TEXT = """\
 1961  Jan.  1 - 1961  Aug.  1     1.422 818 0s + (MJD - 37 300) x 0.001 296s
       Aug.  1 - 1962  Jan.  1     1.372 818 0s +        ""
 1962  Jan.  1 - 1963  Nov.  1     1.845 858 0s + (MJD - 37 665) x 0.001 123 2s
@@ -179,32 +183,32 @@ TAI_MINUS_UTC_1958_1972_TEXT = """\
 
 # (start_day, start_month, offset, dref, factor)
 # Between each pair of dates, (TAI-UTC) = offset + (day - dref) * factor
-MJD_OF_JAN_1_2000 = 51544
-TAI_MINUS_UTC_1958_1972_INFO = [
-    (1958,  1, 0.      , 0.       , 37300 - MJD_OF_JAN_1_2000),
-    (1961,  1, 1.422818, 0.001296 , 37300 - MJD_OF_JAN_1_2000),
-    (1961,  8, 1.372818, 0.001296 , 37300 - MJD_OF_JAN_1_2000),
-    (1962,  1, 1.845858, 0.0011232, 37665 - MJD_OF_JAN_1_2000),
-    (1963, 11, 1.945858, 0.0011232, 37665 - MJD_OF_JAN_1_2000),
-    (1964,  1, 3.240130, 0.001296 , 38761 - MJD_OF_JAN_1_2000),
-    (1964,  4, 3.340130, 0.001296 , 38761 - MJD_OF_JAN_1_2000),
-    (1964,  9, 3.440130, 0.001296 , 38761 - MJD_OF_JAN_1_2000),
-    (1965,  1, 3.540130, 0.001296 , 38761 - MJD_OF_JAN_1_2000),
-    (1965,  3, 3.640130, 0.001296 , 38761 - MJD_OF_JAN_1_2000),
-    (1965,  7, 3.740130, 0.001296 , 38761 - MJD_OF_JAN_1_2000),
-    (1965,  9, 3.840130, 0.001296 , 38761 - MJD_OF_JAN_1_2000),
-    (1966,  1, 4.313170, 0.002592 , 39126 - MJD_OF_JAN_1_2000),
-    (1968,  2, 4.213170, 0.002592 , 39126 - MJD_OF_JAN_1_2000),
-    (1972,  1, 10      , 0.       , 0                        ),
+_MJD_OF_JAN_1_2000 = 51544
+_TAI_MINUS_UTC_1958_1972_INFO = [
+    (1958,  1, 0.      , 0.       , 37300 - _MJD_OF_JAN_1_2000),
+    (1961,  1, 1.422818, 0.001296 , 37300 - _MJD_OF_JAN_1_2000),
+    (1961,  8, 1.372818, 0.001296 , 37300 - _MJD_OF_JAN_1_2000),
+    (1962,  1, 1.845858, 0.0011232, 37665 - _MJD_OF_JAN_1_2000),
+    (1963, 11, 1.945858, 0.0011232, 37665 - _MJD_OF_JAN_1_2000),
+    (1964,  1, 3.240130, 0.001296 , 38761 - _MJD_OF_JAN_1_2000),
+    (1964,  4, 3.340130, 0.001296 , 38761 - _MJD_OF_JAN_1_2000),
+    (1964,  9, 3.440130, 0.001296 , 38761 - _MJD_OF_JAN_1_2000),
+    (1965,  1, 3.540130, 0.001296 , 38761 - _MJD_OF_JAN_1_2000),
+    (1965,  3, 3.640130, 0.001296 , 38761 - _MJD_OF_JAN_1_2000),
+    (1965,  7, 3.740130, 0.001296 , 38761 - _MJD_OF_JAN_1_2000),
+    (1965,  9, 3.840130, 0.001296 , 38761 - _MJD_OF_JAN_1_2000),
+    (1966,  1, 4.313170, 0.002592 , 39126 - _MJD_OF_JAN_1_2000),
+    (1968,  2, 4.213170, 0.002592 , 39126 - _MJD_OF_JAN_1_2000),
+    (1972,  1, 10      , 0.       , 0                         ),
 ]
 
 
 def _initialize_utc_1958_1972():
     """Initialize the TAI-UTC models 1958-1972."""
 
-    global DELTA_T_1958_1972
+    global _DELTA_T_1958_1972
 
-    DELTA_T_1958_1972 = SplineDeltaT(TAI_MINUS_UTC_1958_1972_INFO, last=1972)
+    _DELTA_T_1958_1972 = SplineDeltaT(_TAI_MINUS_UTC_1958_1972_INFO, last=1972)
 
 
 # Initialize at startup
@@ -280,35 +284,35 @@ def _delta_t_long_term(y):
     return -20 + 32 * u**2
 
 # Set it all up for quick indexing of nonnegative years 0-2149
-DELTA_T_INDEX = np.empty(2150, dtype='int')
-DELTA_T_INDEX[    : 500] =  0
-DELTA_T_INDEX[ 500:1600] =  1
-DELTA_T_INDEX[1600:1700] =  2
-DELTA_T_INDEX[1700:1800] =  3
-DELTA_T_INDEX[1800:1860] =  4
-DELTA_T_INDEX[1860:1900] =  5
-DELTA_T_INDEX[1900:1920] =  6
-DELTA_T_INDEX[1920:1941] =  7
-DELTA_T_INDEX[1941:1961] =  8
-DELTA_T_INDEX[1961:1986] =  9
-DELTA_T_INDEX[1986:2005] = 10
-DELTA_T_INDEX[2005:2050] = 11
-DELTA_T_INDEX[2050:    ] = 12
+_DELTA_T_INDEX = np.empty(2150, dtype='int')
+_DELTA_T_INDEX[    : 500] =  0
+_DELTA_T_INDEX[ 500:1600] =  1
+_DELTA_T_INDEX[1600:1700] =  2
+_DELTA_T_INDEX[1700:1800] =  3
+_DELTA_T_INDEX[1800:1860] =  4
+_DELTA_T_INDEX[1860:1900] =  5
+_DELTA_T_INDEX[1900:1920] =  6
+_DELTA_T_INDEX[1920:1941] =  7
+_DELTA_T_INDEX[1941:1961] =  8
+_DELTA_T_INDEX[1961:1986] =  9
+_DELTA_T_INDEX[1986:2005] = 10
+_DELTA_T_INDEX[2005:2050] = 11
+_DELTA_T_INDEX[2050:    ] = 12
 
-DELTA_T_FUNCTIONS = np.empty(13, dtype='object')
-DELTA_T_FUNCTIONS[ 0] = _delta_t_neg0500_0500
-DELTA_T_FUNCTIONS[ 1] = _delta_t_0500_1600
-DELTA_T_FUNCTIONS[ 2] = _delta_t_1600_1700
-DELTA_T_FUNCTIONS[ 3] = _delta_t_1700_1800
-DELTA_T_FUNCTIONS[ 4] = _delta_t_1800_1860
-DELTA_T_FUNCTIONS[ 5] = _delta_t_1860_1900
-DELTA_T_FUNCTIONS[ 6] = _delta_t_1900_1920
-DELTA_T_FUNCTIONS[ 7] = _delta_t_1920_1941
-DELTA_T_FUNCTIONS[ 8] = _delta_t_1941_1961
-DELTA_T_FUNCTIONS[ 9] = _delta_t_1961_1986
-DELTA_T_FUNCTIONS[10] = _delta_t_1986_2005
-DELTA_T_FUNCTIONS[11] = _delta_t_2005_2050
-DELTA_T_FUNCTIONS[12] = _delta_t_2050_2150
+_DELTA_T_FUNCTIONS = np.empty(13, dtype='object')
+_DELTA_T_FUNCTIONS[ 0] = _delta_t_neg0500_0500
+_DELTA_T_FUNCTIONS[ 1] = _delta_t_0500_1600
+_DELTA_T_FUNCTIONS[ 2] = _delta_t_1600_1700
+_DELTA_T_FUNCTIONS[ 3] = _delta_t_1700_1800
+_DELTA_T_FUNCTIONS[ 4] = _delta_t_1800_1860
+_DELTA_T_FUNCTIONS[ 5] = _delta_t_1860_1900
+_DELTA_T_FUNCTIONS[ 6] = _delta_t_1900_1920
+_DELTA_T_FUNCTIONS[ 7] = _delta_t_1920_1941
+_DELTA_T_FUNCTIONS[ 8] = _delta_t_1941_1961
+_DELTA_T_FUNCTIONS[ 9] = _delta_t_1961_1986
+_DELTA_T_FUNCTIONS[10] = _delta_t_1986_2005
+_DELTA_T_FUNCTIONS[11] = _delta_t_2005_2050
+_DELTA_T_FUNCTIONS[12] = _delta_t_2050_2150
 
 
 def _delta_t_neg1999_3000(y, m, d):
@@ -325,7 +329,7 @@ def _delta_t_neg1999_3000(y, m, d):
             else:
                 tt_minus_ut = _delta_t_neg0500_0500(y)
         elif y < 2150:
-            tt_minus_ut = DELTA_T_FUNCTIONS[DELTA_T_INDEX[y_int]](y)
+            tt_minus_ut = _DELTA_T_FUNCTIONS[_DELTA_T_INDEX[y_int]](y)
         else:
             tt_minus_ut = _delta_t_long_term(y)
 
@@ -339,8 +343,7 @@ def _delta_t_neg1999_3000(y, m, d):
             y_below_0000 = y[mask_below_0000]
             tt_minus_ut_below_0000 = _delta_t_neg0500_0500(y_below_0000)
             mask = y_below_0000 < -500
-            if np.any(mask):
-                tt_minus_ut_below_0000[mask] = _delta_t_long_term(y_below_0000[mask])
+            tt_minus_ut_below_0000[mask] = _delta_t_long_term(y_below_0000[mask])
             tt_minus_ut[mask_below_0000] = tt_minus_ut_below_0000
 
         mask_above_2150 = y >= 2150
@@ -353,16 +356,16 @@ def _delta_t_neg1999_3000(y, m, d):
         if below_or_above:
             indices = -np.ones(y.shape, dtype='int')
             mask = np.logical_not(mask_below_0000 | mask_above_2150)
-            indices[mask] = DELTA_T_INDEX[y_int[mask]]
+            indices[mask] = _DELTA_T_INDEX[y_int[mask]]
         else:
-            indices = DELTA_T_INDEX[y_int]
+            indices = _DELTA_T_INDEX[y_int]
 
         # Fill in values for each unique function index
         for indx in set(indices.ravel()):
             if indx < 0:
                 continue
             mask = (indx == indices)
-            tt_minus_ut[mask] = DELTA_T_FUNCTIONS[indx](y[mask])
+            tt_minus_ut[mask] = _DELTA_T_FUNCTIONS[indx](y[mask])
 
     # Apply the "Canon correction" and the offset to TAI - UT
     # see https://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html
@@ -370,14 +373,14 @@ def _delta_t_neg1999_3000(y, m, d):
     return tai_minus_ut
 
 
-DELTA_T_NEG1999_3000 = None
+_DELTA_T_NEG1999_3000 = None
 
 def _initialize_ut1_neg1999_3000():
     """Initialize the TAI-UTC models for years -1999 to 3000 (and beyond)."""
 
-    global DELTA_T_NEG1999_3000
+    global _DELTA_T_NEG1999_3000
 
-    DELTA_T_NEG1999_3000 = FuncDeltaT(_delta_t_neg1999_3000, first=None, last=None)
+    _DELTA_T_NEG1999_3000 = FuncDeltaT(_delta_t_neg1999_3000, first=None, last=None)
 
 
 # Initialize at startup
@@ -387,16 +390,16 @@ _initialize_ut1_neg1999_3000()
 # Model and kernel selectors
 ##########################################################################################
 
-SELECTED_DELTA_T = None                     # Filled in below
-SELECTED_UT_MODEL = 'LEAPS'
-SELECTED_FUTURE_YEAR = None
-RUBBER = False
+_SELECTED_DELTA_T = None                     # Filled in below
+_SELECTED_UT_MODEL = 'LEAPS'
+_SELECTED_FUTURE_YEAR = None
+_RUBBER = False
 
-DELTA_T_DICT = {        # (DeltaT object,
-    'LEAPS'   : LEAPS_DELTA_T,
-    'SPICE'   : SPICE_DELTA_T,
-    'PRE-1972': MergedDeltaT(LEAPS_DELTA_T, DELTA_T_1958_1972),
-    'CANON'   : MergedDeltaT(LEAPS_DELTA_T, DELTA_T_1958_1972, DELTA_T_NEG1999_3000),
+_DELTA_T_DICT = {       # (DeltaT object,
+    'LEAPS'   : _LEAPS_DELTA_T,
+    'SPICE'   : _SPICE_DELTA_T,
+    'PRE-1972': MergedDeltaT(_LEAPS_DELTA_T, _DELTA_T_1958_1972),
+    'CANON'   : MergedDeltaT(_LEAPS_DELTA_T, _DELTA_T_1958_1972, _DELTA_T_NEG1999_3000),
 }
 
 
@@ -438,22 +441,22 @@ def set_ut_model(model='LEAPS', future=None):
         all future years.
     """
 
-    global SELECTED_DELTA_T, SELECTED_UT_MODEL, SELECTED_FUTURE_YEAR, RUBBER
-    global LEAPS_DELTA_T, SPICE_DELTA_T
+    global _SELECTED_DELTA_T, _SELECTED_UT_MODEL, _SELECTED_FUTURE_YEAR, _RUBBER
+    global _LEAPS_DELTA_T, _SPICE_DELTA_T
 
-    SELECTED_DELTA_T = DELTA_T_DICT[model]
-    SELECTED_UT_MODEL = model
+    _SELECTED_DELTA_T = _DELTA_T_DICT[model]
+    _SELECTED_UT_MODEL = model
 
     if model != 'CANON':
         future = None
 
-    if future != SELECTED_FUTURE_YEAR:
+    if future != _SELECTED_FUTURE_YEAR:
         last_year = None if future is None else future - 1
-        LEAPS_DELTA_T.set_last_year(last_year)
-        SPICE_DELTA_T.set_last_year(last_year)
-        SELECTED_FUTURE_YEAR = future
+        _LEAPS_DELTA_T.set_last_year(last_year)
+        _SPICE_DELTA_T.set_last_year(last_year)
+        _SELECTED_FUTURE_YEAR = future
 
-    RUBBER = model not in ('LEAPS', 'SPICE')
+    _RUBBER = model not in ('LEAPS', 'SPICE')
 
 
 # Initialize...
@@ -473,7 +476,7 @@ def load_lsk(lsk_path=''):
     _initialize_leap_seconds(lsk_path)
     _initialize_utc_1958_1972()
     _initialize_ut1_neg1999_3000()
-    set_ut_model(SELECTED_UT_MODEL, future=SELECTED_FUTURE_YEAR)
+    set_ut_model(_SELECTED_UT_MODEL, future=_SELECTED_FUTURE_YEAR)
 
 
 def insert_leap_second(y, m, offset=1):
@@ -486,14 +489,14 @@ def insert_leap_second(y, m, offset=1):
                     second.
     """
 
-    global LEAPS_DELTA_T, SPICE_DELTA_T
+    global _LEAPS_DELTA_T, _SPICE_DELTA_T
 
-    LEAPS_DELTA_T.insert_leap_second(y, m, offset)
-    SPICE_DELTA_T.insert_leap_second(y, m, offset)
+    _LEAPS_DELTA_T.insert_leap_second(y, m, offset)
+    _SPICE_DELTA_T.insert_leap_second(y, m, offset)
 
-    DELTA_T_DICT['LEAPS'] = LEAPS_DELTA_T   # otherwise dict values would be stale
-    DELTA_T_DICT['SPICE'] = SPICE_DELTA_T
-    set_ut_model(SELECTED_UT_MODEL, future=SELECTED_FUTURE_YEAR)
+    _DELTA_T_DICT['LEAPS'] = _LEAPS_DELTA_T     # otherwise dict values would be stale
+    _DELTA_T_DICT['SPICE'] = _SPICE_DELTA_T
+    set_ut_model(_SELECTED_UT_MODEL, future=_SELECTED_FUTURE_YEAR)
 
 ##########################################################################################
 # Standard API
@@ -507,7 +510,7 @@ def delta_t_from_ymd(y, m, d=1):
     are returned if the difference involves UT "rubber seconds".
     """
 
-    return SELECTED_DELTA_T.delta_t_from_ymd(y, m, d)
+    return _SELECTED_DELTA_T.delta_t_from_ymd(y, m, d)
 
 
 def delta_t_from_day(day):
@@ -519,7 +522,7 @@ def delta_t_from_day(day):
 
     day = _number(day)
     (y, m, d) = ymd_from_day(day)
-    return SELECTED_DELTA_T.delta_t_from_ymd(y, m, d)
+    return _SELECTED_DELTA_T.delta_t_from_ymd(y, m, d)
 
 
 def leapsecs_from_ymd(y, m, d=1):
@@ -530,7 +533,7 @@ def leapsecs_from_ymd(y, m, d=1):
     seconds" and therefore always returns integers, typically 86400 or 86401.
     """
 
-    return SELECTED_DELTA_T.leapsecs_from_ymd(y, m, d)
+    return _SELECTED_DELTA_T.leapsecs_from_ymd(y, m, d)
 
 
 def leapsecs_from_ym(y, m, d=1):
@@ -540,7 +543,7 @@ def leapsecs_from_ym(y, m, d=1):
     Alternative name for leapsecs_from_ymd().
     """
 
-    return SELECTED_DELTA_T.leapsecs_from_ymd(y, m, d)
+    return _SELECTED_DELTA_T.leapsecs_from_ymd(y, m, d)
 
 
 def leapsecs_on_day(day):
@@ -552,7 +555,7 @@ def leapsecs_on_day(day):
 
     day = _number(day)
     (y, m, d) = ymd_from_day(day)
-    return SELECTED_DELTA_T.leapsecs_from_ymd(y, m, d)
+    return _SELECTED_DELTA_T.leapsecs_from_ymd(y, m, d)
 
 
 def leapsecs_from_day(day):

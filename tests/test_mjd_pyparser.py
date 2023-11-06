@@ -33,10 +33,10 @@ class Test_mjd_pyparser(unittest.TestCase):
 
         FMTS = []
         for f in ['MJD %s', '%s  mjd', '%s (MJD)']:
-            FMTS.append((0, f, 'MJD', 'UTC'))
+            FMTS.append((0, f, 'MJD', ''))
         if floating:
             for f in ['JD %s', '%s  jd', '%s (JD)']:
-                FMTS.append((0, f, 'JD', 'UTC'))
+                FMTS.append((0, f, 'JD', ''))
         if timesys:
             for j,t in [('MJED', 'TDB'), ('JTD', 'TT')]:
                 FMTS.append((0, f'{j.lower()} %s', j[:-2] + j[-1], t))
@@ -70,10 +70,18 @@ class Test_mjd_pyparser(unittest.TestCase):
                 Test_date_pyparser._confirm_failure(self, parser, test,
                                                     msg=msg % 'FAILURE')
             else:
-                Test_date_pyparser._confirm_success(self, parser, test,
-                                                    msg=msg % 'SUCCESS',
-                                                    values=[('YEAR', yval),
-                                                            ('TIMESYS', sval),
-                                                            ('DAY', nval)])
+                success_msg = msg % 'SUCCESS'
+                parse_dict = Test_date_pyparser._confirm_success(self,
+                                                        parser, test, msg=success_msg,
+                                                        values=[('YEAR', yval),
+                                                                ('DAY', nval)])
+                self.assertEqual(parse_dict.get('TIMESYS', ''), sval, msg=success_msg)
+
+############################################
+# Execute from command line...
+############################################
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
 
 ##########################################################################################

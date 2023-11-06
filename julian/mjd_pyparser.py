@@ -1,6 +1,9 @@
 ##########################################################################################
 # julian/mjd_pyparser.py
 ##########################################################################################
+"""Function to generate a PyParsing grammar for strings using MJD/JD notation
+"""
+##########################################################################################
 
 from julian.time_pyparser import req_timesys
 
@@ -65,10 +68,10 @@ number = float_value | int_value
 ##########################################################################################
 
 mjd = CaselessLiteral('MJD')
-mjd.set_parse_action(lambda s,l,t: _actions(['YEAR', 'MJD', 'TIMESYS', 'UTC'], s,l,t))
+mjd.set_parse_action(lambda s,l,t: _actions(['YEAR', 'MJD'], s,l,t))
 
 par_mjd = CaselessLiteral('(MJD)')
-par_mjd.set_parse_action(lambda s,l,t: _actions(['YEAR', 'MJD', 'TIMESYS', 'UTC'], s,l,t))
+par_mjd.set_parse_action(lambda s,l,t: _actions(['YEAR', 'MJD'], s,l,t))
 
 mjd_date = (
     mjd + opt_white + int_value |
@@ -85,25 +88,23 @@ JD_TYPES = {
     'MJD': ('MJD', 'UTC'),
 }
 
-jd_type = one_of(JD_TYPES.keys(), caseless=True)
+jd_type = one_of(['JD', 'MJD'], caseless=True)
 jd_type.set_parse_action(lambda s,l,t:
-        _actions(['YEAR', JD_TYPES[t[0].upper()][0], 'TIMESYS', 'UTC'], s,l,t))
+        _actions(['YEAR', t[0].upper()], s,l,t))
 
-par_jd_type = one_of(['(' + k + ')' for k in JD_TYPES.keys()], caseless=True)
-par_jd_type.set_parse_action(lambda s,l,t:
-        _actions(['YEAR', JD_TYPES[t[0][1:-1].upper()][0], 'TIMESYS', 'UTC'], s,l,t))
+paren_jd_type = one_of(['(' + k + ')' for k in JD_TYPES.keys()], caseless=True)
+paren_jd_type.set_parse_action(lambda s,l,t:
+        _actions(['YEAR', t[0][1:-1].upper()], s,l,t))
 
 numeric_date = (
     jd_type + opt_white + number |
     number + white + jd_type |
-    number + opt_white + par_jd_type
+    number + opt_white + paren_jd_type
 )
 
 JXD_TYPES = {
-    'JD'  : ('JD' , 'UTC'),
     'JED' : ('JD' , 'TDB'),
     'JTD' : ('JD' , 'TT' ),
-    'MJD' : ('MJD', 'UTC'),
     'MJED': ('MJD', 'TDB'),
     'MJTD': ('MJD', 'TT' ),
 }
@@ -113,15 +114,15 @@ jxd_type.set_parse_action(lambda s,l,t:
         _actions(['YEAR', JXD_TYPES[t[0].upper()][0],
                   'TIMESYS', JXD_TYPES[t[0].upper()][1]], s,l,t))
 
-par_jxd_type = one_of(['(' + k + ')' for k in JXD_TYPES.keys()], caseless=True)
-par_jxd_type.set_parse_action(lambda s,l,t:
+paren_jxd_type = one_of(['(' + k + ')' for k in JXD_TYPES.keys()], caseless=True)
+paren_jxd_type.set_parse_action(lambda s,l,t:
         _actions(['YEAR', JXD_TYPES[t[0][1:-1].upper()][0],
                   'TIMESYS', JXD_TYPES[t[0][1:-1].upper()][1]], s,l,t))
 
 numeric_timesys_date = (
     jxd_type + opt_white + number |
     number + white + jxd_type |
-    number + opt_white + par_jxd_type
+    number + opt_white + paren_jxd_type
 )
 
 ##########################################################################################
@@ -150,7 +151,7 @@ def mjd_pyparser(*, floating=True, timesys=True, padding=True, embedded=False):
 
     if floating:
         if timesys:
-            pyparser = numeric_date + req_timesys | numeric_timesys_date
+            pyparser = numeric_date + req_timesys | numeric_timesys_date | numeric_date
         else:
             pyparser = numeric_date
     else:

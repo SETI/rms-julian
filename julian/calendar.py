@@ -1,27 +1,28 @@
 ##########################################################################################
 # julian/calendar.py
 ##########################################################################################
-# Calendar conversions
-#   Algorithms from http://alcor.concordia.ca/~gpkatch/gdate-algorithm.html
-#
-# day     = number of days elapsed since January 1, 2000
-# month   = number of months elapsed since January 2000
-# (y,m,d) = year, month (1-12), day (1-31)
-# (y,d)   = year and day-of-year (1-366)
-# (y,m)   = year and month number (1-12)
-#
-# All function operate on either scalars or arrays. If given scalars, they return scalars;
-# if given anything array-like, they return arrays.
+"""Calendar functions
+
+Algorithms are from http://alcor.concordia.ca/~gpkatch/gdate-algorithm.html
+
+day     = number of days elapsed since January 1, 2000
+month   = number of months elapsed since January 2000
+(y,m,d) = year, month (1-12), day (1-31)
+(y,d)   = year and day-of-year (1-366)
+(y,m)   = year and month number (1-12)
+
+All function operate on either scalars or arrays. If given scalars, they return Python
+ints or floats; if given anything array-like, they return NumPy arrays.
+"""
 ##########################################################################################
 
-import numbers
-
 import numpy as np
-from julian.utils   import _int, _int64, _is_float, _number
-from julian.warning import _warn
+
+from julian._exceptions import JulianValidateFailure
+from julian._utils      import _int, _is_float, _number
 
 
-def day_from_ymd(y, m, d, *, validate=False, proleptic=False, use_julian=None):
+def day_from_ymd(y, m, d, *, validate=False, proleptic=False):
     """Number of elapsed days after January 1, 2000, given a year, month, and day.
 
     Inputs:
@@ -32,28 +33,16 @@ def day_from_ymd(y, m, d, *, validate=False, proleptic=False, use_julian=None):
                     truncated to integers if necessary.
         d           day number, 1-31, as a scalar, array, or array-like. Values can be
                     integers or floats; if the latter, floating-point values are returned.
-        validate    True to raise ValueError for year, month, and day numbers out of
-                    range; default is False.
+        validate    True to raise JulianValidateFailure (a ValueError subclass) for year,
+                    month, or day numbers out of range; default is False.
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
     """
 
-    global FEB29_1BCE_GREGORIAN, FEB29_1BCE_JULIAN, GREGORIAN_DAY1
-
-    if use_julian is not None:
-        _warn('use_julian is deprecated; use "proleptic=not use_julian"')
-        proleptic = not use_julian
-
-    (y, m, d) = np.broadcast_arrays(y, m, d)
-    if y.shape:
-        y = _int(y)
-        m = _int(m)
-    else:
-        y = int(y[()])
-        m = int(m[()])
-        d = d[()]
+    y = _int(y)
+    m = _int(m)
+    d = _number(d)
 
     is_float = _is_float(d)
     if is_float:
@@ -63,12 +52,12 @@ def day_from_ymd(y, m, d, *, validate=False, proleptic=False, use_julian=None):
         frac = 0
 
     if validate:
+        if np.any(m < 1) or np.any(m > 12):
+            raise JulianValidateFailure('month must be between 1 and 12')
         if np.any(d < 1):
-            raise ValueError('days must be between 1 and 31')
-
-        month = month_from_ym(y, m, validate=True)
-        if np.any(d > days_in_month(month, proleptic=proleptic)):
-            raise ValueError('day number cannot exceed days in month')
+            raise JulianValidateFailure('day number must be at least 1')
+        if np.any(d >= days_in_ym(y, m, proleptic=True) + 1):  # 31.99 is OK, but not 32
+            raise JulianValidateFailure('day number cannot exceed days in month')
 
     mm = (m + 9) % 12   # This makes March the first month and February the last
     yy = y - mm//10     # This subtracts one from the year if the month is January or
@@ -87,38 +76,37 @@ def day_from_ymd(y, m, d, *, validate=False, proleptic=False, use_julian=None):
     # yy==0.)
 
     day = ((365*yy + yy//4 - yy//100 + yy//400) + (mm * 306 + 5) // 10 + d
-           + FEB29_1BCE_GREGORIAN)
+           + _FEB29_1BCE_GREGORIAN)
 
     if proleptic:
         return day + frac
 
     # Handle the Julian-Gregorian calendar transition if necessary
     if np.isscalar(day):
-        if day >= GREGORIAN_DAY1:
+        if day >= _GREGORIAN_DAY1:
             return day + frac
         else:
             alt_day = ((365 * yy + yy//4) + (mm * 306 + 5) // 10 + d
-                       + FEB29_1BCE_JULIAN)
+                       + _FEB29_1BCE_JULIAN)
             if validate:
                 alt_ymd = ymd_from_day(alt_day, proleptic=False)
                 if alt_ymd != (y,m,d):
                     isodate = '%04d-%02d-%02d' % (y, m, d)
-                    raise ValueError(isodate + ' falls between the Julian and Gregorian '
-                                               'calendars')
+                    raise JulianValidateFailure(isodate + ' falls between the Julian and '
+                                                          'Gregorian calendars')
             return alt_day + frac
 
-    mask = (day < GREGORIAN_DAY1)
+    mask = (day < _GREGORIAN_DAY1)
     if np.any(mask):
-        alt_day = ((365 * yy + yy//4) + (mm * 306 + 5) // 10 + d
-                   + FEB29_1BCE_JULIAN)
+        alt_day = (365 * yy + yy//4) + (mm * 306 + 5) // 10 + d + _FEB29_1BCE_JULIAN
         day[mask] = alt_day[mask]
 
         if validate:
             alt_d = ymd_from_day(alt_day[mask], proleptic=False)[2]
-            dd = np.broadcast_to(d, day.shape)
+            dd = np.broadcast_to(d, alt_day.shape)
             if np.any(alt_d != dd[mask]):
-                raise ValueError('one or more dates fall between the Julian and '
-                                 'Gregorian calendars')
+                raise JulianValidateFailure('one or more dates fall between the Julian '
+                                            'and Gregorian calendars')
 
     if is_float:
         return day + frac
@@ -127,7 +115,7 @@ def day_from_ymd(y, m, d, *, validate=False, proleptic=False, use_julian=None):
 
 ########################################
 
-def ymd_from_day(day, *, proleptic=False, use_julian=None):
+def ymd_from_day(day, *, proleptic=False):
     """Year, month and day from day number.
 
     Inputs:
@@ -137,33 +125,28 @@ def ymd_from_day(day, *, proleptic=False, use_julian=None):
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
-                    Regardless of the calendar, all dates BCE are proleptic.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
     """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
 
     day = _number(day)
     is_float = _is_float(day)
     if is_float:
         frac = day % 1
+        day = _int(day)
     else:
         frac = 0
-    day = _int64(day)
 
     # Execute the magic algorithm for the proleptic Gregorian calendar
+    # Note that 64-bit integers are required for the math operations below
     g = day + 730425                    # Elapsed days after March 1, 1 BCE, Gregorian
     y = (10000*g + 14780)//3652425      # Year, assumed starting on March 1
     doy = g - (365*y + y//4 - y//100 + y//400)
-                                        # Day number since March 1 of given year
+                                        # Day number starting from March 1 of given year
 
-    # Correct the year if date is March 1 of
+    # In leap years before year 200, doy = -1 on March 1.
     if np.any(doy < 0):
         if np.shape(day):
             y[doy < 0] -= 1
-        elif doy < 0:
+        else:
             y -= 1
         doy = g - (365*y + y//4 - y//100 + y//400)
 
@@ -176,7 +159,7 @@ def ymd_from_day(day, *, proleptic=False, use_julian=None):
         # were no leap days prior to 46 BCE, and there is no clear consensus on which
         # years were leap years in Rome prior to 8 CE.
 
-        mask = (day < GREGORIAN_DAY1)
+        mask = (day < _GREGORIAN_DAY1)
         if np.any(mask):
             alt_g = day + 730427
             alt_y = (100 * alt_g + 75) // 36525
@@ -200,7 +183,7 @@ def ymd_from_day(day, *, proleptic=False, use_julian=None):
 
 ########################################
 
-def yd_from_day(day, *, proleptic=False, use_julian=None):
+def yd_from_day(day, *, proleptic=False):
     """Year and day-of-year from day number.
 
     Inputs:
@@ -210,20 +193,14 @@ def yd_from_day(day, *, proleptic=False, use_julian=None):
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
-                    Regardless of the calendar, all dates BCE are proleptic.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
     """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
 
     (y,m,d) = ymd_from_day(day, proleptic=proleptic)
     return (y, _number(day) - day_from_ymd(y, 1, 1, proleptic=proleptic) + 1)
 
 ########################################
 
-def day_from_yd(y, d, *, validate=False, proleptic=False, use_julian=None):
+def day_from_yd(y, d, *, validate=False, proleptic=False):
     """Day number from year and day-of-year.
 
     Inputs:
@@ -232,127 +209,77 @@ def day_from_yd(y, d, *, validate=False, proleptic=False, use_julian=None):
                     -1, etc.
         d           day of year, 1-366, as a scalar, array, or array-like. Values can be
                     integers or floats; if the latter, floating-point values are returned.
-        validate    True to raise ValueError for year, month, and day numbers out of
-                    range; default is False.
+        validate    True to raise JulianValidateFailure (a ValueError subclass) for day
+                    numbers out of range; default is False.
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
-                    Regardless of the calendar, all dates BCE are proleptic.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
     """
 
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
-
-    if validate:
+    if validate:    # pragma: no branch
         if np.any(_int(d) < 1) or np.any(_int(d) > days_in_year(y, proleptic=proleptic)):
-            raise ValueError('day number cannot exceed the number of days in the year')
+            raise JulianValidateFailure('day number cannot exceed the number of days in '
+                                        'the year')
 
     return day_from_ymd(y, 1, 1, proleptic=proleptic) + _number(d) - 1
 
 ########################################
 
-def month_from_ym(y, m, *, validate=False):
-    """Number of elapsed months since January 2000.
+_DAYS_IN_MONTH = np.array([0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
 
-    Inputs:
-        y           year as a scalar, array, or array-like. Values are truncated to
-                    integers if necessary. Note that 1 BCE corresponds to year 0, 2 BCE to
-                    -1, etc.
-        m           month number, 1-12, as a scalar, array, or array-like. Values are
-                    truncated to integers if necessary.
-        validate    True to raise ValueError for year, month, and day numbers out of
-                    range; default is False.
-    """
-
-    if validate:
-        if np.any(_int(m) < 1) or np.any(_int(m) > 12):
-            raise ValueError('month number must be between 1 and 12')
-
-    return 12*(y - 2000) + (_int(m) - 1)
-
-########################################
-
-def ym_from_month(month):
-    """Year and month from the number of elapsed months since January 2000.
-
-    Inputs:
-        month       month number, as the number of elapsed months since the beginning of
-                    January 2000. Can be a scalar, array, or array-like. Values are
-                    truncated to integers if necessary.
-    """
-
-    month = _int(month)
-
-    y = _int(month // 12)
-    m = month - 12 * y
-    y += 2000
-    m += 1
-
-    return (y, m)
-
-########################################
-
-def days_in_month(month, *, proleptic=False, use_julian=None):
-    """Number of days in month, given the number of elapsed months since January 2000.
-
-    Inputs:
-        month       month number, as the number of elapsed months since the beginning of
-                    January 2000. Can be a scalar, array, or array-like. Values are
-                    truncated to integers if necessary.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-                    Regardless of the calendar, all dates BCE are proleptic.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
-    """
-
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
-
-    month = _int(month)
-
-    (y, m) = ym_from_month(month)
-    day0 = day_from_ymd(y, m, 1, proleptic=proleptic)
-
-    (y, m) = ym_from_month(month + 1)
-    day1 = day_from_ymd(y, m, 1, proleptic=proleptic)
-
-    return day1 - day0
-
-########################################
-
-def days_in_ym(y, m, *, validate=False, proleptic=False, use_julian=None):
+def days_in_ym(y, m, *, validate=False, proleptic=False):
     """Number of days in month.
 
+    Note that this is the actual number of days from the first of one month to the first
+    of the next. If proleptic is False, this number will be less than the last valid
+    calendar day during the month of transition from the Julian to Gregorian calendar.
+
     Inputs:
         y           year as a scalar, array, or array-like. Values are truncated to
                     integers if necessary. Note that 1 BCE corresponds to year 0, 2 BCE to
                     -1, etc.
         m           month number, 1-12, as a scalar, array, or array-like. Values are
                     truncated to integers if necessary.
-        validate    True to raise ValueError for year and month numbers out of range;
-                    default is False.
+        validate    True to raise JulianValidateFailure (a ValueError subclass) for month
+                    numbers out of range; default is False.
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
-                    Regardless of the calendar, all dates BCE are proleptic.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
     """
 
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
+    y = _int(y)
+    m = _int(m)
 
-    month = month_from_ym(y, m, validate=validate)
-    return days_in_month(month, proleptic=proleptic)
+    outside = np.any(m < 1) or np.any(m > 12)
+    if validate and outside:
+        raise JulianValidateFailure('month must be between 1 and 12')
+
+    # Maybe a bit quicker...
+    if proleptic and not outside:
+        days = _DAYS_IN_MONTH[m]
+        leap_month_mask = (m == 2) & (days_in_year(y) == 366)
+
+        if np.isscalar(leap_month_mask):
+            return 29 if leap_month_mask else int(days)
+
+        if leap_month_mask.shape != np.shape(days):
+            days = np.broadcast_to(days, leap_month_mask.shape).copy()
+
+        days[leap_month_mask] = 29
+        return days
+
+    # Turn off validation because m+1 might be 13
+    return (day_from_ymd(y, m+1, 1, proleptic=proleptic, validate=False) -
+            day_from_ymd(y, m  , 1, proleptic=proleptic, validate=False))
 
 ########################################
 
-def days_in_year(year, *, proleptic=False, use_julian=None):
+def days_in_year(year, *, proleptic=False):
     """Number of days in year.
+
+    Note that this is the actual number of days from the first of one year to the first
+    of the next. If proleptic is False, this number will be less than 365 during the year
+    of transition from the Julian to Gregorian calendar.
 
     Inputs:
         y           year as a scalar, array, or array-like. Values are truncated to
@@ -361,13 +288,20 @@ def days_in_year(year, *, proleptic=False, use_julian=None):
         proleptic   True to interpret all dates according to the modern Gregorian
                     calendar, even those that occurred prior to the transition from the
                     Julian calendar. False to use the Julian calendar for earlier dates.
-                    Regardless of the calendar, all dates BCE are proleptic.
-        use_julian  DEPRECATED input option equivalent to (not proleptic).
     """
 
-    if use_julian is not None:
-        _warn('use_julian option is deprecated; use proleptic=(negated value)')
-        proleptic = not use_julian
+    year = _int(year)
+
+    # This is quicker if there's no calendar transition
+    if proleptic:
+        answer = np.empty(np.shape(year), dtype='int64')
+        answer.fill(365)
+        answer[(year % 4) == 0] = 366
+        answer[(year % 100) == 0] = 365
+        answer[(year % 400) == 0] = 366
+        if np.isscalar(year):
+            return int(answer[()])
+        return answer
 
     return (day_from_ymd(year+1, 1, 1, proleptic=proleptic) -
             day_from_ymd(year,   1, 1, proleptic=proleptic))
@@ -383,43 +317,43 @@ def set_gregorian_start(y=1582, m=10, d=15):
     Gregorian calendar exclusively, even where proleptic=False.
     """
 
-    global GREGORIAN_DAY1, GREGORIAN_DAY1_YMD, GREGORIAN_DAY0_YMD
+    global _GREGORIAN_DAY1, _GREGORIAN_DAY1_YMD, _GREGORIAN_DAY0_YMD
 
     if y is None:       # prevents any Julian calendar date from being used
-        GREGORIAN_DAY1 = -1.e30
+        _GREGORIAN_DAY1 = -1.e30
         return
 
-    GREGORIAN_DAY1 = day_from_ymd(y, m, d, proleptic=True)
-    GREGORIAN_DAY1_YMD = (y, m, d)
-    GREGORIAN_DAY0_YMD = ymd_from_day(GREGORIAN_DAY1-1, proleptic=False)
+    _GREGORIAN_DAY1 = day_from_ymd(y, m, d, proleptic=True)
+    _GREGORIAN_DAY1_YMD = (y, m, d)
+    _GREGORIAN_DAY0_YMD = ymd_from_day(_GREGORIAN_DAY1-1, proleptic=False)
 
 # Fill in some constants used by day_from_ymd
 
 # Day number of February 29 1 BCE (year 0) in the Gregorian and Julian
 # calendars, relative to January 1, 2000 in the Gregorian calendar.
 # Should be...
-# FEB29_1BCE_GREGORIAN = -730426
-# FEB29_1BCE_JULIAN    = -730428
+# _FEB29_1BCE_GREGORIAN = -730426
+# _FEB29_1BCE_JULIAN    = -730428
 
 # Day number of the first day of the Gregorian calendar, October 15, 1582.
 # Should be...
-# GREGORIAN_DAY1 = -152384
-# GREGORIAN_DAY1_YMD = (1582, 10, 15)
-# GREGORIAN_DAY0_YMD = (1582, 10,  4)
+# _GREGORIAN_DAY1 = -152384
+# _GREGORIAN_DAY1_YMD = (1582, 10, 15)
+# _GREGORIAN_DAY0_YMD = (1582, 10,  4)
 
 # Deriving from first principles...
-FEB29_1BCE_GREGORIAN = 0
-FEB29_1BCE_GREGORIAN = (day_from_ymd(0, 2, 29, proleptic=True) -
-                        day_from_ymd(2000, 1, 1, proleptic=True))
+_FEB29_1BCE_GREGORIAN = 0
+_FEB29_1BCE_GREGORIAN = (day_from_ymd(0, 2, 29, proleptic=True) -
+                         day_from_ymd(2000, 1, 1, proleptic=True))
 
-GREGORIAN_DAY1_YMD = (1582, 10, 15)
-GREGORIAN_DAY1 = day_from_ymd(*GREGORIAN_DAY1_YMD, proleptic=True)
+_GREGORIAN_DAY1_YMD = (1582, 10, 15)
+_GREGORIAN_DAY1 = day_from_ymd(*_GREGORIAN_DAY1_YMD, proleptic=True)
 
-FEB29_1BCE_JULIAN = 0
-FEB29_1BCE_JULIAN = (day_from_ymd(0, 2, 29, proleptic=False)
-                     - day_from_ymd(1582, 10, 5, proleptic=False)
-                     + GREGORIAN_DAY1)
+_FEB29_1BCE_JULIAN = 0
+_FEB29_1BCE_JULIAN = (day_from_ymd(0, 2, 29, proleptic=False)
+                      - day_from_ymd(1582, 10, 5, proleptic=False)
+                      + _GREGORIAN_DAY1)
 
-GREGORIAN_DAY0_YMD = ymd_from_day(GREGORIAN_DAY1-1, proleptic=False)
+_GREGORIAN_DAY0_YMD = ymd_from_day(_GREGORIAN_DAY1-1, proleptic=False)
 
 ##########################################################################################
