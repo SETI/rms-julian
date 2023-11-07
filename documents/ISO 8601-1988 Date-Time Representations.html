@@ -1,0 +1,247 @@
+<!--From http://jsoc.stanford.edu/~jsoc/keywords/TIME/iso8601.htm-->
+<html><head><title>ISO 8601:1988 Date/Time Representations</title></head><body><h2>ISO 8601:1988 Date/Time Representations</h2>
+Gary Houston<br>
+1993-01-31<br>
+<hr>
+<h3>Introduction</h3>
+
+This document describes the ISO standard for numerical date/time 
+interchange formats, 8601:1988, which supersedes the ISO
+standards: 2014, 2015, 2711, 3307 and 4031.
+Note that this is only a description of the standard, not
+the standard itself (for which the copyright is held by the ISO). In
+particular note that section numbers do not agree with those of the 
+standard. This document may be freely redistributed, but the text
+may not be changed in any way unless the name of the author is replaced by
+the name of the person controlling the modification. The author does
+not accept liability for errors, misrepresentations or omissions in the
+description of the standard. In situations of life and death it may be 
+prudent to obtain the official document. 
+<p>
+The standard defines formats for numerical representation of dates,
+times and date/time combinations. Local time and Coordinated 
+Universal Time (UTC) are supported. Dates are for the Gregorian
+calendar (introduced in 1582), and can be given in 
+year-month-day, year-week-day or year-day formats. Times are
+given in 24hr format. All date and time formats are represented
+with the largest units given first, i.e., from left to right the
+ranking is year, month, week, day, hour, minute, second. Any
+particular date/time format is a subset of these possible values,
+and the standard lists various permissible subsets. The hyphen
+character is sometimes used to represent missing components,
+thus avoiding ambiguity. The standard allows these hyphens to
+be omitted by mutual agreement in a data interchange, if
+ambiguity can be avoided. Formats are also given for periods of time,
+either by listing the start and end dates or as a given length of time.
+</p><p>
+A calendar date is identified by a given day in a given month
+in a given year. A leap year is a year whose
+number is divisible by four an integral number of times, except in
+the case of centennial years in which it is divisible by four hundred
+an integral number of times. If a year is not a leap year it is a common
+year. Common years have 365 days while leap years have 366. 
+</p><p>
+An ordinal date is identified by a given day
+in a given year. A week is identified by its number in a given
+year. A week begins with a Monday, and the first week of a
+year is the one which includes the first Thursday, or equivalently
+the one which includes January 4. Midnight may be expressed as 
+either 00:00:00 or 24:00:00. 
+</p><p>
+Unless otherwise stated, all values are fixed width, 
+with leading zeros used when
+necessary to pad out a value. Many formats can be given in either
+a "basic format" or an "extended format", where the extended format
+has additional separation characters between values. Characters are
+taken from ISO 646. Some formats require alphabetic letters, which
+should be upper case, although lower case may be used if upper case
+is not available.
+</p><p>
+In this paper, the date/time 14 February 1993, 13:10:30 (ten minutes
+and thirty seconds past one pm) is used to demonstrate formats. The
+ordinal day number is 045 and the week number is 06. The day number
+within the week is 7.
+
+</p><h3>Date Formats</h3>
+
+<h4>Calendar Date Formats</h4>
+
+The following complete, abbreviated or truncated formats are permissible:
+<ul>
+<li>19930214 or 1993-02-14 (complete representation)
+</li><li>1993-02 (reduced precision)
+</li><li>1993
+</li><li>19
+</li><li>930214 or 93-02-14 (truncated, current century assumed)
+</li><li>-9302 or -93-02
+</li><li>-93
+</li><li>--0214 or --02-14
+</li><li>--02
+</li><li>---14
+</li></ul>
+<br>
+<h4>Ordinal Date Formats</h4>
+
+The day number within a given year can be expressed as:
+<ul>
+<li>1993045 or 1993-045 (complete representation)
+</li><li>93045 or 93-045
+</li><li>-045
+</li></ul>
+<br>
+<h4>Week/Day Formats</h4>
+
+Dates with a given week number may be expressed as:
+<ul>
+<li>1993W067 or 1993-W06-7 (complete representation)
+</li><li>1993W06 or 1993-W06
+</li><li>93W067 or 93-W06-7
+</li><li>93W06 or 93-W06
+</li><li>-3W067 or -3-W06-7
+</li><li>-W067 or -W06-7
+</li><li>-W06
+</li><li>-W-7 (day of current week)
+</li><li>---7 (day of any week)
+</li></ul>
+
+<h3>Time formats</h3>
+
+<h4>Local Time of Day</h4>
+
+Local time of day may be expressed as:
+<ul>
+<li>131030 or 13:10:30 (complete representation)
+</li><li>1310 or 13:10
+</li><li>13
+</li><li>-1030 or -10:30
+</li><li>-10
+</li><li>--30
+</li></ul>
+
+Note that when the basic format (e.g,. 1310) is being used, and the
+context does not imply a time value only, the time should be
+preceded by a "T" to avoid confusion with date values. In this
+case the rules for combined date/time formats should be followed,
+which forbid replacing leading time values with hyphens.
+
+<h4>Fractional Local Time of Day</h4>
+
+Decimal fractions may be included with an hour, minute or second.
+The decimal sign should be either a comma (preferred) or a full stop.
+If the value is less than one then the decimal sign should be 
+preceded by a zero. The number of decimal places is set
+depending on the application.<p>
+The following formats are permitted (given one decimal place):
+</p><ul>
+<li>131030,7 or 13:10:30,7
+</li><li>1310,5 or 13:10,5
+</li><li>13,2
+</li><li>-1030,7 or -10:30,7
+</li><li>-10,5
+</li><li>--30,7
+</li></ul>
+
+<h4>Coordinated Universal Time (UTC)</h4>
+
+A time can be expressed in UTC by appending the symbol "Z" without
+spaces to any of the local time or fractional local time formats given above.
+
+<h4>Difference between Local and UTC Times</h4>
+
+The relationship of a local time to UTC can be expressed by appending
+a time zone indicator without spaces to the right-hand side of the
+local time representation, which must include hours.<p>
+E.g., the indicator for New Zealand summer time (13 hours ahead of UTC),
+can be expressed as:
+</p><ul>
+<li>+1300 or +13:00
+</li><li>+13
+</li></ul>
+
+Omitting the minutes implies a lower precision for the time zone value,
+and is independent of the precision of the time value to which the
+zone is attached. Time zones behind UTC use the &#8211; sign. The standard
+implies (but does not state explicitly) that the extended zone format
+(13:00) is used with extended format times, and the basic zone format
+(1300) with basic format times.
+
+<h3>Combined Date/Time Formats</h3>
+
+The symbol "T" is used to separate the date and time parts of the
+combined representation. This may be omitted by mutual consent
+of those interchanging data, if ambiguity can be avoided.
+<p>
+The complete representation is as follows:
+</p><ul>
+<li>19930214T131030 or 1993-02-14T13:10:30
+</li></ul>
+
+The date and/or time components independently obey the rules already
+given in the sections above, with the restrictions:
+<ol>
+<li>The date format should not be truncated on the right (i.e.,
+represented with lower precision) and the
+time format should not be truncated on the left (i.e., no
+leading hyphens).
+</li><li>When the date format is truncated on the left, the leading
+hyphens may be omitted.
+</li></ol>
+<br>
+<h3>Periods of Time</h3>
+
+The subsections below give the complete basic representations for each
+of four methods of specifying periods of time. Where two time
+values are required, they are separated with a solidus "/",
+although the standard states that a double hyphen is used
+in "certain application areas". The dates are given in calendar
+form, but ordinal or week/day may alternatively be used, and
+basic representation can be replaced by the appropriate extended
+representation. Likewise, valid reduced precision, truncated or 
+decimal formats may be used.
+
+<h4>Specific Start and Specific End</h4>
+
+<ul>
+<li>19930214T131030/19930214T131031 (a very short period)
+</li></ul>
+Note that if the higher order components of the second period
+are omitted, the corresponding values from the first period
+are used. Likewise, if a timezone is supplied for the
+first period but not the second, it is assumed to be
+used for both.
+<br>
+<h4>Periods of Time, no Specific Start or End</h4>
+
+This is the only format for which variable width values are used.
+The value starts with "P", and is followed by a list of periods,
+each appended by a single letter designator: "Y" for years, "M"
+for months, "D" for days, "W" for weeks, "H" for hours, "M" for 
+minutes, and "S" for seconds. Time components must be preceded by
+the "T" character. Examples:
+<ul>
+<li>P18Y9M4DT11H9M8S (18 years, 9 months, 4 days, 11 hours, 9 minutes
+and 8 seconds.
+</li><li>P2W (2 weeks).
+</li></ul>
+No extended representation is defined for this format.
+<p>
+Alternatively, if required, a period of time may be expressed 
+using the format specified for points in time, provided the 
+values do not exceed 12 months, 30 days, 24 hours, 60 minutes, and
+60 seconds. Weeks should not be used.
+
+</p><h4>Period with Specific Start</h4>
+
+<ul>
+<li>19930214T131030/P18Y9M4DT11H9M8S
+</li></ul>
+
+<h2>Period with Specific End</h2>
+
+<ul>
+<li>P18Y9M4DT11H9M8S/19930214T131030
+</li></ul>
+<hr>
+<em>Thanks to the University of Erlangen where this document was archived in sgml format.</em><hr>
+
+</body></html>
