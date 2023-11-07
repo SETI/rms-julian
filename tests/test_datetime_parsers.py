@@ -2,6 +2,7 @@
 # julian/test_datetime_parsers.py
 ##########################################################################################
 
+import numpy as np
 import unittest
 
 from julian.datetime_parsers import (
@@ -15,9 +16,8 @@ from julian.DEPRECATED import (
     dates_in_string,
 )
 
-from julian.calendar       import day_from_ymd
-from julian.utc_tai_tdb_tt import day_sec_from_tai, tai_from_tdt
-from julian._exceptions    import JulianParseException, JulianValidateFailure
+from julian.mjd_jd      import jd_from_day_sec, mjd_from_day_sec
+from julian._exceptions import JulianParseException, JulianValidateFailure
 
 
 class Test_datetime_parsers(unittest.TestCase):
@@ -148,9 +148,9 @@ class Test_datetime_parsers(unittest.TestCase):
                          (0, 0))
         self.assertEqual(day_sec_type_from_string('MJD 51544'),
                          (0, 0, 'UTC'))
-        self.assertEqual(day_sec_from_string('51544 (MJD)', timesys=True, mjd=True),
+        self.assertEqual(day_sec_from_string('51544 (MJD)', timesys=True),
                          (0, 0, 'UTC'))
-        self.assertEqual(day_sec_from_string('51544 (MJD)', timesys=False, mjd=True),
+        self.assertEqual(day_sec_from_string('51544 (MJD)', timesys=False),
                          (0, 0))
         self.assertEqual(day_sec_type_from_string('JD 2451545'),
                          (0, 43200, 'UTC'))
@@ -160,8 +160,19 @@ class Test_datetime_parsers(unittest.TestCase):
                          day_sec_type_from_string('51544.5  mjed'))
         self.assertEqual(day_sec_type_from_string('2451545.  jd'),
                          (0, 43200, 'UTC'))
-        self.assertEqual(day_sec_from_string('JD 2451545.  tdt', timesys=True, mjd=True),
+        self.assertEqual(day_sec_from_string('JD 2451545.  tdt', timesys=True),
                          (0, 43200, 'TT'))
+
+        # Check earlier rounding error for dates before MJD=0
+        for k in range(-20,21):
+            mjd = k * 1000
+            day_sec = day_sec_from_string('MJD ' + str(mjd))
+            self.assertEqual(mjd_from_day_sec(*day_sec), mjd)
+
+            jd = jd_from_day_sec(*day_sec)
+            jd = np.round(jd, 1)
+            day_sec = day_sec_from_string('JD ' + str(jd))
+            self.assertEqual(jd_from_day_sec(*day_sec), jd)
 
         # Check day_sec_type_in_string
         self.assertEqual(day_sec_type_in_string('Time:2000-01-01 00:00:00.00'),

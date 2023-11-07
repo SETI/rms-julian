@@ -5,7 +5,7 @@
 Julian Library, version 2.0
 
 This is a large set of routines for handing date and time conversions. Compared to other
-date/time libraries in Python, including CSPYCE, it has these features.
+date/time libraries in Python, including CSPYCE, it has these features:
 
 - It handles the time systems Coordinated Universal Time (UTC), International Atomic Time
   (TAI), Barycentric Dynamical Time (TDB), and Terrestrial Time (TT, previously called
@@ -111,7 +111,7 @@ keep the leap second list up to date.
 
 If the environment variable SPICE_LSK_FILEPATH is defined, then this SPICE leapseconds
 kernel is read at startup. Otherwise, leap seconds through 2020 are always included, as
-defined in SPICE kernel file naif00012.tls. You can also call the function load_lsk()
+defined in SPICE kernel file naif0012.tls. You can also call the function load_lsk()
 directly.
 
 Alternatively, use insert_leap_second() to augment the list with additional leap seconds
@@ -149,11 +149,10 @@ interpreting date and time columns from large ASCII tables.
 
 More general parsers are provided for interpreting individual dates and times in almost
 arbitrary formats:
-    day_from_string(), day_sec_from_string(), sec_from_string()
+    day_from_string(), day_sec_from_string(), sec_from_string().
 These same parsers can also be invoked to "scrape" dates and times from almost arbitrary
 text:
-    day_in_string(), days_in_string(), time_in_string(), times_in_string(),
-    dates_in_string().
+    days_in_strings(), day_sec_in_strings(), secs_in_strings().
 Time zones are recognized, including most standard abbreviations.
 
 For users familiar with the pyparsing module, we provide functions that generate parsers

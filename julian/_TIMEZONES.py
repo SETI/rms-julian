@@ -158,7 +158,7 @@ TIMEZONES = {
     "SLST": "+05:30",
     "SRET": "+11",
     "SRT" : "-03",
-#     "SST" : "-11",
+#     "SST" : "-11",    ambiguous
 #     "SST" : "+08",
     "SYOT": "+03",
     "TAHT": "-10",

@@ -178,7 +178,7 @@ def _day_from_dict(parse_dict, proleptic=True, validate=True):
     """Day number based on the contents of a dictionary."""
 
     y = parse_dict['YEAR']
-    d = int(parse_dict['DAY'])
+    d = int(parse_dict['DAY'] // 1.)
 
     # First check for MJD date
     if y == 'MJD':

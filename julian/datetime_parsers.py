@@ -200,7 +200,7 @@ def _day_sec_timesys_from_dict(parse_dict, leapsecs=True, proleptic=False, valid
         year = 'MJD'
 
     frac = day % 1
-    day = int(day)
+    day = int(day // 1.)
 
     if year == 'MJD':
         day = day_from_mjd(day)

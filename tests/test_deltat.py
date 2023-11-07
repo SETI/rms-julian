@@ -124,7 +124,6 @@ class Test_DeltaT(unittest.TestCase):
         self.assertFalse(dt.is_float)
 
         years = [1971, 1972, 2017, 9999]
-        days = day_from_ymd(years, 1, 1)
         answer = [10, 10, 37, 37]
         self.assertTrue(np.all(dt.delta_t_from_ymd(years, 1) == answer))
         self.assertTrue(np.all(dt.leapsecs_from_ymd(years, 1) == answer))

@@ -23,7 +23,7 @@ from julian.DEPRECATED import (
 )
 
 from julian.calendar    import day_from_ymd
-from julian._exceptions import JulianParseException, JulianValidateFailure
+from julian._exceptions import JulianValidateFailure
 
 DAY_TESTS = [0, 100000, -200000]
 

@@ -2,7 +2,6 @@
 # julian/test_time_parsers.py
 ##########################################################################################
 
-import numpy as np
 import unittest
 
 from julian.time_parsers import (
@@ -15,8 +14,6 @@ from julian.DEPRECATED import (
     times_in_string,
 )
 
-from julian.calendar       import day_from_ymd
-from julian.utc_tai_tdb_tt import day_sec_from_tai, tai_from_tdt
 from julian._exceptions    import JulianParseException, JulianValidateFailure
 
 class Test_time_parsers(unittest.TestCase):

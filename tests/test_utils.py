@@ -2,7 +2,6 @@
 # julian/test_utils.py
 ##########################################################################################
 
-import numbers
 import numpy as np
 import unittest
 

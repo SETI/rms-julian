@@ -16,7 +16,6 @@ from julian.DEPRECATED import (
 )
 
 from julian.calendar       import day_from_yd, day_from_ymd
-from julian.utc_tai_tdb_tt import day_sec_from_tai, tai_from_tdt
 from julian._exceptions    import JulianParseException, JulianValidateFailure
 
 class Test_date_parsers(unittest.TestCase):

@@ -9,7 +9,6 @@ import warnings
 from pyparsing import ParseException, StringEnd
 
 from julian.date_pyparser import date_pyparser
-from julian.mjd_pyparser  import mjd_pyparser
 
 
 class Test_date_pyparser(unittest.TestCase):
@@ -761,11 +760,6 @@ class Test_date_pyparser(unittest.TestCase):
                              floating=False, extended=False,
                              padding=False, embedded=False, failure=False):
 
-        STATUS = {
-            True : 'FAILURE',
-            False: 'SUCCESS',
-        }
-
         # 0 = strict; 1 = loose; invalid=5
         YEARS  = [(0, '2000', 2000), (0, '3000', 3000),
                   (0, '00', 2000), (0, '49', 2049), (0, '50', 1950),
@@ -877,7 +871,6 @@ class Test_date_pyparser(unittest.TestCase):
                         self._confirm_failure(p, test, msg=msg)
 
         # Compressed
-        parser = parser_loose
         for case in [('20000101', 2000,  1,  1),
                      ('19991231', 1999, 12, 31),
                      ('00000101',    0,  1,  1),

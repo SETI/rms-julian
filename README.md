@@ -74,7 +74,6 @@ Day numbers within months are 1-31; day numbers within years are 1-366.
 
 Functions are provided to determine the number of days in a specified month or year:
 
-        days_in_month()
         days_in_year()
         days_in_ym()
 
@@ -136,7 +135,7 @@ system:
 You can also convert directly between integer MJD and integer day numbers using:
 
         mjd_from_day()
-        day_from_mjd().
+        day_from_mjd()
 
 
 ### LEAP SECOND HANDLING
@@ -147,7 +146,7 @@ keep the leap second list up to date.
 
 If the environment variable `SPICE_LSK_FILEPATH` is defined, then this SPICE leapseconds
 kernel is read at startup. Otherwise, leap seconds through 2020 are always included, as
-defined in SPICE kernel file "`naif00012.tls`". You can also call the function `load_lsk()`
+defined in SPICE kernel file "`naif0012.tls`". You can also call the function `load_lsk()`
 directly.
 
 Alternatively, use `insert_leap_second()` to augment the list with additional leap seconds
@@ -207,7 +206,7 @@ text:
 
         days_in_strings()
         day_sec_in_strings()
-        sec_in_strings()
+        secs_in_strings()
 
 Time zones are recognized, including most standard abbreviations.
 

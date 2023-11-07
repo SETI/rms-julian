@@ -25,7 +25,6 @@ from julian.utc_tai_tdb_tt import (
     time_from_time,
     tt_from_tai,
     utc_from_day,
-    utc_from_day_sec,
     utc_from_tai,
 )
 
@@ -35,7 +34,7 @@ from julian.DEPRECATED import (
 )
 
 from julian              import leap_seconds
-from julian.calendar     import day_from_ymd, ymd_from_day
+from julian.calendar     import day_from_ymd
 from julian.formatters   import iso_from_tai
 from julian.leap_seconds import set_ut_model
 
