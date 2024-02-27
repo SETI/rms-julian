@@ -1,6 +1,25 @@
-| PyPI Release | Test Status | Code Coverage |
-| ------------ | ----------- | ------------- |
-| [![PyPI version](https://badge.fury.io/py/rms-julian.svg)](https://badge.fury.io/py/rms-julian) | [![Build status](https://img.shields.io/github/actions/workflow/status/SETI/rms-julian/run-tests.yml?branch=main)](https://github.com/SETI/rms-julian/actions) | [![Code coverage](https://img.shields.io/codecov/c/github/SETI/rms-julian/main?logo=codecov)](https://codecov.io/gh/SETI/rms-julian) |
+[![GitHub release; latest by date](https://img.shields.io/github/v/release/SETI/rms-julian)](https://github.com/SETI/rms-julian/releases)
+[![GitHub Release Date](https://img.shields.io/github/release-date/SETI/rms-julian)](https://github.com/SETI/rms-julian/releases)
+[![Test Status](https://img.shields.io/github/actions/workflow/status/SETI/rms-julian/run-tests.yml?branch=main)](https://github.com/SETI/rms-julian/actions)
+[![Code coverage](https://img.shields.io/codecov/c/github/SETI/rms-julian/main?logo=codecov)](https://codecov.io/gh/SETI/rms-julian)
+<br />
+[![PyPI - Version](https://img.shields.io/pypi/v/rms-julian)](https://pypi.org/project/rms-julian)
+[![PyPI - Format](https://img.shields.io/pypi/format/rms-julian)](https://pypi.org/project/rms-julian)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/rms-julian)](https://pypi.org/project/rms-julian)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/rms-julian)](https://pypi.org/project/rms-julian)
+<br />
+[![GitHub commits since latest release](https://img.shields.io/github/commits-since/SETI/rms-julian/latest)](https://github.com/SETI/rms-julian/commits/main/)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SETI/rms-julian)](https://github.com/SETI/rms-julian/commits/main/)
+[![GitHub last commit](https://img.shields.io/github/last-commit/SETI/rms-julian)](https://github.com/SETI/rms-julian/commits/main/)
+<br />
+[![Number of GitHub open issues](https://img.shields.io/github/issues-raw/SETI/rms-julian)](https://github.com/SETI/rms-julian/issues)
+[![Number of GitHub closed issues](https://img.shields.io/github/issues-closed-raw/SETI/rms-julian)](https://github.com/SETI/rms-julian/issues)
+[![Number of GitHub open pull requests](https://img.shields.io/github/issues-pr-raw/SETI/rms-julian)](https://github.com/SETI/rms-julian/pulls)
+[![Number of GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/SETI/rms-julian)](https://github.com/SETI/rms-julian/pulls)
+<br />
+![GitHub License](https://img.shields.io/github/license/SETI/rms-julian)
+[![Number of GitHub stars](https://img.shields.io/github/stars/SETI/rms-julian)](https://github.com/SETI/rms-julian/stargazers)
+![GitHub forks](https://img.shields.io/github/forks/SETI/rms-julian)
 
 # rms-julian
 
