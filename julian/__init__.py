@@ -181,4 +181,9 @@ from julian.DEPRECATED        import *
 from julian._warnings         import *
 from julian._exceptions       import *
 
+try:
+    from ._version import __version__
+except ImportError as err:
+    __version__ = 'Version unspecified'
+
 ##########################################################################################
