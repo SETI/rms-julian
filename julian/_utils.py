@@ -47,7 +47,7 @@ def _float(arg):
     if isinstance(arg, np.ndarray) and not arg.shape:
         return float(arg[()])
 
-    return np.asfarray(arg)
+    return np.asarray(arg, dtype=np.double)
 
 
 def _number(arg):

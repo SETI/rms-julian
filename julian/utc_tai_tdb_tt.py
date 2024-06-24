@@ -221,7 +221,7 @@ def tai_from_utc(utc):
     if not np.any(mask):
         return tai
 
-    tai = np.asfarray(tai)
+    tai = np.asarray(tai, dtype=np.double)
     tai1 = tai[mask]
     utc_offset = tai1 - _TAI_OF_JAN_1_1972
     day_wrt_1972 = utc_offset // 86400
