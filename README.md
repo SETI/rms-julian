@@ -23,7 +23,7 @@
 
 # rms-julian
 
-Supported versions: Python >= 3.7
+Supported versions: Python >= 3.8
 
 # PDS Ring-Moon Systems Node, SETI Institute
 # Julian Library, version 2.0
