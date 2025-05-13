@@ -19,6 +19,15 @@ class Test_time_of_day(unittest.TestCase):
 
         # Check hms_from_sec
         self.assertEqual(hms_from_sec(0), (0, 0, 0))
+        self.assertIs(type(hms_from_sec(0)[0]), int)
+        self.assertIs(type(hms_from_sec(0)[1]), int)
+        self.assertIs(type(hms_from_sec(0)[2]), int)
+
+        self.assertEqual(hms_from_sec(0.), (0, 0, 0))
+        self.assertIs(type(hms_from_sec(0.)[0]), int)
+        self.assertIs(type(hms_from_sec(0.)[1]), int)
+        self.assertIs(type(hms_from_sec(0.)[2]), float)
+
         self.assertEqual(hms_from_sec(86400), (23, 59, 60))
         small = 2.**-20
         self.assertEqual(hms_from_sec(86410 - small), (23, 59, 70 - small))
@@ -27,7 +36,16 @@ class Test_time_of_day(unittest.TestCase):
 
         # Check sec_from_hms
         self.assertEqual(sec_from_hms(0, 0, 0), 0)
+        self.assertIs(type(sec_from_hms(0, 0, 0)), int)
+        self.assertIs(type(sec_from_hms(0, 0, 0.)), float)
+        self.assertIs(type(sec_from_hms(0, 0., 0)), float)
+        self.assertIs(type(sec_from_hms(0., 0, 0)), float)
+
         self.assertEqual(sec_from_hms(23, 59, 60), 86400)
+        self.assertIs(type(sec_from_hms(23, 59, 60)), int)
+        self.assertIs(type(sec_from_hms(23, 59, 60.)), float)
+        self.assertIs(type(sec_from_hms(23, 59., 60)), float)
+        self.assertIs(type(sec_from_hms(23., 59, 60)), float)
 
         # Array tests
         # This makes about 333,000 non-uniformly spaced transcendental numbers

@@ -117,6 +117,7 @@ class Test_leap_seconds(unittest.TestCase):
         delta_t = delta_t_from_ymd(year,1,1)
         canon_dt = _delta_t_neg1999_3000(year,1,1)
         mask = (year < 1958) | (year >= 2030)
+
         self.assertTrue(np.all(delta_t[mask] == canon_dt[mask]))
 
         set_ut_model('PRE-1972')
@@ -205,36 +206,43 @@ class Test_leap_seconds(unittest.TestCase):
     # Negative leap seconds...
     def test_negative_leap_seconds(self):
 
-        insert_leap_second(2030, 1, -1)
-        insert_leap_second(2031, 1, -2)
-        insert_leap_second(2040, 1, 1)
-
-        self.assertEqual(seconds_on_day(day_from_ymd(2030,1,1)  ), 86400)
-        self.assertEqual(seconds_on_day(day_from_ymd(2030,1,1)-1), 86399)
-
-        self.assertEqual(seconds_on_day(day_from_ymd(2031,1,1)  ), 86400)
-        self.assertEqual(seconds_on_day(day_from_ymd(2031,1,1)-1), 86398)
-
-        self.assertEqual(seconds_on_day(day_from_ymd(2040,1,1)  ), 86400)
-        self.assertEqual(seconds_on_day(day_from_ymd(2040,1,1)-1), 86401)
-
-        self.assertTrue(np.all(seconds_on_day(day_from_ymd([2030,2031,2040],1,1)-1)
-                               == [86399, 86398, 86401]))
-
-        tai = tai_from_iso('2030-01-01T00:00:00')
-        self.assertEqual(tai_from_iso('2029-12-31T23:59:58', validate=True), tai-1)
-        self.assertEqual(tai_from_iso('2029-12-31T23:59:59', validate=False), tai)
-        self.assertRaises(JulianValidateFailure,
-                          tai_from_iso, '2029-12-31T23:59:59', validate=True)
-
-        tai = tai_from_iso('2031-01-01T00:00:00')
-        self.assertEqual(tai_from_iso('2030-12-31T23:59:57', validate=True), tai-1)
-        self.assertRaises(JulianValidateFailure,
-                          tai_from_iso, '2030-12-31T23:59:58', validate=True)
-        self.assertRaises(JulianValidateFailure,
-                          tai_from_iso, '2030-12-31T23:59:59', validate=True)
-
         load_lsk()
+        for name in ('LEAPS', 'SPICE', 'PRE-1972', 'CANON'):
+            set_ut_model(name)
+
+            insert_leap_second(2030, 1, -1)
+            insert_leap_second(2031, 1, -2)
+            insert_leap_second(2040, 1, 1)
+
+            self.assertEqual(seconds_on_day(day_from_ymd(2030,1,1)  ), 86400)
+            self.assertEqual(seconds_on_day(day_from_ymd(2030,1,1)-1), 86399)
+
+            self.assertEqual(seconds_on_day(day_from_ymd(2031,1,1)  ), 86400)
+            self.assertEqual(seconds_on_day(day_from_ymd(2031,1,1)-1), 86398)
+
+            self.assertEqual(seconds_on_day(day_from_ymd(2040,1,1)  ), 86400)
+            self.assertEqual(seconds_on_day(day_from_ymd(2040,1,1)-1), 86401)
+
+            self.assertTrue(np.all(seconds_on_day(day_from_ymd([2030,2031,2040],1,1)-1)
+                                   == [86399, 86398, 86401]))
+
+            tai = tai_from_iso('2030-01-01T00:00:00')
+            self.assertEqual(tai_from_iso('2029-12-31T23:59:58', validate=True), tai-1)
+            self.assertEqual(tai_from_iso('2029-12-31T23:59:59', validate=False), tai)
+            self.assertRaises(JulianValidateFailure,
+                              tai_from_iso, '2029-12-31T23:59:59', validate=True)
+
+            tai = tai_from_iso('2031-01-01T00:00:00')
+            self.assertEqual(tai_from_iso('2030-12-31T23:59:57', validate=True), tai-1)
+            self.assertRaises(JulianValidateFailure,
+                              tai_from_iso, '2030-12-31T23:59:58', validate=True)
+            self.assertRaises(JulianValidateFailure,
+                              tai_from_iso, '2030-12-31T23:59:59', validate=True)
+
+            load_lsk()
+
+        # Go back to the default
+        set_ut_model('LEAPS')
 
 ############################################
 # Execute from command line...
