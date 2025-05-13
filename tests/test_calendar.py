@@ -33,6 +33,10 @@ class Test_calendar(unittest.TestCase):
 
         # day_from_ymd()
         self.assertEqual(day_from_ymd(2000,1,1), 0)
+        self.assertIs(type(day_from_ymd(2000,1,1)), int)
+        self.assertEqual(day_from_ymd(2000,1,1.), 0.)
+        self.assertIs(type(day_from_ymd(2000,1,1.)), float)
+
         self.assertEqual(day_from_ymd(2000,2,[27,28,29]).tolist(),    [57,58,59])
         self.assertEqual(day_from_ymd(2000,[1,2,3],1).tolist(),       [ 0,31,60])
         self.assertEqual(day_from_ymd([2000,2001,2002],1,1).tolist(), [0,366,731])
@@ -70,7 +74,16 @@ class Test_calendar(unittest.TestCase):
         self.assertRaises(jvf, day_from_ymd, 1582, 10, np.arange(1,32), validate=True)
 
         # ymd_from_day()
-        self.assertEqual(ymd_from_day(  0), (2000, 1, 1))
+        self.assertEqual(ymd_from_day(0), (2000, 1, 1))
+        self.assertIs(type(ymd_from_day(0)[0]), int)
+        self.assertIs(type(ymd_from_day(0)[1]), int)
+        self.assertIs(type(ymd_from_day(0)[2]), int)
+
+        self.assertEqual(ymd_from_day(0.), (2000, 1, 1.))
+        self.assertIs(type(ymd_from_day(0.)[0]), int)
+        self.assertIs(type(ymd_from_day(0.)[1]), int)
+        self.assertIs(type(ymd_from_day(0.)[2]), float)
+
         self.assertEqual(ymd_from_day( 60), (2000, 3, 1))
         self.assertEqual(ymd_from_day(365), (2000,12,31))
         self.assertEqual(ymd_from_day(366), (2001, 1, 1))

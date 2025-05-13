@@ -29,10 +29,10 @@ def hms_from_sec(sec):
     if np.any(sec >= 86410):
         raise JulianValidateFailure('seconds >= 86410')
 
-    h = np.minimum(_int(sec//3600), 23)
+    h = _int(np.minimum(_int(sec//3600), 23))
     t = sec - 3600 * h
 
-    m = np.minimum(_int(t//60), 59)
+    m = _int(np.minimum(_int(t//60), 59))
     t -= 60 * m
 
     return (h, m, t)

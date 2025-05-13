@@ -59,7 +59,7 @@ def _default_lsk_path():
 
 
 def _leaps_from_lsk(lsk_path):
-    """Return the list of leap seconds from the specified SPICE leap seconds kernel file,
+    """The list of leap seconds from the specified SPICE leap seconds kernel file,
     represented by a string or Path.
     """
 
@@ -316,6 +316,7 @@ _DELTA_T_FUNCTIONS[12] = _delta_t_2050_2150
 
 
 def _delta_t_neg1999_3000(y, m, d):
+    """Delta T model from Five Millennium Canon of Solar Eclipses: -1999 to +3000."""
 
     y_int = _int(y)
     day = day_from_ymd(y_int, m, d)
@@ -473,9 +474,20 @@ def load_lsk(lsk_path=''):
     inserted, they must be inserted again.
     """
 
+    global _DELTA_T_DICT
+
     _initialize_leap_seconds(lsk_path)
     _initialize_utc_1958_1972()
     _initialize_ut1_neg1999_3000()
+
+    _DELTA_T_DICT = {
+        'LEAPS'   : _LEAPS_DELTA_T,
+        'SPICE'   : _SPICE_DELTA_T,
+        'PRE-1972': MergedDeltaT(_LEAPS_DELTA_T, _DELTA_T_1958_1972),
+        'CANON'   : MergedDeltaT(_LEAPS_DELTA_T, _DELTA_T_1958_1972,
+                                 _DELTA_T_NEG1999_3000),
+    }
+
     set_ut_model(_SELECTED_UT_MODEL, future=_SELECTED_FUTURE_YEAR)
 
 
