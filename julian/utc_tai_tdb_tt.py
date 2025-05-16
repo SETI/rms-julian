@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/utc_tai_tdb_tt.py
 ##########################################################################################
-"""Conversions between time systems: UTC, TAI, TDB, and TT
 """
-##########################################################################################
+==========================
+UTC/TAI/TDB/TT Conversions
+==========================
+"""
 
 import numpy as np
 from julian              import leap_seconds
@@ -30,21 +32,24 @@ _TT_MINUS_TAI = 0.
 
 def set_tai_origin(origin='NOON'):
     """Set the zeros of the TAI and UTC time system to either noon or midnight on January
-    1, 2000. DEPRECATED feature.
+    1, 2000.
 
-    The earlier version of this module measured UTC and TAI from ~ midnight on January 1,
-    2000. The preferred origin for the time systems is 12 hours later. Use this function
-    to reproduce earlier behavior if you are concerned about the matching values of TAI or
-    UTC from an earlier version of the Julian Library.
+    DEPRECATED feature.
 
-    Input:
-        origin      origin of the TAI and UTC time systems, either "NOON" or "MIDNIGHT".
-                    "NOON"      UTC = 0 and TAI = 32 at noon on January 1, 2000 UTC. This
-                                is consistent with the definition of TAI within the SPICE
-                                toolkit.
-                    "MIDNIGHT"  UTC = 0 and TAI = 32 at midnight on January 1, 2000 UTC.
+    Parameters:
+        origin (str):
+            Origin of the TAI and UTC time systems, either "NOON" or "MIDNIGHT". If
+            "NOON", UTC=0 and TAI=32 at noon on January 1, 2000 UTC. This is consistent
+            with the definition of TAI within the SPICE  toolkit. If "MIDNIGHT", UTC=0 and
+            TAI=32 at midnight on January 1, 2000 UTC.
 
-    Note that the TDB and TT time systems have always use the "NOON" origin exclusively.
+    Notes:
+        The earlier version of this module measured UTC and TAI from ~ midnight on January
+        1, 2000. The preferred origin for the time systems is 12 hours later. Use this
+        function to reproduce earlier behavior if you are concerned about the matching
+        values of TAI or UTC from an earlier version of the Julian Library.
+
+        The TDB and TT time systems have always use the "NOON" origin exclusively.
     """
 
     global _TAI_MIDNIGHT_ORIGIN, _SECONDS_PAST_MIDNIGHT
@@ -79,21 +84,24 @@ set_tai_origin()
 def day_sec_from_utc(utc):
     """Convert cumulative time in seconds UTC to day number and elapsed seconds.
 
-    The UTC time system is defined to equal zero at noon on January 1, 2000. It differs
-    from TAI by a fixed offset of 32 seconds for all dates after the adoption of the leap
-    second system in 1972. For earlier dates, when using the "PRE-1972" or "CANON" models,
-    UTC uses "rubber seconds", which can expand or shrink as necessary relative to TAI in
-    order to ensure that every day before 1972 contained exactly 86,400 seconds.
+    Parameters:
+        utc (int, float, or array-like):
+            Time in seconds UTC.
 
-    Input:
-        utc         time in seconds UTC, as a scalar, array, or array-like.
+    Returns:
+        tuple (day, sec):
 
-    Return:         (day, sec)
-        day         integer UTC day number, starting from January 1, 2000, as a scalar or
-                    array.
-        sec         seconds within that day, allowing for leap seconds, as a scalar or
-                    array. If utc values are given as integers, the returned seconds will
-                    also be integers.
+        - **day** (*int or array*): Day number relative to January 1, 2000.
+        - **sec** (*int, float, or array*): Elapsed seconds since beginning of day,
+          including possible leap seconds. Values will be integral if `utc` is integral.
+
+    Notes:
+        The UTC time system is defined to equal zero at noon on January 1, 2000. It
+        differs from TAI by a fixed offset of 32 seconds for all dates after the adoption
+        of the leap second system in 1972. For earlier dates, when using the "PRE-1972" or
+        "CANON" models, UTC uses "rubber seconds", which can expand or shrink as necessary
+        relative to TAI in order to ensure that every day before 1972 contained exactly
+        86,400 seconds.
     """
 
     # Reference the time to TAI midnight on January 1, 2000
@@ -131,20 +139,23 @@ def day_sec_from_utc(utc):
 def utc_from_day_sec(day, sec=0):
     """Convert UTC day number and elapsed seconds to cumulative elapsed UTC seconds.
 
-    The UTC time system is defined to equal zero at noon on January 1, 2000. It differs
-    from TAI by a fixed offset of 32 seconds for all dates after the adoption of the leap
-    second system in 1972. For earlier dates, when using the "PRE-1972" or "CANON" models,
-    UTC uses "rubber seconds", which can expand or shrink as necessary relative to TAI in
-    order to ensure that every day before 1972 contained exactly 86,400 seconds.
+    Parameters:
+        day (int or array-like):
+            Day number relative to January 1, 2000.
+        sec (int, float, or array-like):
+            Elapsed seconds since beginning of day, including possible leap seconds.
 
-    Input:
-        day         integer UTC day number starting from January 1, 2000, as a scalar,
-                    array, or array-like.
-        sec         elapsed UTC seconds within that day, allowing for leap seconds. Can be
-                    a scalar, array, or array-like. Default is zero.
+    Returns:
+        int, float, or array:
+            Time in elapsed seconds. If `sec` is integral, this will also be integral.
 
-    Return:         time in seconds UTC, as a scalar or array. If second values are given
-                    as integers, the returned values will also be integers.
+    Notes:
+        The UTC time system is defined to equal zero at noon on January 1, 2000. It
+        differs from TAI by a fixed offset of 32 seconds for all dates after the adoption
+        of the leap second system in 1972. For earlier dates, when using the "PRE-1972" or
+        "CANON" models, UTC uses "rubber seconds", which can expand or shrink as necessary
+        relative to TAI in order to ensure that every day before 1972 contained exactly
+        86,400 seconds.
     """
 
     day = _number(day)
@@ -152,29 +163,32 @@ def utc_from_day_sec(day, sec=0):
     leapsecs = leapsecs_from_ym(y,m)
     return 86400 * day + leapsecs + (sec - (_SECONDS_PAST_MIDNIGHT
                                             + _LEAPSECS_ON_JAN_1_2000))
-        # the groupings inside parentheses eliminate an array op if day is an array but
-        # sec is not
+    # the groupings inside parentheses eliminate an array op if day is an array but sec is
+    # not
 
 
 def utc_from_day(day, sec=0):
     """Convert UTC day number to cumulative elapsed UTC seconds.
 
-    This is an alternative name for utc_from_day_sec().
+    This is an alternative name for :meth:`utc_from_day_sec`.
 
-    The UTC time system is defined to equal zero at noon on January 1, 2000. It differs
-    from TAI by a fixed offset of 32 seconds for all dates after the adoption of the leap
-    second system in 1972. For earlier dates, when using the "PRE-1972" or "CANON" models,
-    UTC uses "rubber seconds", which can expand or shrink as necessary relative to TAI in
-    order to ensure that every day before 1972 contained exactly 86,400 seconds.
+    Parameters:
+        day (int or array-like):
+            Day number relative to January 1, 2000.
+        sec (int, float, or array-like):
+            Elapsed seconds since beginning of day, including possible leap seconds.
 
-    Input:
-        day         integer UTC day number starting from January 1, 2000, as a scalar,
-                    array, or array-like.
-        sec         elapsed UTC seconds within that day, allowing for leap seconds. Can be
-                    a scalar, array, or array-like. Default is zero.
+    Returns:
+        int, float, or array:
+            Time in seconds UTC. If `sec` is integral, this will also be integral.
 
-    Return:         time in seconds UTC, as a scalar or array. If second values are given
-                    as integers, the returned values will also be integers.
+    Notes:
+        The UTC time system is defined to equal zero at noon on January 1, 2000. It
+        differs from TAI by a fixed offset of 32 seconds for all dates after the adoption
+        of the leap second system in 1972. For earlier dates, when using the "PRE-1972" or
+        "CANON" models, UTC uses "rubber seconds", which can expand or shrink as necessary
+        relative to TAI in order to ensure that every day before 1972 contained exactly
+        86,400 seconds.
     """
 
     return utc_from_day_sec(day, sec=sec)
@@ -186,18 +200,22 @@ def utc_from_day(day, sec=0):
 def tai_from_utc(utc):
     """Convert time in seconds UTC to TAI.
 
-    The UTC time system is defined to equal zero at noon on January 1, 2000. It differs
-    from TAI by a fixed offset of 32 seconds for all dates after the adoption of the leap
-    second system in 1972. For earlier dates, when using the "PRE-1972" or "CANON" models,
-    UTC uses "rubber seconds", which can expand or shrink as necessary relative to TAI in
-    order to ensure that every day before 1972 contained exactly 86,400 seconds.
+    Parameters:
+        utc (int, float, or array-like):
+            Time in seconds UTC.
 
-    Input:
-        utc         time in seconds UTC as a scalar, array, or array-like.
+    Returns:
+        int, float, or array:
+            Time in seconds TAI. If `utc` is integral and UTC "rubber seconds" are not in
+            use, this will also be integral.
 
-    Return:         time in seconds TAI, as a scalar or array. If utc values are given as
-                    integers and UTC "rubber seconds" are not in use, returned values will
-                    also be integers.
+    Notes:
+        The UTC time system is defined to equal zero at noon on January 1, 2000. It
+        differs from TAI by a fixed offset of 32 seconds for all dates after the adoption
+        of the leap second system in 1972. For earlier dates, when using the "PRE-1972" or
+        "CANON" models, UTC uses "rubber seconds", which can expand or shrink as necessary
+        relative to TAI in order to ensure that every day before 1972 contained exactly
+        86,400 seconds.
     """
 
     utc = _number(utc)
@@ -236,18 +254,22 @@ def tai_from_utc(utc):
 def utc_from_tai(tai):
     """Convert time in seconds TAI to UTC.
 
-    The UTC time system is defined to equal zero at noon on January 1, 2000. It differs
-    from TAI by a fixed offset of 32 seconds for all dates after the adoption of the leap
-    second system in 1972. For earlier dates, when using the "PRE-1972" or "CANON" models,
-    UTC uses "rubber seconds", which can expand or shrink as necessary relative to TAI in
-    order to ensure that every day before 1972 contained exactly 86,400 seconds.
+    Parameters:
+        tai (int, float, or array-like):
+            Time in seconds TAI.
 
-    Input:
-        tai         time in seconds TAI as a scalar, array, or array-like.
+    Returns:
+        int, float, or array:
+            Time in seconds UTC. If `tai` is integral and "rubber seconds" are not in use,
+            this will also be integral.
 
-    Return:         time in seconds UTC, as a scalar or array. If tai values are given as
-                    integers and UTC "rubber seconds" are not in use, returned values
-                    will also be integers.
+    Notes:
+        The UTC time system is defined to equal zero at noon on January 1, 2000. It
+        differs from TAI by a fixed offset of 32 seconds for all dates after the adoption
+        of the leap second system in 1972. For earlier dates, when using the "PRE-1972" or
+        "CANON" models, UTC uses "rubber seconds", which can expand or shrink as necessary
+        relative to TAI in order to ensure that every day before 1972 contained exactly
+        86,400 seconds.
     """
 
     tai = _number(tai)
@@ -295,14 +317,16 @@ def utc_from_tai(tai):
 def day_sec_from_tai(tai):
     """Convert time in seconds TAI to day number and elapsed seconds into that day.
 
-    Input:
-        tai         time in seconds TAI, as a scalar, array, or array-like.
+    Parameters:
+        tai (int, float, or array-like):
+            Time in seconds TAI.
 
-    Return:         (day, sec)
-        day         integer UTC day number, starting from January 1, 2000, as a scalar or
-                    array.
-        sec         elapsed seconds into that day, allowing for leap seconds, as a scalar
-                    or array.
+    Returns:
+        tuple (day, sec):
+
+        - **day** (*int or array*): Day number relative to January 1, 2000 UTC.
+        - **sec** (*int, float, or array*): Elapsed seconds since beginning of day,
+          including possible leap seconds.
     """
 
     return day_sec_from_utc(utc_from_tai(tai))
@@ -311,13 +335,15 @@ def day_sec_from_tai(tai):
 def tai_from_day_sec(day, sec=0):
     """Convert day number and elapsed seconds to TAI time.
 
-    Input:
-        day         integer UTC day number, starting from January 1, 2000. Can be a
-                    scalar, array, or array-like.
-        sec         optional elapsed seconds into that day, allowing for leap seconds. Can
-                    be a scalar, array, or array-like.
+    Parameters:
+        day (int or array-like):
+            Day number relative to January 1, 2000 UTC.
+        sec (int, float, or array-like):
+            Elapsed seconds since beginning of day, including possible leap seconds.
 
-    Return:         time in seconds TAI, as a scalar or array.
+    Returns:
+        int, float, or array: Time in seconds TAI. If `sec` is integral and "rubber
+        seconds" are not in use, this will also be integral.
     """
 
     return tai_from_utc(utc_from_day_sec(day, sec))
@@ -326,15 +352,18 @@ def tai_from_day_sec(day, sec=0):
 def tai_from_day(day, sec=0):
     """Convert day number to TAI seconds.
 
-    This is an alternative name for tai_from_day_sec().
+    This is an alternative name for :meth:`tai_from_day_sec`.
 
-    Input:
-        day         integer UTC day number, starting from January 1, 2000. Can be a
-                    scalar, array, or array-like.
-        sec         optional elapsed seconds into that day, allowing for leap seconds. Can
-                    be a scalar, array, or array-like.
+    Parameters:
+        day (int or array-like):
+            Day number relative to January 1, 2000 UTC.
+        sec (int, float, or array-like):
+            Elapsed seconds since beginning of day, including possible leap seconds.
 
-    Return:         time in seconds TAI, as a scalar or array.
+    Returns:
+        int, float, or array:
+            Time in seconds TAI. If `sec` is integral and "rubber seconds" are not in use,
+            this will also be integral.
     """
 
     return tai_from_utc(utc_from_day_sec(day, sec=sec))
@@ -367,12 +396,15 @@ def tai_from_day(day, sec=0):
 def tdb_from_tai(tai, *, iters=2):
     """Convert time in seconds TAI to TDB.
 
-    Input:
-        tai         time in seconds TAI as a scalar, array, or array-like.
-        iters       number of iterations to achieve desired precision. A value of 2
-                    provides complete floating-point convergence.
+    Parameters:
+        tai (int, float, or array-like):
+            Time in seconds tai.
+        iters (int, optional):
+            Number of iterations to achieve desired precision. A value of 2 provides
+            complete floating-point convergence.
 
-    Return:         time in seconds TDB, as a scalar or array.
+    Returns:
+        tdb (float or array): Time in seconds TDB.
     """
 
     # Solve:
@@ -394,10 +426,11 @@ def tdb_from_tai(tai, *, iters=2):
 def tai_from_tdb(tdb):
     """Convert time in seconds TDB to TAI.
 
-    Input:
-        tdb         time in seconds TDB as a scalar, array, or array-like.
+    Parameters:
+        tdb (float or array-like): Time in seconds TDB.
 
-    Return:         time in seconds TAI, as a scalar or array.
+    Returns:
+        tai (float or array): Time in seconds TAI.
     """
 
     # M = DELTET_M0 + DELTET_M1 * tdb
@@ -419,10 +452,11 @@ def tai_from_tdb(tdb):
 def tt_from_tai(tai):
     """Convert time in seconds TAI to TT.
 
-    Input:
-        tai         time in seconds TAI as a scalar, array, or array-like.
+    Parameters:
+        tai (int, float or array-like): Time in seconds TAI.
 
-    Return:         time in seconds TT, as a scalar or array.
+    Returns:
+        tt (float or array): Time in seconds TT.
     """
 
     return _float(tai) + _TT_MINUS_TAI
@@ -431,34 +465,37 @@ def tt_from_tai(tai):
 def tai_from_tt(tt):
     """Convert time in seconds TT to TAI.
 
-    Input:
-        tt          time in seconds TT as a scalar, array, or array-like.
+    Parameters:
+        tt (int, float or array-like): Time in seconds TT.
 
-    Return:         time in seconds TAI, as a scalar or array.
+    Returns:
+        tai (float or array): Time in seconds TAI.
     """
 
     return _float(tt) - _TT_MINUS_TAI
 
 
 def tdt_from_tai(tai):
-    """DEPRECATED function name; use tt_from_tai.
+    """DEPRECATED function name; use `tt_from_tai`.
 
-    Input:
-        tai         time in seconds TAI as a scalar, array, or array-like.
+    Parameters:
+        tai (int, float or array-like): Time in seconds TAI.
 
-    Return:         time in seconds TT, as a scalar or array.
+    Returns:
+        tt (float or array): Time in seconds TT.
     """
 
     return _float(tai) + _TT_MINUS_TAI
 
 
 def tai_from_tdt(tt):
-    """"DEPRECATED function name; use tai_from_tt.
+    """"DEPRECATED function name; use `tai_from_tt`.
 
-    Input:
-        tt          time in seconds TT as a scalar, array, or array-like.
+    Parameters:
+        tt (int, float or array-like): Time in seconds TT.
 
-    Return:         time in seconds TAI, as a scalar or array.
+    Returns:
+        tai (float or array): Time in seconds TAI.
     """
 
     return _float(tt) - _TT_MINUS_TAI
@@ -482,12 +519,17 @@ _TIME_CONVERSION_FUNCS = {
 def time_from_time(time, timesys, newsys='TAI'):
     """Convert a time from one time system to another.
 
-    Input:
-        time        time in seconds as a scalar, array, or array-like.
-        timesys     name of the current time system, "UTC", "TAI", "TDB", or "TT".
-        newsys      name of the desired time system, "UTC", "TAI", "TDB", or "TT".
+    Parameters:
+        time (int, float, or array-like):
+            Time in seconds.
+        timesys (str):
+            Name of the current time system, "UTC", "TAI", "TDB", or "TT".
+        newsys (str):
+            Name of the desired time system, "UTC", "TAI", "TDB", or "TT".
 
-    Return:         time in the specified time system, as a scalar or array.
+    Returns:
+        int, float, or array:
+            Time in seconds in the specified time system.
     """
 
     if timesys == newsys:
@@ -504,19 +546,23 @@ def time_from_time(time, timesys, newsys='TAI'):
 def day_sec_from_time(time, timesys='TAI', *, leapsecs=True):
     """Convert a time in any time system, to UTC day number and seconds.
 
-    Input:
-        time        time in seconds as, a scalar, array, or array-like.
-        timesys     name of the current time system, one of "UTC", "TAI", "TDB", or "TT".
-        leapsecs    if True, UTC day and second values are returned. Otherwise, the day
-                    and seconds are calculated without regard to leap seconds and without
-                    any time system conversion. This can be useful for situations where a
-                    date is referred to as, for example, an "ephemeris date" rather than
-                    as a calendar date.
+    Parameters:
+        time (int, float, or array-like):
+            Time in seconds.
+        timesys (str):
+            Name of the current time system, "UTC", "TAI", "TDB", or "TT".
+        leapsecs (bool, optional):
+            If True, UTC day and second values are returned. Otherwise, the day and
+            seconds are calculated without regard to leap seconds and without any time
+            system conversion. This can be useful for situations where a date is referred
+            to as, for example, an "ephemeris date" rather than as a calendar date.
 
-    Return:         (day, sec)
-        day         integer day number, starting from January 1, 2000, as a scalar or
-                    array.
-        sec         elapsed seconds into that day, as a scalar or array.
+    Returns:
+        tuple (day, sec):
+
+        - **day** (*int or array*): Day number relative to January 1, 2000 UTC.
+        - **sec** (*int, float, or array*): Elapsed seconds since beginning of day,
+          including possible leap seconds.
     """
 
     if not leapsecs:
@@ -539,19 +585,23 @@ def time_from_day_sec(day, sec, timesys='TAI', *, leapsecs=True):
     """Convert UTC day number and elapsed seconds to time in seconds in the specified time
     system.
 
-    Input:
-        day         integer UTC day number, starting from January 1, 2000. Can be a
-                    scalar, array, or array-like.
-        sec         elapsed seconds into that day, allowing for leap seconds. Can be a
-                    scalar, array, or array-like.
-        timesys     name of the desired time system, one of "UTC", "TAI", "TDB", or "TT".
-        leapsecs    if True, the day and sec values are interpreted as UTC values.
-                    Otherwise, the day and seconds are converted to time without regard to
-                    leap seconds, and no time system conversion is performed. This can be
-                    useful for situations where a date is referred to as, for example, an
-                    "ephemeris date" rather than as a calendar date.
+    Parameters:
+        day (int or array-like):
+            Day number relative to January 1, 2000.
+        sec (int, float, or array-like):
+            Elapsed seconds since beginning of day, including possible leap seconds.
+        timesys (str):
+            Name of the current time system, "UTC", "TAI", "TDB", or "TT".
+        leapsecs (bool, optional):
+            If True, `day` and `sec` values are interpreted as UTC values. Otherwise, the
+            day and seconds are converted to time without regard to leap seconds, and no
+            time system conversion is performed. This can be useful for situations where a
+            date is referred to as, for example, an "ephemeris date" rather than as a
+            calendar date.
 
-    Return:         time in seconds in the specified time system, as a scalar or array.
+    Returns:
+        int, float, or array:
+            Time in seconds in the specified time system.
     """
 
     if not leapsecs:

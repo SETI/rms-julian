@@ -10,14 +10,15 @@ from julian.datetime_parsers import (
     day_sec_in_strings,
 )
 
-from julian.DEPRECATED import (
+from julian._DEPRECATED import (
     day_sec_type_from_string,
     day_sec_type_in_string,
     dates_in_string,
 )
 
 from julian.mjd_jd      import jd_from_day_sec, mjd_from_day_sec
-from julian._exceptions import JulianParseException, JulianValidateFailure
+from julian._exceptions import JulianParseException as JPE
+from julian._exceptions import JulianValidateFailure as JVF
 
 
 class Test_datetime_parsers(unittest.TestCase):
@@ -83,8 +84,7 @@ class Test_datetime_parsers(unittest.TestCase):
 
         self.assertEqual(day_sec_type_in_string("[2000-01 00:00:00.00 TDB]]"),
                          None)
-        self.assertEqual(day_sec_type_in_string("d= 2000-02-31 00:00:00.00 TDB]]"),
-                         None)
+        self.assertRaises(JVF, day_sec_type_in_string, "d= 2000-02-31 00:00:00.00 TDB]]")
 
         # Check if DMY is same as MDY
         self.assertEqual(day_sec_from_string('31-12-2000 12:34:56', order='DMY'),
@@ -106,11 +106,14 @@ class Test_datetime_parsers(unittest.TestCase):
         self.assertEqual(day_sec_type_from_string('1998-12-31 23:59:60.99'),
                          (-366, 86400.99, 'UTC'))
 
-        self.assertRaises(JulianValidateFailure,
-                          day_sec_from_string, '2000-01-01 23:59:60', leapsecs=True)
-        self.assertRaises(JulianValidateFailure,
-                          day_sec_from_string, '1999-12-31 23:59:61', leapsecs=True)
-        self.assertRaises(JulianParseException, day_sec_from_string, 'whatever')
+        self.assertEqual(type(day_sec_from_string('1998-12-31 23:59:60')[0]), int)
+        self.assertEqual(type(day_sec_from_string('1998-12-31 23:59:60')[1]), int)
+        self.assertEqual(type(day_sec_from_string('1998-12-31 23:59:60.99')[0]), int)
+        self.assertEqual(type(day_sec_from_string('1998-12-31 23:59:60.99')[1]), float)
+
+        self.assertRaises(JVF, day_sec_from_string, '2000-01-01 23:59:60', leapsecs=True)
+        self.assertRaises(JVF, day_sec_from_string, '1999-12-31 23:59:61', leapsecs=True)
+        self.assertRaises(JPE, day_sec_from_string, 'whatever')
 
         # MJD on a day with a leap second
         # MJD 51178 is December 31, 1998
@@ -194,10 +197,10 @@ class Test_datetime_parsers(unittest.TestCase):
         self.assertEqual(day_sec_type_in_string('Date? 1998-12-31 23:59:60.99 XYZ'),
                          (-366, 86400.99, 'UTC'))
 
-        self.assertEqual(day_sec_type_in_string('Today 2000-01-01 23:59:60=leapsecond'),
-                         None)
-        self.assertEqual(day_sec_type_in_string('today 1999-12-31 23:59:61 leapsecond'),
-                         None)
+        self.assertRaises(JVF, day_sec_type_in_string,
+                          'Today 2000-01-01 23:59:60=leapsecond')
+        self.assertRaises(JVF, day_sec_type_in_string,
+                          'today 1999-12-31 23:59:61 leapsecond')
 
         # dates_in_string
         self.assertEqual(dates_in_string('Time:2000-01-01 00:00:00.00'),
@@ -412,11 +415,9 @@ class Test_datetime_parsers(unittest.TestCase):
         self.assertEqual(day_sec_in_strings(strings, substrings=True, weekdays=True),
                          PCK_ANSWER)
 
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
+        # Check fractional day
+        test = day_sec_from_string('2000-01-31.25', floating=True)
+        self.assertEqual(test, (30, 21600.))
+        self.assertIs(type(test[1]), float)
 
 ##########################################################################################

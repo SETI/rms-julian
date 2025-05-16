@@ -28,7 +28,7 @@ from julian.utc_tai_tdb_tt import (
     utc_from_tai,
 )
 
-from julian.DEPRECATED import (
+from julian._DEPRECATED import (
     day_sec_as_type_from_utc,
     utc_from_day_sec_as_type,
 )
@@ -463,12 +463,5 @@ class Test_utc_tai_tdb_tt(unittest.TestCase):
             (dtest, stest) = day_sec_from_time(tdb2, 'TDB', leapsecs=False)
             self.assertTrue(np.all(dtest == daylist))
             self.assertLess(np.abs(stest - 43200.).max(), 2.e-7)
-
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
 
 ##########################################################################################

@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/mjd_pyparser.py
 ##########################################################################################
-"""Function to generate a PyParsing grammar for strings using MJD/JD notation
 """
-##########################################################################################
+=========================
+MJD/JD pyparsing Grammars
+=========================
+"""
 
 from julian.time_pyparser import req_timesys
 
@@ -38,13 +40,13 @@ white     = Suppress(OneOrMore(White()))
 opt_white = Suppress(ZeroOrMore(White()))
 
 def _action(name, value, s, l, t):
-    return [(name, value), ('~', s.upper().index(t[0].upper(),l) + len(t[0]))]
+    return [(name, value), ('~', s.upper().index(t[0].upper(), l) + len(t[0]))]
 
 def _actions(items, s, l, t):
     item_list = []
     for k in range(0, len(items), 2):
         item_list.append((items[k], items[k+1]))
-    return item_list + [('~', s.upper().index(t[0].upper(),l) + len(t[0]))]
+    return item_list + [('~', s.upper().index(t[0].upper(), l) + len(t[0]))]
 
 ##########################################################################################
 # Numbers
@@ -130,23 +132,29 @@ numeric_timesys_date = (
 def mjd_pyparser(*, floating=True, timesys=True, padding=True, embedded=False):
     """A date parser using MJD, JD, MJED, or JED.
 
-    The pyparser interprets a string and returns a pyparsing.ParseResults object. Calling
-    the as_list() method on this object returns a list containing some but not all of
-    these tuples:
-        ("YEAR", type)      either "MJD" or "JD", indicating that the day value is not
-                            part of an actual year.
-        ("TIMESYS", name)   either "UTC" or "TDB".
-        ("DAY", day)        day number as either an int or a float.
-        ("~", number)       the last occurrence of this tuple in the list contains the
-                            number of characters matched.
+    Parameters:
+        floating (bool, optional:
+            True to allow fractional days. If false, only an MJD integer date is
+            permitted.
+        timesys (str, optional):
+            True to allow an explicit time system in the string via a values such as
+            "MJD", "MJED", "JD", or JED".
+        padding (bool, optional):
+            True to ignore leading or trailing white space.
+        embedded (bool, optional):
+            True to allow the time to be followed by additional text.
 
-    Input:
-        floating    True to allow fractional days. If false, only an MJD integer date is
-                    permitted.
-        timesys     True to allow an explicit time system via "MJxD" or "JxD". Ignored if
-                    floating is False.
-        padding     True to ignore leading or trailing white space.
-        embedded    True to allow the time to be followed by additional text.
+    Returns:
+        pyparsing.ParserElement: A parser for the selected syntax. Calling the `as_list()`
+        method on the returned ParseResult object returns a list containing some but not
+        all of these tuples, depending on what appears in the parsed string:
+
+        * ("YEAR", type): Either "MJD" or "JD", indicating that the day value is not part
+          of an actual year.
+        * ("TIMESYS", name): Time system, either "UTC" or "TDB".
+        * ("DAY", day); Day number as either an int or a float.
+        * ("~", number): The last occurrence of this tuple in the list contains the number
+          of characters matched.
     """
 
     if floating:

@@ -12,7 +12,7 @@ from julian.formatters import (
     iso_from_tai,
 )
 
-from julian.DEPRECATED import (
+from julian._DEPRECATED import (
     hms_format_from_sec,
     yd_format_from_day,
     ydhms_format_from_day_sec,
@@ -23,7 +23,7 @@ from julian.DEPRECATED import (
 )
 
 from julian.calendar    import day_from_ymd
-from julian._exceptions import JulianValidateFailure
+from julian._exceptions import JulianValidateFailure as JVF
 
 DAY_TESTS = [0, 100000, -200000]
 
@@ -495,7 +495,7 @@ class Test_formatters(unittest.TestCase):
         self.assertEqual(hms_format_from_sec(0., digits=3, suffix='Z'), '00:00:00.000Z')
 
         # Check if hms_format_from_sec accepts seconds over 86410
-        self.assertRaises(JulianValidateFailure, hms_format_from_sec, 86411) #!!!
+        self.assertRaises(JVF, hms_format_from_sec, 86411)
 
         # Errors
         self.assertRaises(ValueError, format_sec, 0, kind='X')
@@ -725,12 +725,5 @@ class Test_formatters(unittest.TestCase):
                                                       buffer=np.empty((3,), dtype='int'))
         self.assertRaises(ValueError, format_day_sec, [[0,0],[0,0]], 0.,
                                                       buffer=np.empty((3,3), dtype='U40'))
-
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
 
 ##########################################################################################

@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/formatters.py
 ##########################################################################################
-"""Functions to format date/time strings in ISO-standard formats
 """
-##########################################################################################
+==========
+Formatters
+==========
+"""
 
 import numpy as np
 from julian.calendar       import ymd_from_day, yd_from_day
@@ -29,31 +31,34 @@ def format_day(day, order='YMD', *, ydigits=4, dash='-', ddigits=None, proleptic
                buffer=None, kind="U"):
     """Format a date or array of dates.
 
-    This function supports scalar or array-like inputs. If array-like inputs are provided,
-    an array of strings or ASCII byte strings is returned.
+    Parameters:
+        day (int, float, or array-like):
+            Day number of relative to January 1, 2000.
+        order (str):
+            The order of the year, optional month, and day fields, one of "YMD", "MDY",
+            "DMY", "YD", or "DY".
+        ydigits (int, optional):
+            Number of year digits to include in year, 2 or 4.
+        dash (str)
+            Character(s) to include between fields, if any. Default is "-". Use "" for no
+            separators; any other string can also be used in place of the dashes.
+        ddigits (int, optional):
+            Decimal digits to include in day values; use -1 or None to suppress the
+            decimal point; ignored if day values are integers.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+        buffer (array[str or bytes]):
+            An optional array of strings or byte strings into which to write the results.
+            Must have sufficient dimensions. This can be either strings (dtype.kind = "U")
+            or bytes (dtype.kind = "S"); if the latter, you can provide a NumPy memmap as
+            input and this function will write content directly into an ASCII table file.
+        kind (str):
+            "U" to return strings, "S" to return bytes. Ignored if `buffer` is provided.
 
-    Note that the optional output buffer can be either strings (dtype.kind = "U") or bytes
-    (dtype.kind = "S"). If the latter, you can provide a NumPy memmap as input and this
-    function will write content directly into an ASCII table file.
-
-    Input:
-        day         integer or arbitrary array of integers defining day numbers relative
-                    to January 1, 2000.
-        order       the order of the year, optional month, and day fields, one of "YMD",
-                    "MDY", "DMY", "YD", or "DY".
-        ydigits     number of year digits to include in year, 2 or 4; default 4.
-        dash        character(s) to include between fields, if any. Default is "-". Use ""
-                    for no separators; any other string can also be used in place of
-                    the dashes.
-        ddigits     decimal digits to include in day values; use -1 or None to suppress
-                    the decimal point; ignored if day values are integers.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
+    Returns:
+        str or array: The formatted date(s).
     """
 
     if order not in ('YMD', 'MDY', 'DMY', 'YD', 'DY'):
@@ -66,7 +71,7 @@ def format_day(day, order='YMD', *, ydigits=4, dash='-', ddigits=None, proleptic
     if has_dot:
         scale = 10**ddigits
         day = ((_float(day) * scale + 0.5)//1 + 0.1)/scale
-                # +0.1 to ensure there is no rounding down after division by scale
+        # +0.1 to ensure there is no rounding down after division by scale
         int_day = _int(day)
         frac = day - int_day
         day = int_day
@@ -116,7 +121,7 @@ def format_day(day, order='YMD', *, ydigits=4, dash='-', ddigits=None, proleptic
     ldash = len(dash)
     for field, c in enumerate(order):
         if field > 0 and ldash:
-            fmt_list.append(dash.replace('{','{{').replace('}','}}'))
+            fmt_list.append(dash.replace('{', '{{').replace('}', '}}'))
             dtype_dict['dash' + str(field)] = (su + str(ldash), lstring * w)
             lstring += ldash
 
@@ -156,9 +161,9 @@ def format_day(day, order='YMD', *, ydigits=4, dash='-', ddigits=None, proleptic
 
     # Convert to y,m,d
     if len(order) == 3:
-        (y,m,d) = ymd_from_day(day, proleptic=proleptic)
+        (y, m, d) = ymd_from_day(day, proleptic=proleptic)
     else:
-        (y,d) = yd_from_day(day, proleptic=proleptic)
+        (y, d) = yd_from_day(day, proleptic=proleptic)
         m = 0   # will be ignored
 
     # Use string formatting for a scalar return without a buffer
@@ -234,31 +239,39 @@ def format_sec(sec, digits=None, *, colon=':', suffix='', buffer=None, kind='U')
     (dtype.kind = "S"). If the latter, you can provide a NumPy memmap as input and this
     function will write content directly into an ASCII table file.
 
-    Input:
-        sec         the number of seconds into a day, or an arbitrary array thereof;
-                    each value should be >= 0 and < 86410.
-        digits      the number of digits to include after the decimal point; use a
-                    negative value or None for seconds to be rounded to integer.
-        colon       character(s) to include between fields, if any. Default is ":". Use
-                    "" for no separators; any other string can also be used in place of
-                    the colons.
-        suffix      "Z" to include the Zulu time zone indicator.
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
+    Parameters:
+        sec (int, float, or array-like):
+            Elapsed seconds into day. Each value should be >= 0 and < 86410.
+        digits (int, optional):
+            Decimal digits to include; use -1 or None to suppress the decimal point;
+            ignored if `sec` values are integers.
+        colon (str):
+            Character(s) to include between fields, if any. Default is ":". Use "" for no
+            separators; any other string can also be used in place of the colons.
+        suffix (str, optional):
+            "Z" to include the Zulu time zone indicator.
+        buffer (array[str or bytes]):
+            An optional array of strings or byte strings into which to write the results.
+            Must have sufficient dimensions. This can be either strings (dtype.kind = "U")
+            or bytes (dtype.kind = "S"); if the latter, you can provide a NumPy memmap as
+            input and this function will write content directly into an ASCII table file.
+        kind (str):
+            "U" to return strings, "S" to return bytes. Ignored if `buffer` is provided.
+
+    Returns:
+        str or array: The formatted time(s).
     """
 
     # Convert secs to h,m,s
     sec = _number(sec)
     shape = np.shape(sec)
-    (h,m,s) = hms_from_sec(sec)
+    (h, m, s) = hms_from_sec(sec, validate=True, leapsecs=True)
 
     has_dot = digits is not None and digits >= 0
     if has_dot:
         scale = 10**digits
         sec = ((_float(sec) * scale + 0.5)//1 + 0.1)/scale
-                # +0.1 to ensure there is no rounding down after division by scale
+        # +0.1 to ensure there is no rounding down after division by scale
         int_sec = _int(sec)
         frac = sec - int_sec
         sec = int_sec
@@ -400,30 +413,44 @@ def format_day_sec(day, sec, order='YMDT', *, ydigits=4, dash='-', sep='T', colo
     (dtype "S"). If the latter, you can define it as a NumPy memmap and write content
     directly into an ASCII table file.
 
-    Input:
-        day         integer or arbitrary array of integers defining day numbers relative
-                    to January 1, 2000.
-        order       the order of the year, optional month, day, and time fields. Can be
-                    any of "YMD", "MDY", "DMY", "YD", or "DY". Add "T" at the beginning or
-                    end to indicate whether times come before or after the date.
-        ydigits     number of year digits to include in year, 2 or 4; default 4.
-        dash        character(s) to include between fields, if any. Default is "-". Use ""
-                    for no separators; any other string can also be used in place of
-                    the dashes.
-        sep         character(s) to appear between the date and the time.
-        colon       character(s) to include between fields, if any. Default is ":". Use
-                    "" for no separators; any other string can also be used in place of
-                    the colons.
-        digits      decimal digits to include in second values; use -1 or None to suppress
-                    the decimal point.
-        suffix      "Z" to include the Zulu time zone indicator.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
+    Parameters:
+        day (int, float, or array-like):
+            Day number of relative to January 1, 2000.
+        sec (int, float, or array-like):
+            Elapsed seconds into day.
+        order (str):
+            The order of the year, optional month, day, and time fields. Can be any of
+            "YMD", "MDY", "DMY", "YD", or "DY". Add "T" at the beginning or end to
+            indicate whether times come before or after the date.
+        ydigits (int, optional):
+            Number of year digits to include in year, 2 or 4.
+        dash (str)
+            Character(s) to include between fields, if any. Default is "-". Use "" for no
+            separators; any other string can also be used in place of the dashes.
+        sep (str):
+            Character(s) to appear between the date and the time.
+        colon (str):
+            Character(s) to include between fields, if any. Default is ":". Use "" for no
+            separators; any other string can also be used in place of the colons.
+        digits (int, optional):
+            Decimal digits to include second values; use -1 or None to suppress the
+            decimal point; ignored if `sec` values are integers.
+        suffix (str, optional):
+            "Z" to include the Zulu time zone indicator.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+        buffer (array[str or bytes]):
+            An optional array of strings or byte strings into which to write the results.
+            Must have sufficient dimensions. This can be either strings (dtype.kind = "U")
+            or bytes (dtype.kind = "S"); if the latter, you can provide a NumPy memmap as
+            input and this function will write content directly into an ASCII table file.
+        kind (str):
+            "U" to return strings, "S" to return bytes. Ignored if `buffer` is provided.
+
+    Returns:
+        str or array: The formatted date-time value(s).
     """
 
     ymd_order = order.replace('T', '')
@@ -464,7 +491,7 @@ def format_day_sec(day, sec, order='YMDT', *, ydigits=4, dash='-', sep='T', colo
     digits_ = 0 if digits is None else max(digits, 0)
     scale = 10 ** digits_
     sec = ((sec * scale + 0.5) // 1 + 0.1) / scale
-            # +0.1 to ensure there is no rounding down after division by scale
+    # +0.1 to ensure there is no rounding down after division by scale
 
     secs_on_day = seconds_on_day(day)
     crossovers = (sec >= secs_on_day)
@@ -477,7 +504,7 @@ def format_day_sec(day, sec, order='YMDT', *, ydigits=4, dash='-', sep='T', colo
         day += 1
         sec -= secs_on_day
 
-    ### DETERMINE WHICH DAYS HAVE LEAP SECONDS!
+    # DETERMINE WHICH DAYS HAVE LEAP SECONDS!
 
     # Determine the field widths by formatting the first value
     first_index = len(shape) * (0,)
@@ -485,7 +512,7 @@ def format_day_sec(day, sec, order='YMDT', *, ydigits=4, dash='-', sep='T', colo
     sec0 = sec[first_index]
 
     day_formatted = format_day(day0, ymd_order, ydigits=ydigits, dash=dash,
-                                     proleptic=proleptic)
+                               proleptic=proleptic)
     sec_formatted = format_sec(sec0, colon=colon, digits=digits, suffix=suffix)
 
     if order[0] == 'T':     # if time is first
@@ -557,29 +584,42 @@ def format_tai(tai, order='YMDT', *, ydigits=4, dash='-', sep='T', colon=':', di
     (dtype "S"). If the latter, you can define it as a NumPy memmap and write content
     directly into an ASCII table file.
 
-    Input:
-        tai         time value in seconds TAI or an array of time values.
-        order       the order of the year, optional month, day, and time fields. Can be
-                    any of "YMD", "MDY", "DMY", "YD", or "DY". Add "T" at the beginning or
-                    end to indicate whether times come before or after the date.
-        ydigits     number of year digits to include in year, 2 or 4; default 4.
-        dash        character(s) to include between fields, if any. Default is "-". Use ""
-                    for no separators; any other string can also be used in place of
-                    the dashes.
-        sep         character(s) to appear between the date and the time.
-        colon       character(s) to include between fields, if any. Default is ":". Use
-                    "" for no separators; any other string can also be used in place of
-                    the colons.
-        digits      decimal digits to include in second values; use -1 or None to suppress
-                    the decimal point.
-        suffix      "Z" to include the Zulu time zone indicator.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
+    Parameters:
+        tai (int, float, or array):
+            Time value in seconds TAI.
+        order (str):
+            The order of the year, optional month, day, and time fields. Can be any of
+            "YMD", "MDY", "DMY", "YD", or "DY". Add "T" at the beginning or end to
+            indicate whether times come before or after the date.
+        ydigits (int, optional):
+            Number of year digits to include in year, 2 or 4.
+        dash (str):
+            Character(s) to include between fields, if any. Default is "-". Use "" for no
+            separators; any other string can also be used in place of the dashes.
+        sep (str):
+            Character(s) to appear between the date and the time.
+        colon (str):
+            Character(s) to include between fields, if any. Default is ":". Use "" for no
+            separators; any other string can also be used in place of the colons.
+        digits (int, optional):
+            Decimal digits to include second values; use -1 or None to suppress the
+            decimal point; ignored if `sec` values are integers.
+        suffix (str, optional):
+            "Z" to include the Zulu time zone indicator.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+        buffer (array[str or bytes]):
+            An optional array of strings or byte strings into which to write the results.
+            Must have sufficient dimensions. This can be either strings (dtype.kind = "U")
+            or bytes (dtype.kind = "S"); if the latter, you can provide a NumPy memmap as
+            input and this function will write content directly into an ASCII table file.
+        kind (str):
+            "U" to return strings, "S" to return bytes. Ignored if `buffer` is provided.
+
+    Returns:
+        str or array: The formatted date-time value(s).
     """
 
     (day, sec) = day_sec_from_tai(tai)
@@ -602,20 +642,30 @@ def iso_from_tai(tai, ymd=True, digits=None, *, suffix='', proleptic=False,
     Note that this function is a variant of format_day_sec() but with a reduced set of
     options.
 
-    Input:
-        tai         time value in seconds TAI or an array of time values.
-        digits      the number of digits to include after the decimal point; use a
-                    negative value or None for seconds to be rounded to integer.
-        ymd         True for year-month-day format; False for year plus
-                    day-of-year format.
-        suffix      "Z" to include the Zulu time zone indicator.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        buffer      an optional array of strings or byte strings into which to write the
-                    results. Must have sufficient dimensions.
-        kind        "U" to return strings, "S" to return bytes. Ignored if a buffer is
-                    provided.
+    Parameters:
+        tai (int, float, or array):
+            Time value in seconds TAI.
+        ymd (bool, optional):
+            True for year-month-day format; False for year plus day-of-year format.
+        digits (int, optional):
+            Decimal digits to include second values; use -1 or None to suppress the
+            decimal point; ignored if `sec` values are integers.
+        suffix (str, optional):
+            "Z" to include the Zulu time zone indicator.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+        buffer (array[str or bytes]):
+            An optional array of strings or byte strings into which to write the results.
+            Must have sufficient dimensions. This can be either strings (dtype.kind = "U")
+            or bytes (dtype.kind = "S"); if the latter, you can provide a NumPy memmap as
+            input and this function will write content directly into an ASCII table file.
+        kind (str):
+            "U" to return strings, "S" to return bytes. Ignored if `buffer` is provided.
+
+    Returns:
+        str or array: The formatted date-time value(s).
     """
 
     if ymd:
@@ -626,4 +676,3 @@ def iso_from_tai(tai, ymd=True, digits=None, *, suffix='', proleptic=False,
                           proleptic=proleptic, buffer=buffer, kind=kind)
 
 ##########################################################################################
-

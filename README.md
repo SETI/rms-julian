@@ -1,6 +1,7 @@
 [![GitHub release; latest by date](https://img.shields.io/github/v/release/SETI/rms-julian)](https://github.com/SETI/rms-julian/releases)
 [![GitHub Release Date](https://img.shields.io/github/release-date/SETI/rms-julian)](https://github.com/SETI/rms-julian/releases)
 [![Test Status](https://img.shields.io/github/actions/workflow/status/SETI/rms-julian/run-tests.yml?branch=main)](https://github.com/SETI/rms-julian/actions)
+[![Documentation Status](https://readthedocs.org/projects/rms-julian/badge/?version=latest)](https://rms-julian.readthedocs.io/en/latest/?badge=latest)
 [![Code coverage](https://img.shields.io/codecov/c/github/SETI/rms-julian/main?logo=codecov)](https://codecov.io/gh/SETI/rms-julian)
 <br />
 [![PyPI - Version](https://img.shields.io/pypi/v/rms-julian)](https://pypi.org/project/rms-julian)
@@ -21,19 +22,23 @@
 [![Number of GitHub stars](https://img.shields.io/github/stars/SETI/rms-julian)](https://github.com/SETI/rms-julian/stargazers)
 ![GitHub forks](https://img.shields.io/github/forks/SETI/rms-julian)
 
-# rms-julian
+# Introduction
 
-Supported versions: Python >= 3.8
+The **Julian Library** is a Python module that provides powerful routines for converting
+between astronomical time systems. It supports array operations, leap seconds, and
+multiple calendars. It also provides tools for the parsing and formatting of date/time
+strings and for searching for dates and times embedded in general text.
 
-# PDS Ring-Moon Systems Node, SETI Institute
-# Julian Library, version 2.0
+The Julian Libraray is supported by the PDS Ring-Moon Systems Node, SETI Institute.
 
-This is a large set of routines for handing date and time conversions. Compared to other
-date/time libraries in Python, including CSPYCE, it has these features:
+# Features
+
+Compared to other date/time libraries in Python, including CSPYCE, the Julian Library has
+these features:
 
 - It handles the time systems Coordinated Universal Time (UTC), International Atomic Time
-  (TAI), Barycentric Dynamical Time (TDB), and Terrestrial Time (TT, previously called
-  Terrestrial Dynamical Time or TDT), properly accounting for leap seconds.
+  (TAI), Barycentric Dynamical Time (TDB), and Terrestrial Time (TT), properly accounting
+  for leap seconds.
 
 - Any time can be expressed as a running count of elapsed seconds from a defined epoch, as
   a calendar date, using Julian Date (JD), or using Modified Julian Date (MJD).
@@ -65,19 +70,36 @@ date/time libraries in Python, including CSPYCE, it has these features:
   suppressed entirely.
 
 - A general parser is able to interpret almost arbitrary date-time strings correctly. This
-  parser can also be used to "scrape" occurrences of dates and times from arbitrary text.
+  parser can also be used to search for and extract and dates and times from arbitrary
+  text.
 
+# Installation
 
-### CALENDAR OPERATIONS
+The `julian` module is available via the `rms-julian` package on PyPI and can be
+installed with:
+
+```sh
+pip install rms-julian
+```
+
+# Getting Started
+
+The typical way to use this is just to include this line in your programs:
+
+    import julian
+
+# Overview of `julian` Functions
+
+## Calendar Operations
 
 Every date is represented by an integer "day" value, where day = 0 on January 1, 2000.
 Various functions are provided to convert between day values and year, month, day, or day
 of year:
 
-        day_from_ymd()
-        day_from_yd()
-        ymd_from_day()
-        yd_from_day()
+* `day_from_ymd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.day_from_ymd)
+* `day_from_yd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.day_from_yd)
+* `ymd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.ymd_from_day)
+* `yd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.yd_from_day)
 
 Years prior to 1 CE are specified using the "astronomical year", which includes a year
 zero. As a result, 1 BCE is specified as year 0, 2 BCE as year -1, 4713 BCE as year -4712,
@@ -93,71 +115,85 @@ Day numbers within months are 1-31; day numbers within years are 1-366.
 
 Functions are provided to determine the number of days in a specified month or year:
 
-        days_in_year()
-        days_in_ym()
+* `days_in_year()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.days_in_year)
+* `days_in_month()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.days_in_month)
 
-Use the function `set_gregorian_start()` to specify the (Gregorian) year, month, and day for
+Use the function
+`set_gregorian_start()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.set_gregorian_start)
+to specify the (Gregorian) year, month, and day for
 the transition from the earlier Julian calendar to the modern Gregorian calendar. The
 default start date of the Gregorian calendar is October 15, 1582, when this calendar was
 first adopted in much of Europe. However, the user is free to modify this date; for
 example, Britain adopted the Gregorian calendar on September 14, 1752.
 
 Note that most calendar functions support an input parameter "proleptic", taking a value
-of `True` or `False`. If True, all calendar dates are proleptic (extrapolated backward
+of True or False. If True, all calendar dates are proleptic (extrapolated backward
 assuming the modern calendar), regardless of which calendar was in effect at the time.
 
 
-### TIME SYSTEMS
+## Time Systems
 
 All times are represented by numbers representing seconds past a specified epoch on
-January 1, 2000. Internally, TAI times serve as the intermediary between the different
-time systems (TAI, UTC, TDB, and TT). Conversions are straightforward, using:
+January 1, 2000. Four time systems are supported:
 
-        tai_from_utc()
-        utc_from_tai()
-        tai_from_tdb()
-        tdb_from_tai()
-        tai_from_tt()
-        tt_from_tai()
+* International Atomic Time (TAI)
+* Universal Coordinated Time (UTC)
+* Barycentric Dynamical Time (TDB)
+* Terrestrial Time (TT, previously called Terrestrial Dynamical Time or TDT)
 
-Alternatively, the more general function `time_from_time()` lets you specify the initial and
+Internally, TAI serves as the intermediary between the other time systems. Conversions are
+straightforward, using:
+
+* `tai_from_utc()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_utc)
+* `utc_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.utc_from_tai)
+* `tai_from_tdb()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_tdb)
+* `tdb_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tdb_from_tai)
+* `tai_from_tt()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_tt)
+* `tt_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tt_from_tai)
+
+Alternatively, the more general function
+`time_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.time_from_time)
+lets you specify the initial and
 final time systems of the conversion.
 
 You can also specify a time using an integer day plus the number of elapsed seconds on
 that day, and then convert between these values and any time system:
 
-        day_sec_from_utc()
-        day_sec_from_tai()
-        tai_from_day()
-        tai_from_day_sec()
-        utc_from_day()
-        utc_from_day_sec()
+* `day_sec_from_utc()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_utc)
+* `day_sec_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_tai)
+* `tai_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_day)
+* `tai_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_day_sec)
+* `utc_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.utc_from_day)
+* `utc_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.utc_from_day_sec)
 
-Alternatively, the more general functions `day_sec_from_time()` and `time_from_day_sec()`
+Alternatively, the more general functions
+`day_sec_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_time)
+and
+`time_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.time_from_day_sec)
 let you specify the initial and final time systems.
 
 
-### JULIAN DATES
+# Julian Dates
 
 Similarly, Julian dates and Modified Julian Dates can be converted to times using any time
 system:
 
-        jd_from_time()
-        time_from_jd()
-        mjd_from_time()
-        time_from_mjd()
-        jd_from_day_sec()
-        day_sec_from_jd()
-        mjd_from_day_sec()
-        day_sec_from_mjd()
+* `jd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.jd_from_time)
+* `time_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.time_from_jd)
+* `mjd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.mjd_from_time)
+* `time_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.time_from_mjd)
+* `jd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.jd_from_day_sec)
+* `day_sec_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_jd)
+* `mjd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.mjd_from_day_sec)
+* `day_sec_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_mjd)
 
 You can also convert directly between integer MJD and integer day numbers using:
 
-        mjd_from_day()
-        day_from_mjd()
+* `mjd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.mjd_from_day)
+* `day_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_from_mjd)
 
 
-### LEAP SECOND HANDLING
+## Leap Second Support
 
 In 1972, the UTC time system began using leap seconds to keep TAI times in sync with mean
 solar time to a precision of ~ 1 second. We provide several methods to allow the user to
@@ -165,29 +201,39 @@ keep the leap second list up to date.
 
 If the environment variable `SPICE_LSK_FILEPATH` is defined, then this SPICE leapseconds
 kernel is read at startup. Otherwise, leap seconds through 2020 are always included, as
-defined in SPICE kernel file "`naif0012.tls`". You can also call the function `load_lsk()`
+defined in SPICE kernel file "`naif0012.tls`". You can also call the function 
+`load_lsk()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.load_lsk)
 directly.
 
-Alternatively, use `insert_leap_second()` to augment the list with additional leap seconds
+Alternatively, use 
+`insert_leap_second()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.insert_leap_second)
+to augment the list with additional leap seconds
 (positive or negative).
 
-Use `seconds_on_day()` to determine the length in seconds of a given day; use
-`leapsecs_on_day()` or `leapsecs_from_ymd()` to determine the cumulative number of leap
+Use 
+`seconds_on_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.seconds_on_day)
+to determine the length in seconds of a given day; use
+`leapsecs_on_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.leapsecs_on_day)
+or
+`leapsecs_from_ymd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.leapsecs_from_ymd)
+to determine the cumulative number of leap
 seconds on a given date.
 
-Use `set_ut_model()` to define how to handle times before 1972 and into the future, outside
+Use
+`set_ut_model()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.set_ut_model)
+to define how to handle times before 1972 and into the future, outside
 the duration of the current UTC leap second system.
 
 
-### FORMATTING
+## Date/Time Formatting
 
 Several functions are provided to express dates or times as formatted character strings:
 
-        format_day()
-        format_day_sec()
-        format_sec()
-        format_tai()
-        iso_from_tai()
+* `format_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.format_day)
+* `format_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.format_day_sec)
+* `format_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.format_sec)
+* `format_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.format_tai)
+* `iso_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.iso_from_tai)
 
 Most variations of the ISO 8601:1988 format are supported.
 
@@ -198,17 +244,17 @@ NumPy memmap as input to these functions and it would write content directly int
 ASCII table, avoiding any conversion to/from Unicode.
 
 
-### PARSING
+## String Parsing and Searching
 
 We provide functions for the very fast parsing of identically-formatted strings or
 bytestrings that represent dates, times or both:
 
-        day_from_iso()
-        day_sec_from_iso()
-        sec_from_iso()
-        tai_from_iso()
-        tdb_from_iso()
-        time_from_iso()
+* `day_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.day_from_iso)
+* `day_sec_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.day_sec_from_iso)
+* `sec_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.sec_from_iso)
+* `tai_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.tai_from_iso)
+* `tdb_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.tdb_from_iso)
+* `time_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.time_from_iso)
 
 These functions recognize most variations of the ISO 8601:1988 format, and are ideal for
 interpreting date and time columns from large ASCII tables.
@@ -216,22 +262,38 @@ interpreting date and time columns from large ASCII tables.
 More general parsers are provided for interpreting individual dates and times in almost
 arbitrary formats:
 
-        day_from_string()
-        day_sec_from_string()
-        sec_from_string()
+* `day_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#date_parsers.day_from_string)
+* `day_sec_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#datetime_parsers.day_sec_from_string)
+* `sec_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#time_parsers.sec_from_string)
 
-These same parsers can also be invoked to "scrape" dates and times from almost arbitrary
+These same parsers can also be invoked to search for dates and times embedded in arbitrary
 text:
 
-        days_in_strings()
-        day_sec_in_strings()
-        secs_in_strings()
+* `days_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#date_parsers.days_in_strings)
+* `day_sec_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#datetime_parsers.day_sec_in_strings)
+* `secs_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#time_parsers.secs_in_strings)
 
 Time zones are recognized, including most standard abbreviations.
 
 For users familiar with the pyparsing module, we provide functions that generate parsers
 for a wide variety of special requirements. See:
 
-        date_pyparser()
-        datetime_pyparser()
-        time_pyparser()
+* `date_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#date_pyparser.date_pyparser)
+* `datetime_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#datetime_pyparser.datetime_pyparser)
+* `time_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#time_pyparser.time_pyparser)
+
+# Contributing
+
+Information on contributing to this package can be found in the
+[Contributing Guide](https://github.com/SETI/rms-julian/blob/main/CONTRIBUTING.md).
+
+# Links
+
+- [Documentation](https://rms-julian.readthedocs.io)
+- [Repository](https://github.com/SETI/rms-julian)
+- [Issue tracker](https://github.com/SETI/rms-julian/issues)
+- [PyPi](https://pypi.org/project/rms-julian)
+
+# Licensing
+
+This code is licensed under the [Apache License v2.0](https://github.com/SETI/rms-julian/blob/main/LICENSE).

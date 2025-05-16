@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/datetime_pyparser.py
 ##########################################################################################
-"""Function to generate a PyParsing grammar for arbitrary date/time strings
 """
-##########################################################################################
+=============================
+Date-Time pyparsing  Grammars
+=============================
+"""
 
 from julian.mjd_pyparser  import mjd_pyparser
 from julian.date_pyparser import date_pyparser
@@ -41,48 +43,68 @@ def datetime_pyparser(order='YMD', *, treq=False, strict=False, doy=False, mjd=F
                       padding=True, embedded=False):
     """A date-time pyparser.
 
-    The pyparser interprets a string and returns a pyparsing.ParseResults object. Calling
-    the as_list() method on this object returns a list containing some but not all of
-    these tuples:
-        ("YEAR", year)      year if specified; two-digit years are converted to 1970-2069.
-                            Alternatively, "MJD" or "JD" if the day number is to be
-                            interpreted as a Julian or Modified Julian date.
-        ("MONTH", month)    month if specified, 1-12.
-        ("DAY", day)        day number: 1-31 if a month was specified; 1-366 if a day of
-                            year was specified; otherwise, the MJD or JD day value.
-        ("WEEKDAY", abbrev) day of the week if provided, as an abbreviated uppercase name:
-                            "MON", "TUE", etc.
-        ("HOUR", hour)      hour if specified, 0-23, an int or possibly a float. Hours
-                            am/pm are converted to the range 0-23 automatically.
-        ("MINUTE", minute)  minute if specified, integer or float.
-        ("SECOND", second)  second if specified, integer or float.
-        ("TZ", tz_name)     name of the time zone if specified.
-        ("TZMIN", tzmin)    offset of the time zone in minutes.
-        ("TIMESYS", name)   time system if specified: "UTC", "TAI", "TDB", or "TDT".
-        ("~", number)       the last occurrence of this tuple in the list contains the
-                            number of characters matched.
+    Parameters:
+        order (str):
+            One of "YMD", "MDY", or "DMY", defining the default order for day month, and
+            year in situations where it might be ambiguous.
+        treq (bool, optional):
+            True if a time field is required; False to recognize date strings that do not
+            include a time.
+        strict (bool, optional):
+            True for a stricter parser, which is less likely to match strings that might
+            not actually represent dates.
+        doy (bool, optional):
+            True to recognize dates specified as year and day-of-year.
+        mjd (bool, optional):
+            True to recognize Modified Julian Dates.
+        weekdays (bool, optional):
+            True to allow dates including weekdays.
+        extended (bool, optional):
+            True to support extended year values: signed (with at least four digits) and
+            those involving "CE", "BCE", "AD", "BC".
+        leapsecs (bool, optional):
+            True to recognize leap seconds.
+        ampm (bool, optional):
+            True to recognize "am" and "pm" suffixes.
+        timezones (bool, optional):
+            True to recognize and interpret time zones. If True, returned values are
+            adjusted to UTC.
+        timesys (bool, optional):
+            True to recognize an embedded time system such as "UTC", "TAI", etc.
+        floating (bool, optional):
+            True to allow date-times specified using floating-point days, hours, or
+            minutes.
+        iso_only (bool, optional):
+            Require an ISO 8601:1988-compatible date string; ignore `order`, `strict`,
+            `mjd, `ampm`, and `timesys` options.
+        padding (bool, optional):
+            True to ignore leading or trailing white space.
+        embedded (bool, optional):
+            True to allow the time to be followed by additional text.
 
-    Input:
-        order       One of 'YMD', 'MDY', or 'DMY'; this defines the default order for
-                    date, month, and year in situations where it might be ambiguous.
-        treq        True to allow date values with the time component missing.
-        strict      True for a stricter date parsing, which is less likely to match
-                    strings that might not actually represent dates.
-        doy         True to allow dates specified as year and day-of-year.
-        mjd         True to allow date-times specified as MJD.
-        weekdays    True to allow dates including weekdays.
-        extended    True to support extended year values: signed (with at least four
-                    digits) and those involving "CE", "BCE", "AD", "BC".
-        leapsecs    True to allow leap seconds.
-        ampm        True to allow "am" and "pm" suffixes on times.
-        timezones   True to allow time zone suffixes on times.
-        timesys     True to allow a time system, e.g., "UTC", "TAI", "TDB", or "TT".
-        floating    True to allow date-times specified using floating-point days, hours,
-                    or minutes.
-        iso_only    Require an ISO 8601:1988-compatible date-time string. If True, input
-                    options strict, mjd, ampm, and timesys are ignored.
-        padding     True to ignore leading or trailing white space.
-        embedded    True to allow the time to be followed by additional text.
+    Returns:
+        pyparsing.ParserElement: A parser for the selected syntax. Calling the `as_list()`
+        method on the returned ParseResult object returns a list containing some but not
+        all of these tuples, depending on what appears in the parsed string:
+
+        * ("YEAR", year): Year if specified; two-digit years are converted to 1970-2069.
+          Alternatively, "MJD" or "JD" if the day number is to be interpreted as a Julian
+          or Modified Julian date.
+        * ("MONTH", month): Month if specified, 1-12.
+        * ("DAY", day); Day number: 1-31 if a month was specified; 1-366 if a day of year
+          was specified; otherwise, the MJD or JD day value.
+        * ("WEEKDAY", abbrev): Day of the week if provided, as an abbreviated uppercase
+          name: "MON", "TUE", etc.
+        * ("HOUR", hour): Hour if specified, 0-23, an int or possibly a float. Hours am/pm
+          are converted to the range 0-23 automatically.
+        * ("MINUTE", minute): Minute if specified, integer or float.
+        * ("SECOND", second): Second if specified, integer or float.
+        * ("TZ", tz_name): Name of the time zone if specified.
+        * ("TZMIN", tzmin): Ooffset of the time zone in minutes.
+        * ("TIMESYS", name): "UTC" for an MJD or JD date; "TDB" for an MJED or JED date;
+          "TT" for an MJTD or JTD date.
+        * ("~", number): The last occurrence of this tuple in the list contains the number
+          of characters matched.
     """
 
     # Always include the full ISO 8601:1988 format, including the "T" separator.
@@ -150,7 +172,7 @@ def datetime_pyparser(order='YMD', *, treq=False, strict=False, doy=False, mjd=F
         pyparser = iso_idate + T + iso_time | pyparser
 
     # Finalize and return
-    pyparser = pyparser + ~FollowedBy(alphanums + '.+-' )
+    pyparser = pyparser + ~FollowedBy(alphanums + '.+-')
 
     if padding:
         pyparser = opt_white + pyparser + opt_white

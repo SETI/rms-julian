@@ -10,13 +10,14 @@ from julian.date_parsers import (
     _date_pattern_filter,
 )
 
-from julian.DEPRECATED import (
+from julian._DEPRECATED import (
     day_in_string,
     days_in_string,
 )
 
-from julian.calendar       import day_from_yd, day_from_ymd
-from julian._exceptions    import JulianParseException, JulianValidateFailure
+from julian.calendar    import day_from_yd, day_from_ymd
+from julian._exceptions import JulianParseException as JPE
+from julian._exceptions import JulianValidateFailure as JVF
 
 class Test_date_parsers(unittest.TestCase):
 
@@ -49,8 +50,7 @@ class Test_date_parsers(unittest.TestCase):
         self.assertFalse(_date_pattern_filter('abcdefg mJdhijkl', mjd=True))
 
         # Check if day_from_string works like day_from_ymd
-        self.assertEqual(day_from_string('2000-01-01'),
-                         day_from_ymd(2000,1,1))
+        self.assertEqual(day_from_string('2000-01-01'), day_from_ymd(2000,1,1))
 
         # Check day_from_string
         self.assertEqual(day_from_string('01-02-2000', order='MDY'),
@@ -69,25 +69,17 @@ class Test_date_parsers(unittest.TestCase):
         self.assertEqual(day_from_string('1582-10-01', proleptic=True),  -152398)
         self.assertEqual(day_from_string('1582-10-01', proleptic=False), -152388)
 
-        self.assertRaises(JulianParseException, day_from_string, 'whatever')
-        self.assertRaises(JulianParseException, day_from_string, '01-02-2000 cE',
-                                                                 extended=False)
+        self.assertRaises(JPE, day_from_string, 'whatever')
+        self.assertRaises(JPE, day_from_string, '01-02-2000 cE', extended=False)
 
         # Check date validator, weekdays
-        self.assertRaises(JulianValidateFailure,
-                          day_from_string, '2001-11-31',validate=True)
-        self.assertRaises(JulianValidateFailure,
-                          day_from_string, '2001-02-29', validate=True)
-        self.assertRaises(JulianParseException, day_from_string, '2001-02-ab')
+        self.assertRaises(JVF, day_from_string, '2001-11-31')
+        self.assertRaises(JVF, day_from_string, '2001-02-29')
+        self.assertRaises(JPE, day_from_string, '2001-02-ab')
 
-        self.assertEqual(day_from_string('Monday, 2000-01-01', weekdays=True,
-                                         validate=False), 0)
-        self.assertRaises(JulianValidateFailure,
-                          day_from_string, 'Monday, 2000-01-01', weekdays=True,
-                                           validate=True)    # it was a Saturday
-        self.assertRaises(JulianValidateFailure,
-                          day_from_string, 'Monday, 2000-001', weekdays=True,
-                                           validate=True)
+        self.assertRaises(JVF, day_from_string, 'Monday, 2000-01-01', weekdays=True)
+        self.assertRaises(JVF, day_from_string, 'Monday, 2000-001', weekdays=True)
+        # because it was a Saturday
 
         # Check day_in_string
         self.assertEqual(day_in_string('Today is 01-02-2000!', order='MDY'),
@@ -169,10 +161,10 @@ class Test_date_parsers(unittest.TestCase):
                          [(day_from_yd(1001,1), '1001-001')])
 
         # Check date validator
-        self.assertEqual(days_in_strings('Today=(2001-11-31)',
-                                         validate=True, first=True), None)
-        self.assertEqual(days_in_strings('Today 2001-02-29T12:34:56',
-                                         validate=True, first=True), None)
+        self.assertRaises(JVF, days_in_strings, 'Today=(2001-11-31)', first=True)
+        self.assertRaises(JVF, days_in_strings, 'Today=(2001-11-31)', first=False)
+        self.assertRaises(JVF, days_in_strings, 'Today 2001-02-29T12:34:56', first=True)
+        self.assertRaises(JVF, days_in_strings, 'Today 2001-02-29T12:34:56', first=False)
         self.assertEqual(day_in_string('Today 2001-01-01, not tomorrow', remainder=True),
                                        (366, ', not tomorrow'))
 
@@ -375,12 +367,5 @@ class Test_date_parsers(unittest.TestCase):
                       (1726, '2004 September 22')]
 
         self.assertEqual(days_in_strings(strings, substrings=True), PCK_ANSWER)
-
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
 
 ##########################################################################################

@@ -1,10 +1,15 @@
 ##########################################################################################
-# UNIT TESTS
+# tests/test_v1.py
 ##########################################################################################
 
 import julian as j
 import numpy as np
 import unittest
+import warnings
+
+from julian._exceptions import JulianValidateFailure as JVF
+from julian._warnings import JulianDeprecationWarning as JDW
+import julian._warnings as _warnings
 
 ########################################
 # Calendar conversions
@@ -14,9 +19,7 @@ class Test_Calendar_v1(unittest.TestCase):
 
     def runTest(self):
 
-        import warnings
-        from julian._warnings import JulianDeprecationWarning
-        warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
+        warnings.filterwarnings('ignore', category=JDW)
 
         # day_from_ymd()
         self.assertEqual(j.day_from_ymd(2000,1,1), 0)
@@ -144,6 +147,9 @@ class Test_Calendar_v1(unittest.TestCase):
 
         j.set_gregorian_start()
 
+        warnings.resetwarnings()
+        _warnings._reset_warnings()
+
 ########################################
 # Leapsecond routines
 ########################################
@@ -219,8 +225,8 @@ class Test_Time_of_Day_v1(unittest.TestCase):
                          "86400 is not (23, 59, 60).")
         self.assertEqual(j.hms_from_sec(86409), (23, 59, 69),
                          "86469 is not (23, 59, 69).")
-        self.assertRaises(ValueError, j.hms_from_sec, 86410)
-        self.assertRaises(ValueError, j.hms_from_sec, -1.e-300)
+        self.assertRaises(ValueError, j.hms_from_sec, 86410, validate=True)
+        self.assertRaises(ValueError, j.hms_from_sec, -1.e-300, validate=True)
 
         # Check sec_from_hms
         self.assertEqual(j.sec_from_hms(0, 0, 0), 0,
@@ -365,7 +371,8 @@ class Test_Conversions_v1(unittest.TestCase):
 
     def runTest(self):
 
-        # TAI tests...
+        warnings.filterwarnings('ignore', category=JDW)
+
         j.set_ut_model('LEAPS')
 
         # TAI was 31-32 seconds ahead of UTC in 1999,2000,2001
@@ -427,6 +434,9 @@ class Test_Conversions_v1(unittest.TestCase):
 
         j.set_ut_model('LEAPS')
 
+        warnings.resetwarnings()
+        _warnings._reset_warnings()
+
 ########################################
 # Formatting Routines
 ########################################
@@ -462,7 +472,7 @@ class Test_Formatting_v1(unittest.TestCase):
         self.assertEqual(j.hms_format_from_sec(0,3,'Z'), "00:00:00.000Z")
 
         # Check if hms_format_from_sec accepts seconds over 86410
-        self.assertRaises(ValueError, j.hms_format_from_sec, 86411) #!!!
+        self.assertRaises(JVF, j.hms_format_from_sec, 86411)
 
         # Check if ymdhms_format_from_day_sec returns the correct format.
         self.assertEqual(j.ymdhms_format_from_day_sec(0,0),
@@ -627,6 +637,8 @@ class Test_General_Parsing_v1(unittest.TestCase):
 
     def runTest(self):
 
+        warnings.filterwarnings('ignore', category=JDW)
+
         # Note: julian_dateparser.py has more extensive unit tests
 
         # Check if day_from_string works like day_from_ymd
@@ -678,8 +690,8 @@ class Test_General_Parsing_v1(unittest.TestCase):
                          [j.day_from_ymd(2020,1,1), j.day_from_ymd(2030,10,20)])
 
         # Check date validator
-        self.assertEqual(j.day_in_string("Today=(2001-11-31)"), None)
-        self.assertEqual(j.day_in_string("Today 2001-02-29T12:34:56"), None)
+        self.assertRaises(JVF, j.day_in_string, "Today=(2001-11-31)")
+        self.assertRaises(JVF, j.day_in_string, "Today 2001-02-29T12:34:56")
 
         self.assertEqual(j.day_in_string("Today 2001-01-01, not tomorrow",
                                          remainder=True), (366, ', not tomorrow'))
@@ -772,10 +784,10 @@ class Test_General_Parsing_v1(unittest.TestCase):
         self.assertEqual(j.day_sec_type_in_string("Date? 1998-12-31 23:59:60.99 XYZ"),
                          (-366, 86400.99, "UTC"))
 
-        self.assertEqual(j.day_sec_type_in_string("Today 2000-01-01 23:59:60=leapsecond"),
-                         None)
-        self.assertEqual(j.day_sec_type_in_string("today 1999-12-31 23:59:61 leapsecond"),
-                         None)
+        self.assertRaises(JVF, j.day_sec_type_in_string,
+                          "Today 2000-01-01 23:59:60=leapsecond")
+        self.assertRaises(JVF, j.day_sec_type_in_string,
+                          "today 1999-12-31 23:59:61 leapsecond")
 
         # dates_in_string
         self.assertEqual(j.dates_in_string("Time:2000-01-01 00:00:00.00"),
@@ -789,11 +801,24 @@ class Test_General_Parsing_v1(unittest.TestCase):
         self.assertEqual(j.dates_in_string("Today is [[200z-01-01 0z:00:0z.00 TDB]]"),
                          [])
 
-############################################
-# Execute from command line...
-############################################
+        warnings.resetwarnings()
+        _warnings._reset_warnings()
 
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
+
+class Test_v1_warnings(unittest.TestCase):
+
+    def runTest(self):
+
+        with self.assertWarns(JDW):
+            (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
+
+        # This should yield an error
+        warnings.filterwarnings('error')
+        self.assertRaises(JDW, j.times_in_string, "End time[23:59:60.000]")
+
+        # This warning was already raised so it should not be repeated
+        (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
+
+        warnings.resetwarnings()
 
 ##########################################################################################

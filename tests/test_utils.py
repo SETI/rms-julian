@@ -152,11 +152,4 @@ class Test_utils(unittest.TestCase):
         self.assertTrue(_is_float(np.array([3.,4])))
         self.assertFalse(_is_float(np.array([3,4])))
 
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
-
 ##########################################################################################

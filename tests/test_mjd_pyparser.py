@@ -7,7 +7,6 @@ import unittest
 
 class Test_mjd_pyparser(unittest.TestCase):
 
-
     def runTest(self):
 
         from julian.mjd_pyparser import mjd_pyparser
@@ -76,12 +75,5 @@ class Test_mjd_pyparser(unittest.TestCase):
                                                         values=[('YEAR', yval),
                                                                 ('DAY', nval)])
                 self.assertEqual(parse_dict.get('TIMESYS', ''), sval, msg=success_msg)
-
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
 
 ##########################################################################################

@@ -1,5 +1,5 @@
 ##########################################################################################
-# julian/DEPRECATED.py
+# julian/_DEPRECATED.py
 ##########################################################################################
 """Deprecated function names from Julian Library version 1
 """
@@ -120,8 +120,7 @@ def day_in_string(string, order='YMD', remainder=False, use_julian=True):
     _warn('day_in_string() is deprecated; use days_in_strings() with first=True')
 
     result = days_in_strings([string], order=order, doy=True, mjd=False,
-                             proleptic=(not use_julian), validate=True,
-                             substrings=True, first=True)
+                             proleptic=(not use_julian), substrings=True, first=True)
     if result is None:
         return None
 
@@ -146,8 +145,7 @@ def days_in_string(string, order='YMD', use_julian=True):
     _warn('days_in_string() is deprecated; use days_in_strings()')
 
     return days_in_strings([string], order=order, doy=True, mjd=False,
-                           proleptic=(not use_julian), validate=True, substrings=False,
-                           first=False)
+                           proleptic=(not use_julian), substrings=False, first=False)
 
 ##########################################################################################
 # From julian/datetime_parsers.py
@@ -203,7 +201,7 @@ def day_sec_type_in_string(string, order='YMD', *, remainder=False, use_julian=T
     result = day_sec_in_strings([string], order=order, doy=True, mjd=False,
                                 proleptic=(not use_julian), treq=False, leapsecs=True,
                                 ampm=True, timezones=False, timesys=True, floating=False,
-                                validate=True, substrings=True, first=True)
+                                substrings=True, first=True)
     if result is None:
         return None
 
@@ -231,7 +229,7 @@ def dates_in_string(string, order='YMD', *, use_julian=True):
     return day_sec_in_strings([string], order=order, doy=True, mjd=True,
                               proleptic=(not use_julian), treq=False, leapsecs=True,
                               ampm=True, timezones=False, floating=True, timesys=True,
-                              validate=True, substrings=False, first=False)
+                              substrings=False, first=False)
 
 ##########################################################################################
 # From julian/formatters.py
@@ -596,7 +594,7 @@ def time_in_string(string, remainder=False):
     _warn('time_in_string() is deprecated; use sec_in_strings()')
 
     result = secs_in_strings([string], leapsecs=True, ampm=True, timezones=False,
-                             floating=False, validate=True, substrings=True, first=True)
+                             floating=False, substrings=True, first=True)
     if result is None:
         return None
 
@@ -616,7 +614,7 @@ def times_in_string(string):
     _warn('times_in_string() is deprecated; use sec_in_strings()')
 
     return secs_in_strings([string], leapsecs=True, ampm=True, timezones=False,
-                           floating=True, validate=True)
+                           floating=True)
 
 ##########################################################################################
 # From julian/utc_tai_tdb_tt.py
@@ -650,4 +648,3 @@ def day_sec_as_type_from_utc(day, sec, time_type='UTC'):
     return day_sec_from_time(time, time_type, leapsecs=(time_type == 'UTC'))
 
 ##########################################################################################
-

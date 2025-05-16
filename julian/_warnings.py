@@ -1,14 +1,13 @@
 ##########################################################################################
 # julian/_warnings.py
 ##########################################################################################
-"""Definition of class JulianDeprecationWarning
-"""
-##########################################################################################
+"""Warnings manager"""
 
 import warnings
 
 
 class JulianDeprecationWarning(DeprecationWarning):
+    """Raised to alert the user that they are using a deprecated feature."""
     pass
 
 
@@ -25,5 +24,13 @@ def _warn(message):
 
     warnings.warn(message, category=JulianDeprecationWarning)
     _WARNING_MESSAGES.add(message)
+
+
+def _reset_warnings():
+    """Reset the list of warnings issued."""
+
+    global _WARNING_MESSAGES
+
+    _WARNING_MESSAGES = set()
 
 ##########################################################################################

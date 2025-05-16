@@ -3,4 +3,5 @@ cspyce
 numpy
 pyparsing
 pytest
+rms-filecache
 rms-textkernel
