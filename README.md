@@ -96,10 +96,10 @@ Every date is represented by an integer "day" value, where day = 0 on January 1,
 Various functions are provided to convert between day values and year, month, day, or day
 of year:
 
-* `day_from_ymd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.day_from_ymd)
-* `day_from_yd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.day_from_yd)
-* `ymd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.ymd_from_day)
-* `yd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.yd_from_day)
+* `day_from_ymd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.calendar.day_from_ymd)
+* `day_from_yd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.calendar.day_from_yd)
+* `ymd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.calendar.ymd_from_day)
+* `yd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.calendar.yd_from_day)
 
 Years prior to 1 CE are specified using the "astronomical year", which includes a year
 zero. As a result, 1 BCE is specified as year 0, 2 BCE as year -1, 4713 BCE as year -4712,
@@ -115,11 +115,11 @@ Day numbers within months are 1-31; day numbers within years are 1-366.
 
 Functions are provided to determine the number of days in a specified month or year:
 
-* `days_in_year()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.days_in_year)
-* `days_in_month()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.days_in_month)
+* `days_in_year()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.calendar.days_in_year)
+* `days_in_month()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.calendar.days_in_month)
 
 Use the function
-`set_gregorian_start()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#calendar.set_gregorian_start)
+`set_gregorian_start()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.calendar.set_gregorian_start)
 to specify the (Gregorian) year, month, and day for
 the transition from the earlier Julian calendar to the modern Gregorian calendar. The
 default start date of the Gregorian calendar is October 15, 1582, when this calendar was
@@ -144,32 +144,32 @@ January 1, 2000. Four time systems are supported:
 Internally, TAI serves as the intermediary between the other time systems. Conversions are
 straightforward, using:
 
-* `tai_from_utc()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_utc)
-* `utc_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.utc_from_tai)
-* `tai_from_tdb()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_tdb)
-* `tdb_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tdb_from_tai)
-* `tai_from_tt()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_tt)
-* `tt_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tt_from_tai)
+* `tai_from_utc()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.tai_from_utc)
+* `utc_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.utc_from_tai)
+* `tai_from_tdb()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.tai_from_tdb)
+* `tdb_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.tdb_from_tai)
+* `tai_from_tt()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.tai_from_tt)
+* `tt_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.tt_from_tai)
 
 Alternatively, the more general function
-`time_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.time_from_time)
+`time_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.time_from_time)
 lets you specify the initial and
 final time systems of the conversion.
 
 You can also specify a time using an integer day plus the number of elapsed seconds on
 that day, and then convert between these values and any time system:
 
-* `day_sec_from_utc()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_utc)
-* `day_sec_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_tai)
-* `tai_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_day)
-* `tai_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.tai_from_day_sec)
-* `utc_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.utc_from_day)
-* `utc_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.utc_from_day_sec)
+* `day_sec_from_utc()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_sec_from_utc)
+* `day_sec_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_sec_from_tai)
+* `tai_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.tai_from_day)
+* `tai_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.tai_from_day_sec)
+* `utc_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.utc_from_day)
+* `utc_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.utc_from_day_sec)
 
 Alternatively, the more general functions
-`day_sec_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_time)
+`day_sec_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_sec_from_time)
 and
-`time_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.time_from_day_sec)
+`time_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.time_from_day_sec)
 let you specify the initial and final time systems.
 
 
@@ -178,19 +178,19 @@ let you specify the initial and final time systems.
 Similarly, Julian dates and Modified Julian Dates can be converted to times using any time
 system:
 
-* `jd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.jd_from_time)
-* `time_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.time_from_jd)
-* `mjd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.mjd_from_time)
-* `time_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.time_from_mjd)
-* `jd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.jd_from_day_sec)
-* `day_sec_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_jd)
-* `mjd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.mjd_from_day_sec)
-* `day_sec_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_sec_from_mjd)
+* `jd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.jd_from_time)
+* `time_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.time_from_jd)
+* `mjd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.mjd_from_time)
+* `time_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.time_from_mjd)
+* `jd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.jd_from_day_sec)
+* `day_sec_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_sec_from_jd)
+* `mjd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.mjd_from_day_sec)
+* `day_sec_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_sec_from_mjd)
 
 You can also convert directly between integer MJD and integer day numbers using:
 
-* `mjd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.mjd_from_day)
-* `day_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#utc_tai_tdb_tt.day_from_mjd)
+* `mjd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.mjd_from_day)
+* `day_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_from_mjd)
 
 
 ## Leap Second Support
@@ -201,26 +201,26 @@ keep the leap second list up to date.
 
 If the environment variable `SPICE_LSK_FILEPATH` is defined, then this SPICE leapseconds
 kernel is read at startup. Otherwise, leap seconds through 2020 are always included, as
-defined in SPICE kernel file "`naif0012.tls`". You can also call the function 
-`load_lsk()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.load_lsk)
+defined in SPICE kernel file "`naif0012.tls`". You can also call the function
+`load_lsk()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.leap_seconds.load_lsk)
 directly.
 
-Alternatively, use 
-`insert_leap_second()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.insert_leap_second)
+Alternatively, use
+`insert_leap_second()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.leap_seconds.insert_leap_second)
 to augment the list with additional leap seconds
 (positive or negative).
 
-Use 
-`seconds_on_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.seconds_on_day)
+Use
+`seconds_on_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.leap_seconds.seconds_on_day)
 to determine the length in seconds of a given day; use
-`leapsecs_on_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.leapsecs_on_day)
+`leapsecs_on_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.leap_seconds.leapsecs_on_day)
 or
-`leapsecs_from_ymd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.leapsecs_from_ymd)
+`leapsecs_from_ymd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.leap_seconds.leapsecs_from_ymd)
 to determine the cumulative number of leap
 seconds on a given date.
 
 Use
-`set_ut_model()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#leap_seconds.set_ut_model)
+`set_ut_model()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.leap_seconds.set_ut_model)
 to define how to handle times before 1972 and into the future, outside
 the duration of the current UTC leap second system.
 
@@ -229,11 +229,11 @@ the duration of the current UTC leap second system.
 
 Several functions are provided to express dates or times as formatted character strings:
 
-* `format_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.format_day)
-* `format_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.format_day_sec)
-* `format_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.format_sec)
-* `format_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.format_tai)
-* `iso_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#formatters.iso_from_tai)
+* `format_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.formatters.format_day)
+* `format_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.formatters.format_day_sec)
+* `format_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.formatters.format_sec)
+* `format_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.formatters.format_tai)
+* `iso_from_tai()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.formatters.iso_from_tai)
 
 Most variations of the ISO 8601:1988 format are supported.
 
@@ -249,12 +249,12 @@ ASCII table, avoiding any conversion to/from Unicode.
 We provide functions for the very fast parsing of identically-formatted strings or
 bytestrings that represent dates, times or both:
 
-* `day_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.day_from_iso)
-* `day_sec_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.day_sec_from_iso)
-* `sec_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.sec_from_iso)
-* `tai_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.tai_from_iso)
-* `tdb_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.tdb_from_iso)
-* `time_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#iso_parsers.time_from_iso)
+* `day_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.iso_parsers.day_from_iso)
+* `day_sec_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.iso_parsers.day_sec_from_iso)
+* `sec_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.iso_parsers.sec_from_iso)
+* `tai_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.iso_parsers.tai_from_iso)
+* `tdb_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.iso_parsers.tdb_from_iso)
+* `time_from_iso()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.iso_parsers.time_from_iso)
 
 These functions recognize most variations of the ISO 8601:1988 format, and are ideal for
 interpreting date and time columns from large ASCII tables.
@@ -262,25 +262,25 @@ interpreting date and time columns from large ASCII tables.
 More general parsers are provided for interpreting individual dates and times in almost
 arbitrary formats:
 
-* `day_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#date_parsers.day_from_string)
-* `day_sec_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#datetime_parsers.day_sec_from_string)
-* `sec_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#time_parsers.sec_from_string)
+* `day_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.date_parsers.day_from_string)
+* `day_sec_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.datetime_parsers.day_sec_from_string)
+* `sec_from_string()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.time_parsers.sec_from_string)
 
 These same parsers can also be invoked to search for dates and times embedded in arbitrary
 text:
 
-* `days_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#date_parsers.days_in_strings)
-* `day_sec_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#datetime_parsers.day_sec_in_strings)
-* `secs_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#time_parsers.secs_in_strings)
+* `days_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.date_parsers.days_in_strings)
+* `day_sec_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.datetime_parsers.day_sec_in_strings)
+* `secs_in_strings()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.time_parsers.secs_in_strings)
 
 Time zones are recognized, including most standard abbreviations.
 
 For users familiar with the pyparsing module, we provide functions that generate parsers
 for a wide variety of special requirements. See:
 
-* `date_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#date_pyparser.date_pyparser)
-* `datetime_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#datetime_pyparser.datetime_pyparser)
-* `time_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#time_pyparser.time_pyparser)
+* `date_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.date_pyparser.date_pyparser)
+* `datetime_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.datetime_pyparser.datetime_pyparser)
+* `time_pyparser()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.time_pyparser.time_pyparser)
 
 # Contributing
 
