@@ -39,6 +39,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/SETI/rms-julian"
+Documentation = "https://rms-julian.readthedocs.io/en/latest"
 Repository = "https://github.com/SETI/rms-julian"
 Source = "https://github.com/SETI/rms-julian"
 Issues = "https://github.com/SETI/rms-julian/issues"

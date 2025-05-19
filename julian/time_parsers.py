@@ -97,9 +97,9 @@ def secs_in_strings(strings, leapsecs=True, ampm=True, timezones=False, floating
             this case, None is returned if no time is found rather than an empty list.
 
     Returns:
-        tuple (sec[, dday][, substring]) list[tuple], or None: If `first` is False, a list
-        of tuples is returned; otherwise, a single tuple is returned or None if no time
-        was found. Within this tuple:
+        tuple (sec[, dday][, substring]), list[tuple], or None: If `first` is False, a
+        list of tuples is returned; otherwise, a single tuple is returned or None if no
+        time was found. Within this tuple:
 
         - **sec** (*int or float*): Elapsed seconds since the beginning of the day, after
           any time zone offset has been applied.

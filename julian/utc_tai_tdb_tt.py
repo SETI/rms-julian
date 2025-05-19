@@ -54,7 +54,6 @@ def set_tai_origin(origin='NOON'):
 
     global _TAI_MIDNIGHT_ORIGIN, _SECONDS_PAST_MIDNIGHT
     global _TAI_OF_JAN_1_2000, _TAI_OF_JAN_1_1972, _TT_MINUS_TAI
-    global _UTC_OF_JAN_1_2000, _UTC_OF_JAN_1_1972
 
     if origin == 'NOON':
         _TAI_MIDNIGHT_ORIGIN = False

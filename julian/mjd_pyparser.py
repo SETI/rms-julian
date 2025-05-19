@@ -92,11 +92,11 @@ JD_TYPES = {
 
 jd_type = one_of(['JD', 'MJD'], caseless=True)
 jd_type.set_parse_action(lambda s,l,t:
-        _actions(['YEAR', t[0].upper()], s,l,t))
+                         _actions(['YEAR', t[0].upper()], s,l,t))
 
 paren_jd_type = one_of(['(' + k + ')' for k in JD_TYPES.keys()], caseless=True)
 paren_jd_type.set_parse_action(lambda s,l,t:
-        _actions(['YEAR', t[0][1:-1].upper()], s,l,t))
+                               _actions(['YEAR', t[0][1:-1].upper()], s,l,t))
 
 numeric_date = (
     jd_type + opt_white + number |
@@ -113,13 +113,14 @@ JXD_TYPES = {
 
 jxd_type = one_of(JXD_TYPES.keys(), caseless=True)
 jxd_type.set_parse_action(lambda s,l,t:
-        _actions(['YEAR', JXD_TYPES[t[0].upper()][0],
-                  'TIMESYS', JXD_TYPES[t[0].upper()][1]], s,l,t))
+                          _actions(['YEAR', JXD_TYPES[t[0].upper()][0],
+                                    'TIMESYS', JXD_TYPES[t[0].upper()][1]], s,l,t))
 
 paren_jxd_type = one_of(['(' + k + ')' for k in JXD_TYPES.keys()], caseless=True)
 paren_jxd_type.set_parse_action(lambda s,l,t:
-        _actions(['YEAR', JXD_TYPES[t[0][1:-1].upper()][0],
-                  'TIMESYS', JXD_TYPES[t[0][1:-1].upper()][1]], s,l,t))
+                                _actions(['YEAR', JXD_TYPES[t[0][1:-1].upper()][0],
+                                          'TIMESYS', JXD_TYPES[t[0][1:-1].upper()][1]],
+                                         s,l,t))
 
 numeric_timesys_date = (
     jxd_type + opt_white + number |
@@ -133,7 +134,7 @@ def mjd_pyparser(*, floating=True, timesys=True, padding=True, embedded=False):
     """A date parser using MJD, JD, MJED, or JED.
 
     Parameters:
-        floating (bool, optional:
+        floating (bool, optional):
             True to allow fractional days. If false, only an MJD integer date is
             permitted.
         timesys (str, optional):

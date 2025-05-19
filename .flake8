@@ -1,24 +1,55 @@
 [flake8]
 max-line-length: 90
 extend-ignore =
-    E201 Whitespace after '('
-    E202 Whitespace before ')'
-    E203 Whitespace before ':'
-    E211 Whitespace before '('
-    E221 Multiple spaces before operator
-    E222 Multiple spaces after operator
-    E225 Missing whitespace around operator
-    E226 Missing whitespace around arithmetic operator
-    E231 Missing whitespace after ',', ';', or ':'
-    E241 Multiple spaces after ','
-    E272 Multiple spaces before keyword
-    E741 Do not use variables named 'I', 'O', or 'l'
-    E201, E202, E203, E211, E221, E222, E225, E226, E231, E241, E272, E741
+    # E116 unexpected indentation (comment)
+    # E201 Whitespace after '('
+    # E202 Whitespace before ')'
+    # E203 Whitespace before ':'
+    # E211 Whitespace before '('
+    # E221 Multiple spaces before operator
+    # E222 Multiple spaces after operator
+    # E225 Missing whitespace around operator
+    # E226 Missing whitespace around arithmetic operator
+    # E231 Missing whitespace after ',', ';', or ':'
+    # E241 Multiple spaces after ','
+    # E262 inline comment should start with '# '
+    # E272 Multiple spaces before keyword
+    # E302 expected 2 blank lines, found 1
+    # E305 expected 2 blank lines after class or function definition, found 1
+    # E402 module level import not at top of file
+    # E741 Do not use variables named 'I', 'O', or 'l'
+    E116, E201, E202, E203, E211, E221, E222, E225, E226, E231
+    E241, E262, E272, E302, E305, E402, E741
 
 per-file-ignores =
     # F401 module imported but unused
     # F403 unable to detect undefined names
     __init__.py: F401, F403
+    _DEPRECATED.py: E402
+    # E127 continuation line over-indented for visual indent
+    date_parsers.py: E127
+    # E111 indentation is not a multiple of 4
+    # E128 continuation line under-indented for visual indent
+    # E227 missing whitespace around bitwise or shift operator
+    date_pyparser.py: E111, E128, E227
+    # E111 indentation is not a multiple of 4
+    # E127 continuation line over-indented for visual indent
+    # E128 continuation line under-indented for visual indent
+    # E228 missing whitespace around modulo operator
+    # E261 at least two spaces before inline comment
+    time_pyparser.py: E111, E127, E128, E228, E261
+    # E111 indentation is not a multiple of 4
+    # E114 indentation is not a multiple of 4 (comment)
+    # E117 over-indented (comment)
+    # E127 continuation line over-indented for visual indent
+    # E128 continuation line under-indented for visual indent
+    # E131 continuation line unaligned for hanging indent
+    # E228 missing whitespace around modulo operator
+    # E265 block comment should start with '# '
+    # E266 too many leading '#' for block comment
+    # E303 too many blank lines (2)
+    # E501 line too long (91 > 90 characters)
+    tests/*: E111, E114, E117, E127, E128, E131, E228, E265, E266, E303, E501
 
 # E111 Indentation is not a multiple of four
 # E114 Indentation is not a multiple of four (comment)

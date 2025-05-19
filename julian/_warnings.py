@@ -17,8 +17,6 @@ _WARNING_MESSAGES = set()
 def _warn(message):
     """Raise this DeprecationWarning message, but only once."""
 
-    global _WARNING_MESSAGES
-
     if message in _WARNING_MESSAGES:
         return
 

@@ -203,7 +203,7 @@ def sec_from_iso(strings, *, validate=True, leapsecs=True, strip=False, syntax=F
     data extracted from a column of an ASCII table.
 
     Parameters:
-        strings (str, bytes, or array-like[str or bytes]:
+        strings (str, bytes, or array-like[str or bytes]):
             Strings to interpret. If an array is provided, all values must use the same
             format.
         validate (bool, optional):
@@ -454,7 +454,7 @@ def tai_from_iso(strings, *, validate=True, strip=False, proleptic=False):
     This is a shortcut for `time_from_iso()` with timesys='TAI'.
 
     Parameters:
-        strings (str, bytes, or array-like:
+        strings (str, bytes, or array-like):
             Strings to interpret. If an array is provided, all values must use the same
             format.
         validate (bool, optional):
@@ -514,7 +514,7 @@ def time_from_iso(strings, timesys='TAI', *, validate=True, strip=False, prolept
     """Time in a specified time system given an ISO date or date-time string.
 
     Parameters:
-        strings (str, bytes, or array-like[str or bytes]:
+        strings (str, bytes, or array-like[str or bytes]):
             Strings to interpret. If an array is provided, all values must use the same
             format.
         timesys (str):

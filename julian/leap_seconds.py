@@ -447,7 +447,6 @@ def set_ut_model(model='LEAPS', future=None):
     """
 
     global _SELECTED_DELTA_T, _SELECTED_UT_MODEL, _SELECTED_FUTURE_YEAR, _RUBBER
-    global _LEAPS_DELTA_T, _SPICE_DELTA_T
 
     _SELECTED_DELTA_T = _DELTA_T_DICT[model]
     _SELECTED_UT_MODEL = model
@@ -517,8 +516,6 @@ def insert_leap_second(y, m, offset=1):
 
         The list of leap seconds is a global setting of the Julian Library.
     """
-
-    global _LEAPS_DELTA_T, _SPICE_DELTA_T
 
     _LEAPS_DELTA_T.insert_leap_second(y, m, offset)
     _SPICE_DELTA_T.insert_leap_second(y, m, offset)
