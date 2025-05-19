@@ -178,19 +178,19 @@ let you specify the initial and final time systems.
 Similarly, Julian dates and Modified Julian Dates can be converted to times using any time
 system:
 
-* `jd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.jd_from_time)
-* `time_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.time_from_jd)
-* `mjd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.mjd_from_time)
-* `time_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.time_from_mjd)
-* `jd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.jd_from_day_sec)
-* `day_sec_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_sec_from_jd)
-* `mjd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.mjd_from_day_sec)
-* `day_sec_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_sec_from_mjd)
+* `jd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.jd_from_time)
+* `time_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.time_from_jd)
+* `mjd_from_time()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.mjd_from_time)
+* `time_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.time_from_mjd)
+* `jd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.jd_from_day_sec)
+* `day_sec_from_jd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.day_sec_from_jd)
+* `mjd_from_day_sec()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.mjd_from_day_sec)
+* `day_sec_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.day_sec_from_mjd)
 
 You can also convert directly between integer MJD and integer day numbers using:
 
-* `mjd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.mjd_from_day)
-* `day_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.utc_tai_tdb_tt.day_from_mjd)
+* `mjd_from_day()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.mjd_from_day)
+* `day_from_mjd()`[![image](https://raw.githubusercontent.com/SETI/rms-julian/main/icons/link.png)](https://rms-julian.readthedocs.io/en/latest/module.html#julian.mjd_jd.day_from_mjd)
 
 
 ## Leap Second Support
