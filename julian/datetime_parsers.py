@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/datetime_parsers.py
 ##########################################################################################
-"""Functions to parse date/time strings given in arbitrary formats
 """
-##########################################################################################
+=================
+Date-Time Parsers
+=================
+"""
 
 import numbers
 import pyparsing
@@ -25,39 +27,61 @@ def day_sec_from_string(string, order='YMD', *, doy=True, mjd=True, weekdays=Fal
                         ampm=True, timezones=False, timesys=False, floating=False):
     """Day and second values based on the parsing of a free-form string.
 
-    Input:
-        string      string to interpret.
-        order       one of "YMD", "MDY", or "DMY"; this defines the default order for
-                    date, month, and year in situations where it might be ambiguous.
-        doy         True to recognize dates specified as year and day-of-year.
-        mjd         True to recognize dates expressed as MJD, JD, MJED, JED, etc.
-        weekdays    True to allow dates including weekdays.
-        extended    True to support extended year values: signed (with at least four
-                    digits) and those involving "CE", "BCE", "AD", "BC".
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        treq        True if a time field is required; False to recognize date strings that
-                    do not include a time.
-        leapsecs    True to recognize leap seconds.
-        ampm        True to recognize "am" and "pm" suffixes.
-        timezones   True to recognize and interpret time zones. If True, returned values
-                    are adjusted to UTC.
-        timesys     True to recognize an embedded time system such as "UTC", "TAI", etc.
-        floating    True to recognize time specified using floating-point hours or
-                    minutes.
+    Parameters:
+        string (str):
+            String to interpret.
+        order (str):
+            One of "YMD", "MDY", or "DMY", defining the default order for day month, and
+            year in situations where it might be ambiguous.
+        doy (bool, optional):
+            True to recognize dates specified as year and day-of-year.
+        mjd (bool, optional):
+            True to recognize Modified Julian Dates.
+        weekdays (bool, optional):
+            True to allow dates including weekdays.
+        extended (bool, optional):
+            True to support extended year values: signed (with at least four digits) and
+            those involving "CE", "BCE", "AD", "BC".
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+        treq (bool, optional):
+            True if a time field is required; False to recognize date strings that do not
+            include a time.
+        leapsecs (bool, optional):
+            True to recognize leap seconds.
+        ampm (bool, optional):
+            True to recognize "am" and "pm" suffixes.
+        timezones (bool, optional):
+            True to recognize and interpret time zones. If True, returned values are
+            adjusted to UTC.
+        timesys (bool, optional):
+            True to recognize an embedded time system such as "UTC", "TAI", etc.
+        floating (bool, optional):
+            True to recognize time specified using floating-point hours or minutes.
 
-    Return:         (day, sec) or (day, sec, tsys)
-        day         integer day number, converted to UTC if a time zone was identified.
-        sec         seconds into day, converted to UTC if a time zone was identified.
-        tsys        name of the time system, included if the input value of timesys is
-                    True.
+    Returns:
+        tuple (day, sec[, tsys]):
+
+        - **day** (*int*): Integer day number, converted to UTC if a time zone was
+          identified.
+        - **sec** (*int or float*): Seconds into day, converted to UTC if a time zone was
+          identified.
+        - **tsys** (*str*): Name of the time system, included if `timesys` is True.
+
+    Raises:
+        JulianParseException:
+            If `string` was not recognized as a valid date-time expression.
+        JulianValidateFailure:
+            If the date-time string contains invalid or contradictory information.
     """
 
     parser = datetime_pyparser(order=order, treq=treq, strict=False, doy=doy, mjd=mjd,
-                      weekdays=weekdays, extended=extended, leapsecs=leapsecs, ampm=ampm,
-                      timezones=timezones, floating=floating, timesys=timesys,
-                      iso_only=False, padding=True, embedded=False)
+                               weekdays=weekdays, extended=extended, leapsecs=leapsecs,
+                               ampm=ampm, timezones=timezones, floating=floating,
+                               timesys=timesys, iso_only=False, padding=True,
+                               embedded=False)
     try:
         parse_list = parser.parse_string(string).as_list()
     except pyparsing.ParseException:
@@ -79,48 +103,67 @@ def day_sec_from_string(string, order='YMD', *, doy=True, mjd=True, weekdays=Fal
 def day_sec_in_strings(strings, order='YMD', *, doy=False, mjd=False, weekdays=False,
                        extended=False, proleptic=False, treq=False, leapsecs=True,
                        ampm=False, timezones=False, timesys=False, floating=False,
-                       validate=True, substrings=False, first=False):
+                       substrings=False, first=False):
     """List of day and second values representing date/time strings found by searching one
     or more strings for patterns that look like formatted dates and times.
 
-    Input:
-        strings     list/array/tuple of strings to interpret.
-        order       one of "YMD", "MDY", or "DMY"; this defines the default order for
-                    date, month, and year in situations where it might be ambiguous.
-        doy         True to allow dates specified as year and day-of-year.
-        mjd         True to allow dates expressed as MJD, JD, MJED, JED, etc.
-        weekdays    True to allow dates including weekdays.
-        extended    True to support extended year values: signed (with at least four
-                    digits) and those involving "CE", "BCE", "AD", "BC".
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        treq        True if a time field is required; False to recognize date strings that
-                    do not include a time.
-        leapsecs    True to recognize leap seconds.
-        ampm        True to recognize "am" and "pm" suffixes.
-        timezones   True to recognize and interpret time zones. If True, returned values
-                    are adjusted to UTC.
-        timesys     True to allow a time system, e.g., "UTC", "TAI", "TDB", or "TT".
-        floating    True to recognize time specified using floating-point hours or
-                    minutes.
-        validate    if True, patterns that resembled date/time strings but are not valid
-                    for other reasons are ignored.
-        substrings  True to also return the substring containing each identified date and
-                    time.
-        first       True to return when the first date and time is found, with None on
-                    failure; False to return the full, ordered list of dates and times.
+    Parameters:
+        strings (list, tuple, or array):
+            Strings to interpret.
+        order (str):
+            One of "YMD", "MDY", or "DMY", defining the default order for day month, and
+            year in situations where it might be ambiguous.
+        doy (bool, optional):
+            True to recognize dates specified as year and day-of-year.
+        mjd (bool, optional):
+            True to recognize Modified Julian Dates.
+        weekdays (bool, optional):
+            True to allow dates including weekdays.
+        extended (bool, optional):
+            True to support extended year values: signed (with at least four digits) and
+            those involving "CE", "BCE", "AD", "BC".
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+        treq (bool, optional):
+            True if a time field is required; False to recognize date strings that do not
+            include a time.
+        leapsecs (bool, optional):
+            True to recognize leap seconds.
+        ampm (bool, optional):
+            True to recognize "am" and "pm" suffixes.
+        timezones (bool, optional):
+            True to recognize and interpret time zones. If True, returned values are
+            adjusted to UTC.
+        timesys (bool, optional):
+            True to recognize an embedded time system such as "UTC", "TAI", etc.
+        floating (bool, optional):
+            True to recognize time specified using floating-point hours or minutes.
+        substrings (bool, optional):
+            True to also return the substring containing each identified date-time value.
+        first (bool, optional):
+            True to return the first date-time value found rather than a list of values.
+            In this case, None is returned if no date-time is found rather than an empty
+            list.
 
-    Return:         a list of tuples (day, sec, optional tsys, optional substring).
-        day         integer day number, onverted to UTC if a time zone was identified.
-        sec         seconds into day, onverted to UTC if a time zone was identified.
-        tsys        name of each associated time system, with "UTC" the default; included
-                    if the input value of timesys is True.
-        substring   the substring containing the text that was interpreted to represent
-                    this date and time; included if the input value of substrings is True.
+    Returns:
+        tuple (day, sec[, tsys][, substring]), list[tuple], or None: If `first` is False,
+        a list of tuples containing information about each date-time is returned;
+        otherwise, a single tuple is returned or None if no date-time value was found.
+        Within this tuple:
 
-        Note: If the input value of first is True, then a single tuple is returned
-        rather than a list of tuples. If no date was identified, None is returned.
+        - **day** (*int*): Day number, converted to UTC if a time zone was identified.
+        - **sec** (*int or float*): Seconds into day, converted to UTC if a time zone was
+          identified.
+        - **tsys** (*str*): The name of each associated time system, with "UTC" the
+          default; included if `timesys` is True.
+        - **substring** (*str*): The substring containing the text that was interpreted to
+          represent this date and time; included if `substrings` is True.
+
+    Raises:
+        JulianValidateFailure:
+            If a matched date-time string contains invalid or contradictory information.
     """
 
     if isinstance(strings, str):
@@ -146,14 +189,9 @@ def day_sec_in_strings(strings, order='YMD', *, doy=False, mjd=False, weekdays=F
             if not parse_dict:
                 break
 
-            try:
-                (day, sec, tsys) = _day_sec_timesys_from_dict(parse_dict,
-                                                              leapsecs=leapsecs,
-                                                              proleptic=proleptic,
-                                                              validate=validate)
-            except ValueError:  # pragma: no cover
-                continue
-
+            (day, sec, tsys) = _day_sec_timesys_from_dict(parse_dict, leapsecs=leapsecs,
+                                                          proleptic=proleptic,
+                                                          validate=True)
             result = [day, sec]
             if timesys:
                 result.append(tsys)

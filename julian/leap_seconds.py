@@ -1,15 +1,18 @@
 ##########################################################################################
 # julian/leap_seconds.py
 ##########################################################################################
-"""Functions for managing and tracking leap seconds and "rubber second" offsets.
 """
-##########################################################################################
+====================
+Leap Seconds Support
+====================
+"""
 
 import numpy as np
 import pathlib
 import os
 import re
 import sys
+from filecache import FCPath
 
 from julian.calendar import day_from_ymd, days_in_year, ymd_from_day
 from julian._deltat  import FuncDeltaT, LeapDeltaT, MergedDeltaT, SplineDeltaT
@@ -63,8 +66,8 @@ def _leaps_from_lsk(lsk_path):
     represented by a string or Path.
     """
 
-    global _DELTET_DELTA_T_A, _DELTET_K, _DELTET_EB, _DELTET_M0, _DELTET_M1, \
-           _DELTET_DELTA_AT
+    global _DELTET_DELTA_T_A, _DELTET_K, _DELTET_EB, _DELTET_M0, _DELTET_M1
+    global _DELTET_DELTA_AT
 
     _MONTHNO = {'JAN':1, 'FEB':2, 'MAR':3, 'APR':4, 'MAY':5, 'JUN':6, 'JUL':7, 'AUG':8,
                 'SEP':9, 'OCT':10, 'NOV':11, 'DEC':12}
@@ -74,7 +77,7 @@ def _leaps_from_lsk(lsk_path):
     # releases as well.
 
     def get_float(value):
-        return float(value.lower().replace('d','e'))
+        return float(value.lower().replace('d', 'e'))
 
     # Define a regex to match lines like:
     #   "DELTET/DELTA_T_A =   32.184"
@@ -95,7 +98,9 @@ def _leaps_from_lsk(lsk_path):
     # Read the LSK
     deltet_dict = {}            # a dictionary name -> value from lsk_regex1
     deltet_delta_at = []        # a list of (leap seconds, year, month, day)
-    with open(lsk_path, 'r', encoding='latin8') as f:
+    lsk_path = FCPath(lsk_path)
+    lsk_path.retrieve()
+    with lsk_path.get_local_path().open(mode='r', encoding='latin-1') as f:
         for rec in f:           # pragma: no branch
             if rec.startswith('\\begindata'):
                 break
@@ -320,7 +325,7 @@ def _delta_t_neg1999_3000(y, m, d):
 
     y_int = _int(y)
     day = day_from_ymd(y_int, m, d)
-    y = y_int + (day - day_from_ymd(y_int,1,1)) / days_in_year(y_int)
+    y = y_int + (day - day_from_ymd(y_int, 1, 1)) / days_in_year(y_int)
 
     # Determine values of TT - UT based on the defined functions
     if np.isscalar(y):
@@ -408,42 +413,40 @@ def set_ut_model(model='LEAPS', future=None):
     """Define how to handle the differences between TAI and UT for years prior to 1972 and
     for years into the future.
 
-    Input:
-        model       One of "LEAPS", "SPICE", "PRE-1972", or "CANON". See below.
-        future      the future year at which to use the "CANON" model, if it is selected.
-                    Use None or np.inf to suppress the CANON model for all future dates.
-                    Ignored if the "CANON" model is not in use.
+    This is a global setting of the Julian Library, although it can be changed at will.
 
-    The following models are supported:
-      "LEAPS"
-        This is the default model including leap seconds. It assumes that TAI-UTC equals
-        10 prior to 1972 and will hold its current fixed value into the future.
+    Parameters:
+        model (str, optional):
+            One of "LEAPS", "SPICE", "PRE-1972", or "CANON". See Notes.
+        future (int, optional):
+            The future year at which to use the "CANON" model, if it is selected. Use None
+            or np.inf to suppress the CANON model for all future dates. Ignored if the
+            "CANON" model is not in use.
 
-      "SPICE"
-        Replicate the behavior of the SPICE Toolkit, in which TAI-UTC=9 before 1972. In
-        this system, December 31, 1971 incorrectly contained a leap second.
+    Notes:
+        The following models are supported:
 
-      "PRE-1972"
-        In addition to the "LEAPS" model, iclude the full model for UTC widely used during
-        the period 1958-1972. In these years, the UTC time system was defined in terms of
-        a "rubber second", which could expand or shrink as necessary to ensure that every
-        UTC day had exactly 86,400 seconds. In addition, several fractional leap seconds
-        were added during the 1960s. See
-            https://hpiers.obspm.fr/eop-pc/index.php?index=TAI-UTC_tab
-
-      "CANON"
-        In addition to the "PRE-1972" model, include the model for UT1 "rubber seconds"
-        based on the Five Millennium Canon of Solar Eclipses for the years -1999 to 3000.
-        See
-            https://eclipse.gsfc.nasa.gov/SEpubs/5MCSE.html
-        When selected, this model will apply for all years before 1958. Use the input
-        parameter "future" to specify the future year in which this model overrides the
-        UTC leap second model; otherwise, by default, the leap second model will apply to
-        all future years.
+        * "LEAPS": This is the default model including leap seconds. It assumes that
+          TAI-UTC equals 10 prior to 1972 and will hold its current fixed value into the
+          future.
+        * "SPICE": Replicate the behavior of the SPICE Toolkit, in which TAI-UTC=9 before
+          1972. In this system, December 31, 1971 incorrectly contained a leap second.
+        * "PRE-1972": In addition to the "LEAPS" model, iclude the full model for UTC
+          widely used during the period 1958-1972. In these years, the UTC time system was
+          defined in terms of a "rubber second", which could expand or shrink as necessary
+          to ensure that every UTC day had exactly 86,400 seconds. In addition, several
+          fractional leap seconds were added during the 1960s. See
+          https://hpiers.obspm.fr/eop-pc/index.php?index=TAI-UTC_tab.
+        * "CANON": In addition to the "PRE-1972" model, include the model for UT1 "rubber
+          seconds" based on the Five Millennium Canon of Solar Eclipses for the years
+          -1999 to 3000. See https://eclipse.gsfc.nasa.gov/SEpubs/5MCSE.html.
+          When selected, this model will apply for all years before 1958. Use the input
+          parameter "future" to specify the future year in which this model overrides the
+          UTC leap second model; otherwise, by default, the leap second model will apply
+          to all future years.
     """
 
     global _SELECTED_DELTA_T, _SELECTED_UT_MODEL, _SELECTED_FUTURE_YEAR, _RUBBER
-    global _LEAPS_DELTA_T, _SPICE_DELTA_T
 
     _SELECTED_DELTA_T = _DELTA_T_DICT[model]
     _SELECTED_UT_MODEL = model
@@ -465,13 +468,21 @@ set_ut_model()
 
 
 def load_lsk(lsk_path=''):
-    """Load the specified SPICE leap seconds kernel, possibly overriding the default
-    kernel.
+    """Load a specified SPICE leap seconds kernel.
 
-    If lsk_path is blank or None, the default kernel is re-loaded.
+    Any previously defined leap seconds are replaced by the new list. If additional leap
+    seconds were previously inserted via :meth:`insert_leap_second`, they must be inserted
+    again.
 
-    The selected UTC model is preserved. If additional leap seconds were previously
-    inserted, they must be inserted again.
+    Parameters:
+        lsk_path (str, pathlib, of filecache.FCPath, optional):
+            The path to an LSK kernel file. If this is blank or None, the default LSK
+            kernel is re-loaded.
+
+    Notes:
+        The currently selected UTC model is preserved.
+
+        The list of leap seconds is a global setting of the Julian Library.
     """
 
     global _DELTA_T_DICT
@@ -494,14 +505,17 @@ def load_lsk(lsk_path=''):
 def insert_leap_second(y, m, offset=1):
     """Insert a new (positive or negative) leap second.
 
-    Input:
-        y, m        insert the leap second(s) just before the beginning of the specified
-                    year and month. This must be after any previously defined leap second.
-        offset      the change in TAI - UT. Default is 1; use -1 for a negative leap
-                    second.
-    """
+    Parameters:
+        y (int): Year of the new leap second.
+        m (int): Month of the new leap second.
+        offset (int):
+            The change in TAI - UT. The default is 1; use -1 for a negative leap second.
 
-    global _LEAPS_DELTA_T, _SPICE_DELTA_T
+    Notes:
+        The new leap second must occur after any previously defined leap seconds.
+
+        The list of leap seconds is a global setting of the Julian Library.
+    """
 
     _LEAPS_DELTA_T.insert_leap_second(y, m, offset)
     _SPICE_DELTA_T.insert_leap_second(y, m, offset)
@@ -518,8 +532,16 @@ def delta_t_from_ymd(y, m, d=1):
     """The difference between TAI seconds and UT seconds for the given date, expressed as
     a calendar year, month, and optional day.
 
-    Integers are returned if the difference is exclusively defined by leap seconds; floats
-    are returned if the difference involves UT "rubber seconds".
+    Parameters:
+        y (int or array-like): Year.
+        m (int or array-like): Month, 1-12.
+        d (int, float, or array-like): Day of month, 1-31.
+
+    Returns:
+        int, float or array:
+            TAI-UT in seconds. If values are exclusively defined as integral values of
+            leap seconds, returned values are integral; if any "rubber seconds" are
+            involved, they are floats.
     """
 
     return _SELECTED_DELTA_T.delta_t_from_ymd(y, m, d)
@@ -528,8 +550,14 @@ def delta_t_from_ymd(y, m, d=1):
 def delta_t_from_day(day):
     """The difference between TAI seconds and UT seconds for the given day number.
 
-    Integers are returned if the difference is exclusively defined by leap seconds; floats
-    are returned if the difference involves UT "rubber seconds".
+    Parameters:
+        day (int, float, or array-like): Day number relative to January 1, 2000.
+
+    Returns:
+        int, float or array:
+            TAI-UT in seconds. If values are exclusively defined as integral values of
+            leap seconds, returned values are integral; if any "rubber seconds" are
+            involved, they are floats.
     """
 
     day = _number(day)
@@ -541,8 +569,13 @@ def leapsecs_from_ymd(y, m, d=1):
     """The number of leap seconds on the given date, where the date is expressed as a
     calendar year, month, and optional day.
 
-    This differs from the function tai_minus_utc_from_ymd() in that it ignores UT "rubber
-    seconds" and therefore always returns integers, typically 86400 or 86401.
+    Parameters:
+        y (int or array-like): Year.
+        m (int or array-like): Month, 1-12.
+        d (int, float, or array-like): Day of month, 1-31.
+
+    Returns:
+        int or array[int]: TAI-UT as integer seconds.
     """
 
     return _SELECTED_DELTA_T.leapsecs_from_ymd(y, m, d)
@@ -552,7 +585,15 @@ def leapsecs_from_ym(y, m, d=1):
     """The number of leap seconds on the given date, where the date is expressed as a
     calendar year, month, and optional day.
 
-    Alternative name for leapsecs_from_ymd().
+    Alternative name for :meth:`leapsecs_from_ymd`.
+
+    Parameters:
+        y (int or array-like): Year.
+        m (int or array-like): Month, 1-12.
+        d (int, float, or array-like): Day of month, 1-31.
+
+    Returns:
+        int or array: TAI-UT as integer seconds.
     """
 
     return _SELECTED_DELTA_T.leapsecs_from_ymd(y, m, d)
@@ -561,8 +602,14 @@ def leapsecs_from_ym(y, m, d=1):
 def leapsecs_on_day(day):
     """The cumulative difference between TAI and UT for the given day number.
 
-    This differs from the function tai_minus_utc_from_day() in that it ignores UT "rubber
-    seconds" and therefore always returns integers, typically 86400 or 86401.
+    This differs from the function `tai_minus_utc_from_day()` in that it ignores UT
+    "rubber seconds" and therefore always returns integers, typically 86400 or 86401.
+
+    Parameters:
+        day (int, float, or array-like): Day number of relative to January 1, 2000.
+
+    Returns:
+        int or array: TAI-UT as integer seconds.
     """
 
     day = _number(day)
@@ -573,10 +620,16 @@ def leapsecs_on_day(day):
 def leapsecs_from_day(day):
     """The cumulative difference between TAI and UT for the given day number.
 
-    This differs from the function tai_minus_utc_from_day() in that it ignores UT "rubber
-    seconds" and therefore always returns integers, typically 86400 or 86401.
+    This differs from the function `tai_minus_utc_from_day()` in that it ignores UT
+    "rubber seconds" and therefore always returns integers, typically 86400 or 86401.
 
-    Alternative name for leapsecs_on_day().
+    Alternative name for :meth:`leapsecs_on_day`.
+
+    Parameters:
+        day (int, float, or array-like): Day number of relative to January 1, 2000.
+
+    Returns:
+        int or array: TAI-UT as integer seconds.
     """
 
     return leapsecs_on_day(day)
@@ -585,14 +638,23 @@ def leapsecs_from_day(day):
 def seconds_on_day(day, leapsecs=True, timesys='UTC'):
     """Number of seconds on a given day number.
 
-    If leapsecs is True, values of 86400 are returned regardless of the input.
+    Parameters:
+        day (int, float, or array-like):
+            Day number of relative to January 1, 2000.
+        leapsecs (bool, optional):
+            If False, values of 86400 are returned regardless of the input.
+        timesys (str, optional): The time system, "UTC" or "TAI".
 
-    If timesys equals "UTC" (the default), the values returned are in units of UTC "rubber
-    seconds", which are adjusted relative to TAI seconds in order to ensure that every day
-    prior to 1972 contains exactly 86400 seconds.
+    Returns:
+        int or array:
+            Number of seconds on the day, 86400 unless there is a leap second.
 
-    if timesys equals "TAI", then the values returned are in fixed units of TAI seconds,
-    meaning that days prior to 1972 may not have integral durations.
+    Notes:
+        If timesys equals "UTC", the values returned are in units of UTC "rubber seconds",
+        which are adjusted relative to TAI seconds in order to ensure that every day prior
+        to 1972 contains exactly 86400 seconds. If timesys equals "TAI", then the values
+        returned are in fixed units of TAI seconds, meaning that days prior to 1972 may
+        not have integral durations.
     """
 
     day = _int(day)

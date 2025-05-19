@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/iso_parsers.py
 ##########################################################################################
-"""Functions to interpret date/time strings in ISO-standard formats
 """
-##########################################################################################
+===========
+ISO Parsers
+===========
+"""
 
 import numpy as np
 from julian.calendar       import day_from_ymd, day_from_yd
@@ -59,17 +61,27 @@ def day_from_iso(strings, *, validate=True, syntax=False, strip=False, proleptic
     Because it can handle arrays of bytestrings, it is very efficient at processing raw
     data extracted from a column of an ASCII table.
 
-    Input:
-        strings     One or more strings or bytestrings to interpret.
-        validate    True to check the year/month/day values more carefully; raise
-                    JulianValidateFailure (a ValueError subclass) on error.
-        syntax      True to check the string values more closely for conformance to the
-                    ISO standard; raise JulianParseException (a ValueError subclass) on
-                    error.
-        strip       True to skip over leading and trailing blanks.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Parameters:
+        strings (str, bytes, or array-like):
+            String(s) to interpret.
+        validate (bool, optional):
+            True to validate the year/month/day values.
+        syntax (bool, optional):
+            True to check the string values more closely for conformance to the ISO
+            standard; raise JulianParseException (a ValueError subclass) on error.
+        strip (bool, optional):
+            True to skip over leading and trailing blanks.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+
+    Returns:
+        int or array: Day number(s) relative to January 1, 2000.
+
+    Raises:
+        JulianValidateFailure:
+            If `validate` is True and a year, month, or day value is out of range.
     """
 
     # Convert to bytestring if necessary, replace Unicode
@@ -88,7 +100,7 @@ def day_from_iso(strings, *, validate=True, syntax=False, strip=False, proleptic
         (w0, w1) = _count_white(first)
     else:
         (w0, w1) = (0, 0)
-        test = first.replace('-', '').replace('.','')
+        test = first.replace('-', '').replace('.', '')
         if not test.isdecimal():
             raise JulianParseException(f'unrecognized ISO date format: "{first}"')
 
@@ -169,7 +181,10 @@ def day_from_iso(strings, *, validate=True, syntax=False, strip=False, proleptic
 
     # Add fraction if needed
     if kdot:
-        day = day + f/10.**(flen)
+        if np.shape(day):
+            day = day + f/10.**(flen)
+        else:
+            day = day + float(f)/10.**(flen)
 
     return day
 
@@ -187,16 +202,29 @@ def sec_from_iso(strings, *, validate=True, leapsecs=True, strip=False, syntax=F
     Because it can handle arrays of bytestrings, it is very efficient at processing raw
     data extracted from a column of an ASCII table.
 
-    Input:
-        strings     One or more strings or bytestrings to interpret.
-        validate    True to check the year/month/day syntax and values more carefully.
-        syntax      True to check the string values more closely for conformance to the
-                    ISO standard.
-        strip       True to skip over leading and trailing blanks.
-        leapsecs    True to tolerate leap second values during validation.
+    Parameters:
+        strings (str, bytes, or array-like[str or bytes]):
+            Strings to interpret. If an array is provided, all values must use the same
+            format.
+        validate (bool, optional):
+            True to check the year/month/day values more carefully; raise
+            JulianValidateFailure (a ValueError subclass) on error.
+        syntax (bool, optional):
+            True to check the string values more closely for conformance to the ISO
+            standard; raise JulianParseException (a ValueError subclass) on error.
+        strip (bool, optional):
+            True to skip over leading and trailing blanks.
+        leapsecs (bool, optional):
+            True to tolerate leap second values during validation.
 
-    This avoids the very slow julian_isoparser routines and is very fast. It also works
-    for lists or arrays of arbitrary shape, provided every item uses the same format.
+    Returns:
+        int, float, or array:
+            Elapsed seconds since beginning of day. Values are integral the seconds value
+            is integral.
+
+    Raises:
+        JulianValidateFailure: If `validate` is True and an hour, minute, or second value
+            is out of range.
     """
 
     # Convert to bytestring if necessary, replace Unicode
@@ -215,7 +243,7 @@ def sec_from_iso(strings, *, validate=True, leapsecs=True, strip=False, syntax=F
         (w0, w1) = _count_white(first)
     else:
         (w0, w1) = (0, 0)
-        test = first.replace(':', '').replace('.','').rstrip('Z')
+        test = first.replace(':', '').replace('.', '').rstrip('Z')
         if not test.isdecimal():
             raise JulianParseException(f'unrecognized ISO time format: "{first}"')
 
@@ -346,13 +374,34 @@ def day_sec_from_iso(strings, *, validate=True, syntax=False, strip=False,
     Because it can handle arrays of bytestrings, it is very efficient at processing raw
     data extracted from a column of an ASCII table.
 
-    Input:
-        strings     One or more strings or bytestrings to interpret.
-        validate    True to check the year/month/day syntax and values more carefully.
-        strip       True to skip over leading and trailing blanks.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Parameters:
+        strings (str, bytes, or array-like:
+            Strings to interpret. If an array is provided, all values must use the same
+            format.
+        validate (bool, optional):
+            True to validate the ranges of the year, month, and day values.
+        syntax (bool, optional):
+            True to check the string values more closely for conformance to the ISO
+            standard; raise JulianParseException (a ValueError subclass) on error.
+        strip (bool, optional):
+            True to skip over leading and trailing blanks.
+        leapsecs (bool, optional):
+            True to tolerate leap second values during validation.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+
+    Returns:
+        tuple (day, sec):
+
+        - **day** (*int or array*): Day number(s) relative to January 1, 2000.
+        - **sec** (*int, float, or array*): Elapsed seconds since beginning of day. Values
+          are integral the seconds value is integral.
+
+    Raises:
+        JulianValidateFailure:
+            If `validate` is True and any numeric value is out of range.
     """
 
     # Convert to an array of strings, replace Unicode
@@ -383,9 +432,9 @@ def day_sec_from_iso(strings, *, validate=True, syntax=False, strip=False,
 
     strings = strings.view(np.dtype(dtype_dict))
     day = day_from_iso(strings['date'], validate=validate, syntax=syntax, strip=strip,
-                                        proleptic=proleptic)
+                       proleptic=proleptic)
     sec = sec_from_iso(strings['time'], validate=validate, syntax=syntax, strip=strip,
-                                        leapsecs=True)
+                       leapsecs=True)
 
     if syntax:
         if np.any(strings['sep'] != csep.encode('latin8')):
@@ -402,13 +451,27 @@ def day_sec_from_iso(strings, *, validate=True, syntax=False, strip=False,
 def tai_from_iso(strings, *, validate=True, strip=False, proleptic=False):
     """TAI time given an ISO date or date-time string.
 
-    Input:
-        strings     One or more strings or bytestrings to interpret.
-        validate    True to check the year/month/day syntax and values more carefully.
-        strip       True to skip over leading and trailing blanks.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    This is a shortcut for `time_from_iso()` with timesys='TAI'.
+
+    Parameters:
+        strings (str, bytes, or array-like):
+            Strings to interpret. If an array is provided, all values must use the same
+            format.
+        validate (bool, optional):
+            True to validate the date and time values.
+        strip (bool, optional):
+            True to skip over leading and trailing blanks.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+
+    Returns:
+        int, float, or array: Time in seconds TAI.
+
+    Raises:
+        JulianValidateFailure:
+            If a value embedded in the date or time is out of range.
     """
 
     (day, sec) = day_sec_from_iso(strings, validate=validate, strip=strip,
@@ -419,15 +482,27 @@ def tai_from_iso(strings, *, validate=True, strip=False, proleptic=False):
 def tdb_from_iso(strings, *, validate=True, strip=False, proleptic=False):
     """TDB time given an ISO date or date-time string.
 
-    This is a shortcut for time_from_iso() with timesys='TDB'.
+    This is a shortcut for `time_from_iso()` with timesys='TDB'.
 
-    Input:
-        strings     One or more strings or bytestrings to interpret.
-        validate    True to check the year/month/day syntax and values more carefully.
-        strip       True to skip over leading and trailing blanks.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Parameters:
+        strings (str, bytes, or array-like):
+            Strings to interpret. If an array is provided, all values must use the same
+            format.
+        validate (bool, optional):
+            True to validate the date and time values.
+        strip (bool, optional):
+            True to skip over leading and trailing blanks.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+
+    Returns:
+        int, float, or array: Time in seconds TDB.
+
+    Raises:
+        JulianValidateFailure:
+            If a value embedded in the date or time is out of range.
     """
 
     (day, sec) = day_sec_from_iso(strings, validate=validate, strip=strip,
@@ -438,13 +513,27 @@ def tdb_from_iso(strings, *, validate=True, strip=False, proleptic=False):
 def time_from_iso(strings, timesys='TAI', *, validate=True, strip=False, proleptic=False):
     """Time in a specified time system given an ISO date or date-time string.
 
-    Input:
-        strings     One or more strings or bytestrings to interpret.
-        validate    True to check the year/month/day syntax and values more carefully.
-        strip       True to skip over leading and trailing blanks.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Parameters:
+        strings (str, bytes, or array-like[str or bytes]):
+            Strings to interpret. If an array is provided, all values must use the same
+            format.
+        timesys (str):
+            Name of the time system, "UTC", "TAI", "TDB", or "TT".
+        validate (bool, optional):
+            True to validate the date and time values.
+        strip (bool, optional):
+            True to skip over leading and trailing blanks.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+
+    Returns:
+        int, float, or array: Time in seconds in the specified time system.
+
+    Raises:
+        JulianValidateFailure:
+            If a value embedded in the date or time is out of range.
     """
 
     tai = tai_from_iso(strings, validate=validate, strip=strip, proleptic=proleptic)

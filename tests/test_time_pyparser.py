@@ -992,11 +992,4 @@ class Test_time_pyparser(unittest.TestCase):
                                 timesys=False, iso_only=False,
                                 padding=padding, embedded=embedded)
 
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
-
 ##########################################################################################

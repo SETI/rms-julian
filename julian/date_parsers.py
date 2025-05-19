@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/date_parsers.py
 ##########################################################################################
-"""Functions to parse dates given in arbitrary formats
 """
-##########################################################################################
+============
+Date Parsers
+============
+"""
 
 import pyparsing
 import re
@@ -21,24 +23,38 @@ _PRE_FILTER = True      # set False for some performance tests
 ##########################################################################################
 
 def day_from_string(string, order='YMD', *, doy=True, mjd=False, weekdays=False,
-                    extended=False, proleptic=False, validate=True):
+                    extended=False, proleptic=False):
     """Day number based on the parsing of a free-form string.
 
-    Input:
-        string      string to interpret.
-        order       One of "YMD", "MDY", or "DMY"; this defines the default order for
-                    date, month, and year in situations where it might be ambiguous.
-        doy         True to recognize dates specified as year and day-of-year.
-        mjd         True to recognize Modified Julian Dates.
-        weekdays    True to allow dates including weekdays.
-        extended    True to support extended year values: signed (with at least four
-                    digits) and those involving "CE", "BCE", "AD", "BC".
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        validate    True to raise JulianValidateFailure (a ValueError subclass) for
-                    patterns that resemble dates but do not correspond to an actual date
-                    on the calendar.
+    Parameters:
+        string (str):
+            String to interpret.
+        order (str):
+            One of "YMD", "MDY", or "DMY", defining the default order for day month, and
+            year in situations where it might be ambiguous.
+        doy (bool, optional):
+            True to recognize dates specified as year and day-of-year.
+        mjd (bool, optional):
+            True to recognize Modified Julian Dates.
+        weekdays (bool, optional):
+            True to allow dates including weekdays.
+        extended (bool, optional):
+            True to support extended year values: signed (with at least four digits) and
+            those involving "CE", "BCE", "AD", "BC".
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+
+    Returns:
+        int:
+            Day number relative to January 1, 2000.
+
+    Raises:
+        JulianParseException:
+            If `string` was not recognized as a valid date expression.
+        JulianValidateFailure:
+            If the date string contains invalid or contradictory information.
     """
 
     parser = date_pyparser(order=order, strict=False, doy=doy, mjd=mjd, weekdays=weekdays,
@@ -49,43 +65,53 @@ def day_from_string(string, order='YMD', *, doy=True, mjd=False, weekdays=False,
         raise JulianParseException(f'unrecognized date format: "{string}"')
 
     parse_dict = {key:value for key, value in parse_list}
-    return _day_from_dict(parse_dict, proleptic=proleptic, validate=validate)
+    return _day_from_dict(parse_dict, proleptic=proleptic, validate=True)
 
 ##########################################################################################
-# Date scrapers
+# Date scraper
 ##########################################################################################
 
 def days_in_strings(strings, order='YMD', *, doy=False, mjd=False, weekdays=False,
-                    extended=False, proleptic=False, validate=True, substrings=False,
-                    first=False):
+                    extended=False, proleptic=False, substrings=False, first=False):
     """List of day numbers obtained by searching one or more strings for patterns that
-   look like formatted dates.
+    look like formatted dates.
 
-    Input:
-        strings     list/array/tuple of strings to interpret.
-        order       One of "YMD", "MDY", or "DMY"; this defines the default order for
-                    date, month, and year in situations where it might be ambiguous.
-        doy         True to recognize dates specified as year and day-of-year.
-        mjd         True to recognize Modified Julian Dates.
-        weekdays    True to allow dates including weekdays.
-        extended    True to support extended year values: signed (with at least four
-                    digits) and those involving "CE", "BCE", "AD", "BC".
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
-        validate    if True, patterns that resembled dates but are not valid for other
-                    reasons are ignored.
-        substrings  True to also return the substring containing each identified date.
-        first       True to return when the first day is found, with None on failure;
-                    False to return the full, ordered list of days found.
+    Parameters:
+        strings (str, list, tuple, or array):
+            Strings to interpret.
+        order (str):
+            One of "YMD", "MDY", or "DMY", defining the default order for day month, and
+            year in situations where it might be ambiguous.
+        doy (bool, optional):
+            True to recognize dates specified as year and day-of-year.
+        mjd (bool, optional):
+            True to recognize Modified Julian Dates.
+        weekdays (bool, optional):
+            True to allow dates including weekdays.
+        extended (bool, optional):
+            True to support extended year values: signed (with at least four digits) and
+            those involving "CE", "BCE", "AD", "BC".
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+        substrings (bool, optional):
+            True to also return the substring containing each identified date.
+        first (bool, optional):
+            True to return the first date found rather than a list of dates. In this case,
+            None is returned if no date is found rather than an empty list.
 
-    Return:         a list containing either day values or tuples (day, substring).
-        day         day numbers.
-        substring   the substring containing the text that was interpreted to represent
-                    this date; included if the input value of substrings is True.
+    Returns:
+        int, tuple (day, substring), list[int or tuple], or None:
+            If `first=False`, a list of dates is returned; otherwise, a single date is
+            returned or None if no date was found. If `substrings` is False, each date is
+            represented by a day number relative to January 1, 2000. If `substrings` is
+            True, each date is represented by a tuple, where the first element is the
+            day number and the second is the substring found that defines this date.
 
-        Note: If the input value of first is True, then the returned quantity is not a
-        list, just a single day value or tuple, or else None if no date was identified.
+    Raises:
+        JulianValidateFailure:
+            If a matched date string contains invalid or contradictory information.
     """
 
     if isinstance(strings, str):
@@ -107,10 +133,7 @@ def days_in_strings(strings, order='YMD', *, doy=False, mjd=False, weekdays=Fals
             if not parse_dict:
                 break
 
-            try:
-                day = _day_from_dict(parse_dict, proleptic=proleptic, validate=validate)
-            except ValueError:
-                continue
+            day = _day_from_dict(parse_dict, proleptic=proleptic, validate=True)
 
             if substrings:
                 day_list.append((day, substring))
@@ -134,16 +157,20 @@ _WORDS = re.compile('([A-Za-z0-9.]+)')
 def _search_in_string(string, parser):
     """Parse dictionary derived from the first matching pattern in the string.
 
-    Input:
-        string      string to interpret.
-        parser      parser to use.
+    Parameters:
+        string (str):
+            String to interpret.
+        parser (pyparsing.ParserElement):
+            Parser to use.
 
-    Return:         (parse_dict, match, remainder)
-        parse_dict  dictionary of information about the first matching string. If no match
-                    was found, this dictionary is empty.
-        match       the text that matched; empty string on failure.
-        remainder   the remainder of the string following the match; empty string on
-                    failure.
+    Returns:
+        tuple (dict, match, remainder):
+
+        - **dict** (*dict*): A dictionary of information about the first matching string.
+          If no match was found, this dictionary is empty.
+        - **match** (*str*): The text that matched; empty string on failure.
+        - **remainder** (*str*): The remainder of the string following the match; empty
+          string on failure.
     """
 
     # To speed things up, only check starting at the beginning of each word
@@ -251,4 +278,3 @@ def _date_pattern_filter(string, doy=False, mjd=False):
     return False
 
 ##########################################################################################
-

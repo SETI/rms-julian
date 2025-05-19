@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/mjd_jd.py
 ##########################################################################################
-"""Functions to convert to/from Julian Date and Modified Julian Date
 """
-##########################################################################################
+==================
+MJD/JD Conversions
+==================
+"""
 
 from julian                import utc_tai_tdb_tt
 from julian.leap_seconds   import seconds_on_day
@@ -24,12 +26,12 @@ _JD_MINUS_MJD = 2400000.5
 def mjd_from_day(day):
     """Modified Julian Date for a given UTC day number.
 
-    Input:
-        day         UTC day number, starting from midnight on January 1, 2000 UTC, as
-                    scalar, array, or array-like.
+    Parameters:
+        day (int, float, or array-like): Day number relative to January 1, 2000.
 
-    Return          the Modified Julian Date, as a scalar or array. If the day input is
-                    integral, integers are returned.
+    Returns:
+        int, float, or array:
+            The Modified Julian Date. If `day` is integral, integers are returned.
     """
 
     return _number(day) + _MJD_OF_JAN_1_2000
@@ -38,11 +40,13 @@ def mjd_from_day(day):
 def day_from_mjd(mjd):
     """UTC day number for a given UTC Modified Julian Date.
 
-    Input:
-        mjd         MJD day number, as a scalar, array, or array-like.
+    Parameters:
+        mjd (int, float, or array-like): MJD day number.
 
-    Return          the associated UTC day, numbered starting from midnight on January 1,
-                    2000 UTC. If the mjd input is integral, integers are returned.
+    Returns:
+        int, float, or array:
+            Day number, starting from midnight on January 1, 2000. If `mjd` is integral,
+            integers are returned.
     """
 
     return _number(mjd) - _MJD_OF_JAN_1_2000
@@ -51,19 +55,23 @@ def day_from_mjd(mjd):
 def mjd_from_day_sec(day, sec=0):
     """UTC Modified Julian Date for a given UTC day number and seconds.
 
-    Input:
-        day         integer UTC day number, starting from January 1, 2000. Can be a
-                    scalar, array, or array-like.
-        sec         elapsed seconds within that day, allowing for leap seconds. Can be a
-                    scalar, array, or array-like.
+    Parameters:
+        day (int, float, or array-like):
+            Day number relative to January 1, 2000.
+        sec (int, float, or array-like):
+            Elapsed seconds within that day, allowing for leap seconds.
 
-    Return          the Modified Julian Date, as a scalar or array.
+    Returns:
+        int, float, or array:
+            The Modified Julian Date. If `sec` is zero, integers are returned.
 
-    Note that the MJD time system has day-length "ticks", which means that it interacts in
-    a peculiar way with leap seconds. When allowing for leap seconds, some days are longer
-    than others. Nevertheless, this time system is defined such that the value of MJD
-    always increases by one frome the end of one day to the end of the next. On days that
-    contain leap seconds, the fractional rate must therefore be a bit slower.
+    Notes:
+        The MJD time system has day-length "ticks", which means that it interacts in a
+        peculiar way with leap seconds. When allowing for leap seconds, some days are
+        longer than others. Nevertheless, this time system is defined such that the value
+        of MJD always increases by one from the end of one day to the end of the next. On
+        days that contain leap seconds, the fractional rate must therefore be a bit
+        slower.
     """
 
     day = _int(day)
@@ -73,20 +81,24 @@ def mjd_from_day_sec(day, sec=0):
 def day_sec_from_mjd(mjd):
     """UTC day number and seconds for a given UTC Modified Julian Date.
 
-    Input:
-        mjd         Julian day value, as a scalar, array, or array-like.
+    Parameters:
+        mjd (int, float, or array-like):
+            MJD day number.
 
-    Return:         (day, sec)
-        day         integer UTC day number, starting from midnight on January 1, 2000, as
-                    a scalar or array.
-        sec         seconds within that day, allowing for leap seconds, as a scalar or
-                    array. If mjd values are integral, integers are returned.
+    Returns:
+        tuple (day, sec):
 
-    Note that the MJD time system has day-length "ticks", which means that it interacts in
-    a peculiar way with leap seconds. When allowing for leap seconds, some days are longer
-    than others. Nevertheless, this time system is defined such that the value of MJD
-    always increases by one frome the end of one day to the end of the next. On days that
-    contain leap seconds, the fractional rate must therefore be a bit slower.
+        - **day** (*int or array*): Day number, starting from midnight on January 1, 2000.
+        - **sec** (*int, float, or array*): Elapsed seconds within that day, allowing for
+          leap seconds. If `mjd` is integral, integers are returned.
+
+    Notes:
+        The MJD time system has day-length "ticks", which means that it interacts in a
+        peculiar way with leap seconds. When allowing for leap seconds, some days are
+        longer than others. Nevertheless, this time system is defined such that the value
+        of MJD always increases by one from the end of one day to the end of the next. On
+        days that contain leap seconds, the fractional rate must therefore be a bit
+        slower.
     """
 
     mjd = _number(mjd)
@@ -100,19 +112,22 @@ def day_sec_from_mjd(mjd):
 def jd_from_day_sec(day, sec=0):
     """UTC Julian Date for a given UTC day number and seconds.
 
-    Input:
-        day         integer UTC day number, starting from January 1, 2000. Can be a
-                    scalar, array, or array-like.
-        sec         elapsed seconds within that day, allowing for leap seconds. Can be a
-                    scalar, array, or array-like.
+    Parameters:
+        day (int, float, or array-like):
+            Day number relative to January 1, 2000.
+        sec (int, float, or array-like):
+            Elapsed seconds within that day, allowing for leap seconds.
 
-    Return          the Julian Date, as a scalar or array.
+    Returns:
+        float or array: The Julian Date.
 
-    Note that the JD time system has day-length "ticks", which means that it interacts in
-    a peculiar way with leap seconds. When allowing for leap seconds, some days are longer
-    than others. Nevertheless, this time system is defined such that the value of JD
-    always increases by one frome the end of one day to the end of the next. On days that
-    contain leap seconds, the fractional rate must therefore be a bit slower.
+    Notes:
+        The JD time system has day-length "ticks", which means that it interacts in a
+        peculiar way with leap seconds. When allowing for leap seconds, some days are
+        longer than others. Nevertheless, this time system is defined such that the value
+        of JD always increases by one frome the end of one day to the end of the next. On
+        days that contain leap seconds, the fractional rate must therefore be a bit
+        slower.
     """
 
     return mjd_from_day_sec(day, sec) + _JD_MINUS_MJD
@@ -121,20 +136,23 @@ def jd_from_day_sec(day, sec=0):
 def day_sec_from_jd(jd):
     """UTC day number and seconds for a given UTC Julian Date.
 
-    Input:
-        jd          Julian date, as a scalar, array, or array-like.
+    Parameters:
+        jd (int, float, or array-like): Julian date.
 
-    Return:         (day, sec)
-        day         integer UTC day number, starting from midnight on January 1, 2000, as
-                    a scalar or array.
-        sec         seconds within that day, allowing for leap seconds, as a scalar or
-                    array. If mjd values are integral, integers are returned.
+    Returns:
+        tuple (day, sec):
 
-    Note that the JD time system has day-length "ticks", which means that it interacts in
-    a peculiar way with leap seconds. When allowing for leap seconds, some days are longer
-    than others. Nevertheless, this time system is defined such that the value of JD
-    always increases by one frome the end of one day to the end of the next. On days that
-    contain leap seconds, the fractional rate must therefore be a bit slower.
+        - **day** (*int or array*): Day number, starting from midnight on January 1, 2000.
+        - **sec** (*int, float, or array*): Elapsed seconds within that day, allowing for
+          leap seconds. If `mjd` is integral, integers are returned.
+
+    Notes:
+        The JD time system has day-length "ticks", which means that it interacts in a
+        peculiar way with leap seconds. When allowing for leap seconds, some days are
+        longer than others. Nevertheless, this time system is defined such that the value
+        of JD always increases by one frome the end of one day to the end of the next. On
+        days that contain leap seconds, the fractional rate must therefore be a bit
+        slower.
     """
 
     return day_sec_from_mjd(jd - _JD_MINUS_MJD)
@@ -146,14 +164,18 @@ def day_sec_from_jd(jd):
 def mjd_from_time(time, timesys='TAI', mjdsys=None):
     """Modified Julian Date for a given time, allowing for time system conversions.
 
-    Input:
-        time        time in seconds within the specified time system.
-        timesys     name of the current time system, one of "UTC", "TAI", "TDB", or "TT".
-        mjdsys      time system for the MJD, one of "UTC", "TAI", "TDB", or "TT". Leap
-                    seconds are included if mjdsys="UTC"; otherwise, they are ignored.
-                    If not specified, mjdsys equals timesys.
+    Parameters:
+        time (int, float, or array-like):
+            Time in seconds within the selected time system.
+        timesys (str, optional):
+            Name of the current time system, one of "UTC", "TAI", "TDB", or "TT".
+        mjdsys (str, optional):
+            Name of the time system for MJD, one of "UTC", "TAI", "TDB", or "TT". Leap
+            seconds are included if mjdsys="UTC"; otherwise, they are ignored. If not
+            specified, `mjdsys` equals `timesys`.
 
-    Return          the Modified Julian Date, as a scalar or array.
+    Returns:
+        float or array: The Modified Julian Date in the `mjdsys` time system.
     """
 
     # Ignores leap seconds; provides backward compatibility
@@ -180,14 +202,18 @@ def mjd_from_time(time, timesys='TAI', mjdsys=None):
 def time_from_mjd(mjd, timesys='TAI', mjdsys=None):
     """Time in the seconds for a specified MJD, allowing for time system conversions.
 
-    Input:
-        mjd         time in seconds within the specified time system.
-        timesys     name of the desired time system, one of "UTC", "TAI", "TDB", or "TT".
-        mjdsys      time system for the MJD, one of "UTC", "TAI", "TDB", or "TT". Leap
-                    seconds are included in the "UTC" MJD time system; ignored otherwise.
-                    If not specified, mjdsys equals timesys.
+    Parameters:
+        mjd (int, float, or array):
+            Time in seconds within the specified time system.
+        timesys (str, optional):
+            Name of the current time system, one of "UTC", "TAI", "TDB", or "TT".
+        mjdsys (str, optional):
+            Name of the time system for MJD, one of "UTC", "TAI", "TDB", or "TT". Leap
+            seconds are included if mjdsys="UTC"; otherwise, they are ignored. If not
+            specified, `mjdsys` equals `timesys`.
 
-    Return          time in seconds in the specified time system, as a scalar or array.
+    Returns:
+        float or array: Time in seconds in the `mjdsys` time system.
     """
 
     # Ignores leap seconds; provides backward compatibility
@@ -214,14 +240,18 @@ def time_from_mjd(mjd, timesys='TAI', mjdsys=None):
 def jd_from_time(time, timesys='TAI', jdsys=None):
     """Julian Date for a given time, allowing for time system conversions.
 
-    Input:
-        time        time in seconds within the specified time system.
-        timesys     name of the current time system, one of "UTC", "TAI", "TDB", or "TT".
-        jdsys       time system for the JD, one of "UTC", "TAI", "TDB", or "TT". Leap
-                    seconds are included if mjdsys="UTC"; otherwise, they are ignored. If
-                    not specified, jdsys equals timesys.
+    Parameters:
+        time (int, float, or array-like):
+            Time in seconds within the selected time system.
+        timesys (str, optional):
+            Name of the current time system, one of "UTC", "TAI", "TDB", or "TT".
+        jdsys (str, optional):
+            Name of the time system for JD, one of "UTC", "TAI", "TDB", or "TT". Leap
+            seconds are included if mjdsys="UTC"; otherwise, they are ignored. If not
+            specified, `jdsys` equals `timesys`.
 
-    Return          the Julian Date, as a scalar or array.
+    Returns:
+          float or array: The Julian Date in the `jdsys` time system.
     """
 
     return mjd_from_time(time, timesys=timesys, mjdsys=jdsys) + _JD_MINUS_MJD
@@ -230,14 +260,18 @@ def jd_from_time(time, timesys='TAI', jdsys=None):
 def time_from_jd(jd, timesys='TAI', jdsys=None):
     """Time in the seconds for a specified JD, allowing for time system conversions.
 
-    Input:
-        jd          time in seconds within the specified time system.
-        timesys     name of the desired time system, one of "UTC", "TAI", "TDB", or "TT".
-        jdsys       time system for the JD, one of "UTC", "TAI", "TDB", or "TT". Leap
-                    seconds are included in the "UTC" MJD time system; ignored otherwise.
-                    If not specified, jdsys equals timesys.
+    Parameters:
+        jd (int, float, or array):
+            Time in seconds within the specified time system.
+        timesys (str, optional):
+            Name of the current time system, one of "UTC", "TAI", "TDB", or "TT".
+        jdsys (str, optional):
+            Name of the time system for MJD, one of "UTC", "TAI", "TDB", or "TT". Leap
+            seconds are included if mjdsys="UTC"; otherwise, they are ignored. If not
+            specified, `mjdsys` equals `timesys`.
 
-    Return          time in seconds in the specified time system, as a scalar or array.
+    Returns:
+        float or array: Time in seconds in the `jdsys` time system.
     """
 
     return time_from_mjd(jd - _JD_MINUS_MJD, mjdsys=jdsys, timesys=timesys)
@@ -245,25 +279,53 @@ def time_from_jd(jd, timesys='TAI', jdsys=None):
 # Shortcuts for TAI
 
 def mjd_from_tai(tai):
-    """Modified Julian Date from TAI seconds."""
+    """Modified Julian Date from TAI seconds.
+
+    Parameters:
+        tai (int, float, or array-like): Time in seconds TAI.
+
+    Returns:
+        float or array: The Modified Julian Date.
+    """
 
     return mjd_from_day_sec(*day_sec_from_tai(tai))
 
 
 def jd_from_tai(tai):
-    """Julian Date fram TAI seconds."""
+    """Julian Date fram TAI seconds.
+
+    Parameters:
+        tai (int, float, or array-like): Time in seconds TAI.
+
+    Returns:
+        float or array: The Julian Date.
+    """
 
     return jd_from_day_sec(*day_sec_from_tai(tai))
 
 
 def tai_from_mjd(mjd):
-    """TAI seconds from Modified Julian Date."""
+    """TAI seconds from Modified Julian Date.
+
+    Parameters:
+        mjd (int, float, or array): The Modified Julian Date.
+
+    Returns:
+        float or array: Time in seconds TAI.
+    """
 
     return tai_from_day_sec(*day_sec_from_mjd(mjd))
 
 
 def tai_from_jd(jd):
-    """TAI seconds from Modified Julian Date."""
+    """TAI seconds from Julian Date.
+
+    Parameters:
+        jd (int, float, or array): The Julian Date.
+
+    Returns:
+        float or array: Time in seconds TAI.
+    """
 
     return tai_from_day_sec(*day_sec_from_jd(jd))
 

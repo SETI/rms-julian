@@ -1,19 +1,22 @@
 ##########################################################################################
 # julian/calendar.py
 ##########################################################################################
-"""Calendar functions
-
-Algorithms are from http://alcor.concordia.ca/~gpkatch/gdate-algorithm.html
-
-day     = number of days elapsed since January 1, 2000
-month   = number of months elapsed since January 2000
-(y,m,d) = year, month (1-12), day (1-31)
-(y,d)   = year and day-of-year (1-366)
-(y,m)   = year and month number (1-12)
-
-All function operate on either scalars or arrays. If given scalars, they return Python
-ints or floats; if given anything array-like, they return NumPy arrays.
 """
+==================
+Calendar functions
+==================
+"""
+##########################################################################################
+# Algorithms are from http://alcor.concordia.ca/~gpkatch/gdate-algorithm.html
+#
+# day     = number of days elapsed since January 1, 2000
+# month   = number of months elapsed since January 2000
+# (y,m,d) = year, month (1-12), day (1-31)
+# (y,d)   = year and day-of-year (1-366)
+# (y,m)   = year and month number (1-12)
+#
+# All function operate on either scalars or arrays. If given scalars, they return Python
+# ints or floats; if given anything array-like, they return NumPy arrays.
 ##########################################################################################
 
 import numpy as np
@@ -25,19 +28,21 @@ from julian._utils      import _int, _is_float, _number
 def day_from_ymd(y, m, d, *, validate=False, proleptic=False):
     """Number of elapsed days after January 1, 2000, given a year, month, and day.
 
-    Inputs:
-        y           year as a scalar, array, or array-like. Values are truncated to
-                    integers if necessary. Note that 1 BCE corresponds to year 0, 2 BCE to
-                    -1, etc.
-        m           month number, 1-12, as a scalar, array, or array-like. Values are
-                    truncated to integers if necessary.
-        d           day number, 1-31, as a scalar, array, or array-like. Values can be
-                    integers or floats; if the latter, floating-point values are returned.
-        validate    True to raise JulianValidateFailure (a ValueError subclass) for year,
-                    month, or day numbers out of range; default is False.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Parameters:
+        y (int or array-like): Year number. Note that 1 BCE corresponds to year 0, 2 BCE
+            to -1, etc.
+        m (int or array-like): Month number, 1-12.
+        d (int, float or array-like): Day number, 1-31.
+        validate (bool, optional): True to raise JulianValidateFailure (a ValueError
+            subclass) for year, month, or day numbers out of range; default is False.
+        proleptic (bool, optional): True to interpret all dates according to the modern
+            Gregorian calendar, even those that occurred prior to the transition from the
+            Julian calendar. False to use the Julian calendar for earlier dates.
+
+    Returns:
+        int, float, or array:
+            Days number relative to January 1, 2000. Values are floating-point if `d` is
+            floating-point; otherwise they are integral.
     """
 
     y = _int(y)
@@ -118,13 +123,19 @@ def day_from_ymd(y, m, d, *, validate=False, proleptic=False):
 def ymd_from_day(day, *, proleptic=False):
     """Year, month and day from day number.
 
-    Inputs:
-        day         number of elapsed days after January 1, 2000 as a scalar, array, or
-                    or array-like. Values can be integers or floats; if the latter,
-                    returned day values are also floats.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Parameters:
+        day (int, float, or array-like): Day number of relative to January 1, 2000.
+        proleptic (bool, optional): True to interpret all dates according to the modern
+            Gregorian calendar, even those that occurred prior to the transition from the
+            Julian calendar. False to use the Julian calendar for earlier dates.
+
+    Returns:
+        tuple (y, m, d):
+
+        - **y** (*int or array*): Year.
+        - **m** (*int or array*): Month (1-12).
+        - **d** (*int, float, or array*): Day of month (1-31). Values are floating-point
+          if `day` is floating-point; otherwise, they are integral.
     """
 
     day = _number(day)
@@ -186,16 +197,21 @@ def ymd_from_day(day, *, proleptic=False):
 def yd_from_day(day, *, proleptic=False):
     """Year and day-of-year from day number.
 
-    Inputs:
-        day         number of elapsed days after January 1, 2000 as a scalar, array, or
-                    array-like. Values can be integers or floats; if the latter, returned
-                    day values are also floats.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Parameters:
+        day (int, float, or array-like): Day number of relative to January 1, 2000.
+        proleptic (bool, optional): True to interpret all dates according to the modern
+            Gregorian calendar, even those that occurred prior to the transition from the
+            Julian calendar. False to use the Julian calendar for earlier dates.
+
+    Returns:
+        tuple (y, d):
+
+        - **y** (*int or array*): Year.
+        - **d** (*int, float, or array*): Day of year (1-366). Values are floating-point
+          if `day` is given as floating-point; otherwise they are integral.
     """
 
-    (y,m,d) = ymd_from_day(day, proleptic=proleptic)
+    (y, m, d) = ymd_from_day(day, proleptic=proleptic)
     return (y, _number(day) - day_from_ymd(y, 1, 1, proleptic=proleptic) + 1)
 
 ########################################
@@ -203,17 +219,22 @@ def yd_from_day(day, *, proleptic=False):
 def day_from_yd(y, d, *, validate=False, proleptic=False):
     """Day number from year and day-of-year.
 
-    Inputs:
-        y           year as a scalar, array, or array-like. Values are truncated to
-                    integers if necessary. Note that 1 BCE corresponds to year 0, 2 BCE to
-                    -1, etc.
-        d           day of year, 1-366, as a scalar, array, or array-like. Values can be
-                    integers or floats; if the latter, floating-point values are returned.
-        validate    True to raise JulianValidateFailure (a ValueError subclass) for day
-                    numbers out of range; default is False.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Parameters:
+        y (int or array-like): Year number. Note that 1 BCE corresponds to year 0, 2 BCE
+            to -1, etc.
+        d (int, float, or array-like): Day of year, 1-366.
+        validate (bool, optional): True to confirm that day numbers are in range.
+        proleptic (bool, optional): True to interpret all dates according to the modern
+            Gregorian calendar, even those that occurred prior to the transition from the
+            Julian calendar. False to use the Julian calendar for earlier dates.
+
+    Raises:
+        JulianValidateFailure: If `validate` is True and a number is out of range.
+
+    Returns:
+        int, float, or array:
+            Day number relative to January 1, 2000. Values are floating-point if `d` is
+            given as floating-point; otherwise they are integral.
     """
 
     if validate:    # pragma: no branch
@@ -227,24 +248,31 @@ def day_from_yd(y, d, *, validate=False, proleptic=False):
 
 _DAYS_IN_MONTH = np.array([0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
 
-def days_in_ym(y, m, *, validate=False, proleptic=False):
+def days_in_month(y, m, *, validate=False, proleptic=False):
     """Number of days in month.
 
-    Note that this is the actual number of days from the first of one month to the first
-    of the next. If proleptic is False, this number will be less than the last valid
-    calendar day during the month of transition from the Julian to Gregorian calendar.
+    Parameters:
+        y (int or array-like):
+            Year number. Note that 1 BCE corresponds to year 0, 2 BCE to -1, etc.
+        m (int or array-like):
+            Month number, 1-12.
+        validate (bool, optional):
+            True to confirm that month numbers are in range.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
 
-    Inputs:
-        y           year as a scalar, array, or array-like. Values are truncated to
-                    integers if necessary. Note that 1 BCE corresponds to year 0, 2 BCE to
-                    -1, etc.
-        m           month number, 1-12, as a scalar, array, or array-like. Values are
-                    truncated to integers if necessary.
-        validate    True to raise JulianValidateFailure (a ValueError subclass) for month
-                    numbers out of range; default is False.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Returns:
+        int or array-like: Number of days in month.
+
+    Raises:
+        JulianValidateFailure: If `validate` is True and a number is out of range.
+
+    Notes:
+        This is the number of days from the first of one month to the first of the next.
+        If proleptic is False, this number will be less than the last valid calendar day
+        during the month of transition from the Julian to Gregorian calendar.
     """
 
     y = _int(y)
@@ -272,22 +300,58 @@ def days_in_ym(y, m, *, validate=False, proleptic=False):
     return (day_from_ymd(y, m+1, 1, proleptic=proleptic, validate=False) -
             day_from_ymd(y, m  , 1, proleptic=proleptic, validate=False))
 
+
+def days_in_ym(y, m, *, validate=False, proleptic=False):
+    """Number of days in month.
+
+    DEPRECATED name for :meth:`~days_in_month`.
+
+    Parameters:
+        y (int or array-like):
+            Year number. Note that 1 BCE corresponds to year 0, 2 BCE to -1, etc.
+        m (int or array-like):
+            Month number, 1-12.
+        validate (bool, optional):
+            True to confirm that month numbers are in range.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
+
+    Returns:
+        int or array-like: Number of days in month.
+
+    Raises:
+        JulianValidateFailure: If `validate` is True and a number is out of range.
+
+    Notes:
+        This is the number of days from the first of one month to the first of the next.
+        If proleptic is False, this number will be less than the last valid calendar day
+        during the month of transition from the Julian to Gregorian calendar.
+    """
+
+    return days_in_month(y, m, validate=validate, proleptic=proleptic)
+
 ########################################
 
 def days_in_year(year, *, proleptic=False):
     """Number of days in year.
 
-    Note that this is the actual number of days from the first of one year to the first
-    of the next. If proleptic is False, this number will be less than 365 during the year
-    of transition from the Julian to Gregorian calendar.
+    Parameters:
+        y (int or array-like):
+            Year number. Note that 1 BCE corresponds to year 0, 2 BCE to -1, etc.
+        proleptic (bool, optional):
+            True to interpret all dates according to the modern Gregorian calendar, even
+            those that occurred prior to the transition from the Julian calendar. False to
+            use the Julian calendar for earlier dates.
 
-    Inputs:
-        y           year as a scalar, array, or array-like. Values are truncated to
-                    integers if necessary. Note that 1 BCE corresponds to year 0, 2 BCE to
-                    -1, etc.
-        proleptic   True to interpret all dates according to the modern Gregorian
-                    calendar, even those that occurred prior to the transition from the
-                    Julian calendar. False to use the Julian calendar for earlier dates.
+    Returns:
+        int or array: Number of days in year.
+
+    Notes:
+        This is the number of days from the first of one year to the first of the next. If
+        proleptic is False, this number will be less than 365 during the year of
+        transition from the Julian to Gregorian calendar.
     """
 
     year = _int(year)
@@ -311,10 +375,23 @@ def days_in_year(year, *, proleptic=False):
 def set_gregorian_start(y=1582, m=10, d=15):
     """Set the first day of the Gregorian calendar as a year, month, and day.
 
-    Note that is a global setting for the entire Julian library.
+    Parameters:
+        y (int):
+            The year number at the start of the modern Gregorian calendar. Use None to
+            suppress the Julian calendar, using the Gregorian calendar exclusively, even
+            where `proleptic=False` is specified.
+        m (int):
+            The month number (1-12) at the start of the Gregorian calendar.
+        d (int):
+            The day number (1-31) at the start of the Gregorian calendar.
 
-    Use set_gregorian_start(None) to ignore the Julian calendar, using the modern
-    Gregorian calendar exclusively, even where proleptic=False.
+    Notes:
+        This calendar was introduced by Pope Gregoary XIII to correct the drift between
+        the pre-existing Julian calendar and the actual solar year. In Europe, it began on
+        October 15, 1582. However, the Julian calendar was not adopted in England until
+        September 14, 1752.
+
+        This is a global setting of the Julian Library.
     """
 
     global _GREGORIAN_DAY1, _GREGORIAN_DAY1_YMD, _GREGORIAN_DAY0_YMD

@@ -1,6 +1,12 @@
 coverage
 cspyce
+flake8
+myst-parser
 numpy
 pyparsing
 pytest
+rms-filecache
 rms-textkernel
+sphinx
+sphinxcontrib-napoleon
+sphinx-rtd-theme

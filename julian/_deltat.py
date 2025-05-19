@@ -10,8 +10,8 @@ from julian.calendar import day_from_ymd
 
 # Use the min and max int64 values for unlimited year ranges
 # ...but divide by 14 to ensures that 13*year does not overflow.
-_MIN_YEAR = np.ma.maximum_fill_value(np.dtype('int64')) // 14     # -658812288346769701
-_MAX_YEAR = np.ma.minimum_fill_value(np.dtype('int64')) // 14     #  658812288346769700
+_MIN_YEAR = np.ma.maximum_fill_value(np.dtype('int64')) // 14   # -658812288346769701
+_MAX_YEAR = np.ma.minimum_fill_value(np.dtype('int64')) // 14   #  658812288346769700
 
 
 class DeltaT(object):
@@ -21,59 +21,58 @@ class DeltaT(object):
     This class is used to manage leap seconds (TAI - UTC) and variations in Earth's
     rotation (TT - UT1).
 
-    Required attributes are:
-        first       the first year covered by this object.
-        last        the last year (inclusive) to which this object applies. Its value is
-                    _MAX_YEAR if the object applies to all future years. This value is only
-                    relevant if this object is part of a MergedDeltaT object, in which
-                    case a lower-precedence object will be used for later years.
-        before      the value of delta-T to return for times before the earliest date.
-        after       the value of delta-T to return for times after the latest date.
-        is_float    True if this object returns floating-point values; False if it returns
-                    integers.
+    Attributes:
+        first (int):
+            The first year covered by this object.
+        last (int):
+            The last year (inclusive) to which this object applies. Its value is _MAX_YEAR
+            if the object applies to all future years. This value is only relevant if this
+            object is part of a MergedDeltaT object, in which case a lower-precedence
+            object will be used for later years.
+        before (float):
+            The value of delta-T to return for times before the earliest date.
+        after (float):
+            The value of delta-T to return for times after the latest date.
+        is_float (bool):
+            True if this object returns floating-point values; False if it returns
+            integers.
 
-    Note that DeltaT objects always cover a complete range of years, never fractional
-    years.
+    Notes:
+         DeltaT objects always cover a complete range of years, never fractional years.
     """
 
     FLAG = -99999999        # An impossible value of delta-T
 
     def delta_t_from_ymd(self, y, m, d=1):
-        """The cumulative delta-T in seconds for the given day, expressed as a calendar
-        year, month, and optional day.
+        """Cumulative delta-T in seconds for the given day.
 
-        Integers are returned if the value is integral; otherwise, floats are returned.
+        Parameters:
+            y (int or array-like): Calendar year.
+            m (int or array-like): Calendar month number (1-12).
+            d (int or array-like): Day of month (1-31).
 
-        Input:
-            y       calendar year as an integer scalar, array, or array-like.
-            m       calendar month number (1-12) as an integer scalar, array, or
-                    array-like.
-            d       calendar day number (1-31) as an integer scalar, array, or array-like.
-
-        Note that if any of the input values are arrays or array-like, they need not have
-        the same array shape; the the returned array will be have the broadcasted shape
-        of the input arrays.
+        Returns:
+            int, float, or array: Cumulative delta-T in seconds for the given day.
+            Integers are returned if the value is integral; otherwise, floats are
+            returned.
         """
 
         pass        # defined by subclass       # pragma: no cover
 
     def leapsecs_from_ymd(self, y, m, d=1):
-        """The cumulative number of leap seconds on the given date, where the date is
-        expressed as a calendar year, month, and optional day.
+        """The cumulative number of leap seconds on the given date.
 
         This differs from the function delta_t_from_ymd() in that it returns values in
         units of UT "rubber seconds" rather than in units of TAI seconds. Values are
         always integers and have a fixed value if delta-T uses floating-point values.
 
-        Input:
-            y       calendar year as an integer scalar, array, or array-like.
-            m       calendar month number (1-12) as an integer scalar, array, or
-                    array-like.
-            d       calendar day number (1-31) as an integer scalar, array, or array-like.
+        Parameters:
+            y (int or array-like): Calendar year.
+            m (int or array-like): Calendar month number (1-12).
+            d (int or array-like): Day of month (1-31).
 
-        Note that if any of the input values are arrays or array-like, they need not have
-        the same array shape; the the returned array will be have the broadcasted shape
-        of the input arrays.
+        Returns:
+            int or array: Cumulative delta-T in seconds for the given day.
         """
 
         # Default behavior is to return zeros
@@ -97,22 +96,28 @@ class LeapDeltaT(DeltaT):
     def __init__(self, info, before=None, last=None):
         """Constructor.
 
-        Input:
-            info        a list of tuples (year, month, delta_t), where delta_t is the
-                        integer number of leap seconds at the beginning of the specified
-                        year and month. Dates must be in chronological order.
-            before      the value to return for dates before the earliest date; default is
-                        to return the same value as for the earliest date in the info
-                        list.
-            last        the last year (inclusive) to which this object applies. Use None
-                        or np.inf for an object that applies for all future dates. This
-                        value is only relevant if this object is part of a MergedDeltaT
-                        object, in which case a lower-precedence object will be used for
-                        later years.
+        Parameters:
+            info (list):
+                A list of tuples (year, month, delta_t), where delta_t is the integer
+                number of leap seconds at the beginning of the specified year and month.
+                Dates must be in chronological order.
+            before (float):
+                The value to return for dates before the earliest date; default is to
+                return the same value as for the earliest date in the info list.
+            last (float):
+                The last year (inclusive) to which this object applies. Use None or or
+                np.inf for an object that applies for all future dates. This value is only
+                relevant if this object is part of a MergedDeltaT object, in which case a
+                lower-precedence object will be used for later years.
         """
 
         self.update_count = 0
         self._update(info, before=before, last=last)
+
+    def __str__(self):                                          # pragma: no cover
+        last = 'inf' if self.last > 1.e16 else self.last
+        return (f'LeapDeltaT({self.before}, {self.info[0]}, {self.info[-1]}, '
+                f', {last}, {self.update_count})')
 
     def _update(self, info, before, last):
         """Internal method to insert the list of leap seconds table into this existing
@@ -149,7 +154,7 @@ class LeapDeltaT(DeltaT):
             else:
                 prev_delta_t = self.leaps[indx]
 
-        self.update_count += 1          # keep track of updates
+        self.update_count += 1      # keep track of updates
 
     def set_last_year(self, last):
         """Redefine the last year for which this object applies.
@@ -161,14 +166,14 @@ class LeapDeltaT(DeltaT):
         self._update(self.info, before=self.before, last=last)
 
     def insert_leap_second(self, y, m, offset=1):
-        """Insert a new (positive or negative) leap second into this model.
+        """Insert a new (positive or negative) leap second into this model, starting just
+        before a given month.
 
-        Input:
-            y, m        insert the leap second(s) just before the beginning of the
-                        specified year and month. This must be after any previously
-                        defined leap second.
-            offset      the change in delta-T. Default is 1; use -1 for a negative leap
-                        second.
+        Parameters:
+            y (int): Calendar year.
+            m (int): Calendar month number (1-12).
+            offset (int):
+                The change in delta-T. Default is 1; use -1 for a negative leap second.
         """
 
         latest_leaps = self.leaps[-1]
@@ -181,20 +186,17 @@ class LeapDeltaT(DeltaT):
         self._update(info, before=self.before, last=self.last)
 
     def delta_t_from_ymd(self, y, m, d=1):
-        """The cumulative delta-T in seconds for the given day, expressed as a calendar
-        year, month, and optional day.
+        """Cumulative delta-T in seconds for the given day.
 
-        Leap second values are always integers.
+        Parameters:
+            y (int or array-like): Calendar year.
+            m (int or array-like): Calendar month number (1-12).
+            d (int or array-like): Day of month (1-31).
 
-        Input:
-            y       calendar year as an integer scalar, array, or array-like.
-            m       calendar month number (1-12) as an integer scalar, array, or
-                    array-like.
-            d       calendar day number (1-31) as an integer scalar, array, or array-like.
-
-        Note that if any of the input values are arrays or array-like, they need not have
-        the same array shape; the the returned array will be have the broadcasted shape
-        of the input arrays.
+        Returns:
+            int, float, or array: Cumulative delta-T in seconds for the given day.
+            Integers are returned if the value is integral; otherwise, floats are
+            returned.
         """
 
         (y, m, d) = np.broadcast_arrays(y, m, d)
@@ -205,27 +207,23 @@ class LeapDeltaT(DeltaT):
 
         y = np.minimum(y, self.max_year)
         indx = np.maximum(13 * (y - self.first) + m, 0)
-        return self.leaps[indx]
+        leaps = self.leaps[indx]
+        return leaps if leaps.shape else int(leaps)
 
     def leapsecs_from_ymd(self, y, m, d=1):
-        """The cumulative number of leap seconds on the given date, where the date is
-        expressed as a calendar year, month, and optional day.
+        """The cumulative number of leap seconds on the given date.
 
         This differs from the function delta_t_from_ymd() in that it returns values in
         units of UT "rubber seconds" rather than in units of TAI seconds. Values are
         always integers and have a fixed value if delta-T uses floating-point values.
 
-        For this subclass, leapsecs_from_ymd() and delta_t_from_ymd() are the same.
+        Parameters:
+            y (int or array-like): Calendar year.
+            m (int or array-like): Calendar month number (1-12).
+            d (int or array-like): Day of month (1-31).
 
-        Input:
-            y       calendar year as an integer scalar, array, or array-like.
-            m       calendar month number (1-12) as an integer scalar, array, or
-                    array-like.
-            d       calendar day number (1-31) as an integer scalar, array, or array-like.
-
-        Note that if any of the input values are arrays or array-like, they need not have
-        the same array shape; the the returned array will be have the broadcasted shape
-        of the input arrays.
+        Returns:
+            int or array: Cumulative delta-T in seconds for the given day.
         """
 
         return self.delta_t_from_ymd(y, m, d)
@@ -244,7 +242,7 @@ class SplineDeltaT(DeltaT):
     def __init__(self, info, before=None, last=None):
         """Constructor.
 
-        Input:
+        Parameters:
             info        a list of tuples with three, four, or five elements
                         (y, m, offset[, slope[, dref]]).
                             y, m    year and month at the start of a spline window;
@@ -304,9 +302,9 @@ class SplineDeltaT(DeltaT):
         self.params.fill(DeltaT.FLAG)
 
         indx = 13 * (years - self.first) + months
-        self.params[indx,0] = self.offsets
-        self.params[indx,1] = self.slopes
-        self.params[indx,2] = self.drefs
+        self.params[indx, 0] = self.offsets
+        self.params[indx, 1] = self.slopes
+        self.params[indx, 2] = self.drefs
 
         # Values of zero need to be replaced by the next-lower set of values
         prev_params = np.array([self.before, 0., 0.])
@@ -317,20 +315,17 @@ class SplineDeltaT(DeltaT):
                 prev_params = self.params[indx]
 
     def delta_t_from_ymd(self, y, m, d=1):
-        """The cumulative delta-T in seconds for the given day, expressed as a calendar
-        year, month, and optional day.
+        """Cumulative delta-T in seconds for the given day.
 
-        Returned values are always floating-point.
+        Parameters:
+            y (int or array-like): Calendar year.
+            m (int or array-like): Calendar month number (1-12).
+            d (int or array-like): Day of month (1-31).
 
-        Input:
-            y       calendar year as an integer scalar, array, or array-like.
-            m       calendar month number (1-12) as an integer scalar, array, or
-                    array-like.
-            d       calendar day number (1-31) as an integer scalar, array, or array-like.
-
-        Note that if any of the input values are arrays or array-like, they need not have
-        the same array shape; the the returned array will be have the broadcasted shape
-        of the input arrays.
+        Returns:
+            int, float, or array: Cumulative delta-T in seconds for the given day.
+            Integers are returned if the value is integral; otherwise, floats are
+            returned.
         """
 
         (y, m, d) = np.broadcast_arrays(y, m, d)
@@ -367,7 +362,7 @@ class FuncDeltaT(DeltaT):
     def __init__(self, func, first=None, last=None, before=None, after=None):
         """Constructor.
 
-        Input:
+        Parameters:
             info        a function of (y,m,d) that returns values of delta-T.
             first       the first year covered by this object. Use None or -np.inf for an
                         object that applies to all earlier dates.
@@ -392,20 +387,17 @@ class FuncDeltaT(DeltaT):
         self.after  = func(self.last+1,1,1) if after  is None else float(after)
 
     def delta_t_from_ymd(self, y, m, d=1):
-        """The cumulative delta-T in seconds for the given day, expressed as a calendar
-        year, month, and optional day.
+        """Cumulative delta-T in seconds for the given day.
 
-        Returned values are always floating-point.
+        Parameters:
+            y (int or array-like): Calendar year.
+            m (int or array-like): Calendar month number (1-12).
+            d (int or array-like): Day of month (1-31).
 
-        Input:
-            y       calendar year as an integer scalar, array, or array-like.
-            m       calendar month number (1-12) as an integer scalar, array, or
-                    array-like.
-            d       calendar day number (1-31) as an integer scalar, array, or array-like.
-
-        Note that if any of the input values are arrays or array-like, they need not have
-        the same array shape; the the returned array will be have the broadcasted shape
-        of the input arrays.
+        Returns:
+            int, float, or array: Cumulative delta-T in seconds for the given day.
+            Integers are returned if the value is integral; otherwise, floats are
+            returned.
         """
 
         (y, m, d) = np.broadcast_arrays(y, m, d)
@@ -465,8 +457,8 @@ class MergedDeltaT(DeltaT):
         for m in self.upward:
             if m.first == self.first:
                 self.earliest_model = m
+                # defines whether leap_seconds_from_ymd() returns a nonzero value
                 self.leap_model_defines_before = isinstance(m, LeapDeltaT)
-                    # defines whether leap_seconds_from_ymd() returns a nonzero value
 
         self.before = self.earliest_model.before
         if self.is_float:           # pragma: no branch
@@ -483,20 +475,17 @@ class MergedDeltaT(DeltaT):
                 self.leap_model_update = m.update_count
 
     def delta_t_from_ymd(self, y, m, d=1):
-        """The cumulative delta-T in seconds for the given day, expressed as a calendar
-        year, month, and optional day.
+        """Cumulative delta-T in seconds for the given day.
 
-        Returned values are always floating-point.
+        Parameters:
+            y (int or array-like): Calendar year.
+            m (int or array-like): Calendar month number (1-12).
+            d (int or array-like): Day of month (1-31).
 
-        Input:
-            y       calendar year as an integer scalar, array, or array-like.
-            m       calendar month number (1-12) as an integer scalar, array, or
-                    array-like.
-            d       calendar day number (1-31) as an integer scalar, array, or array-like.
-
-        Note that if any of the input values are arrays or array-like, they need not have
-        the same array shape; the the returned array will be have the broadcasted shape
-        of the input arrays.
+        Returns:
+            int, float, or array: Cumulative delta-T in seconds for the given day.
+            Integers are returned if the value is integral; otherwise, floats are
+            returned.
         """
 
         # If the LeapDeltaT was updated, update this
@@ -538,8 +527,8 @@ class MergedDeltaT(DeltaT):
                 floats[mask] = model.is_float
 
         model = self.models[0]
+        # Use the highest-precedence model wherever the value is still undefined
         mask = undefined | ((y >= model.first) & (y <= model.last))
-            # use the highest-precedence model wherever the value is still undefined
         results[mask] = model.delta_t_from_ymd(y, m, d)[mask]
         floats[mask] = model.is_float
 
@@ -549,22 +538,19 @@ class MergedDeltaT(DeltaT):
         return results
 
     def leapsecs_from_ymd(self, y, m, d=1):
-        """The cumulative number of leap seconds on the given date, where the date is
-        expressed as a calendar year, month, and optional day.
+        """The cumulative number of leap seconds on the given date.
 
         This differs from the function delta_t_from_ymd() in that it returns values in
         units of UT "rubber seconds" rather than in units of TAI seconds. Values are
         always integers and have a fixed value if delta-T uses floating-point values.
 
-        Input:
-            y       calendar year as an integer scalar, array, or array-like.
-            m       calendar month number (1-12) as an integer scalar, array, or
-                    array-like.
-            d       calendar day number (1-31) as an integer scalar, array, or array-like.
+        Parameters:
+            y (int or array-like): Calendar year.
+            m (int or array-like): Calendar month number (1-12).
+            d (int or array-like): Day of month (1-31).
 
-        Note that if any of the input values are arrays or array-like, they need not have
-        the same array shape; the the returned array will be have the broadcasted shape
-        of the input arrays.
+        Returns:
+            int or array: Cumulative delta-T in seconds for the given day.
         """
 
         if not self.leap_model:
@@ -577,4 +563,3 @@ class MergedDeltaT(DeltaT):
         return self.leap_model.leapsecs_from_ymd(y, m, d)
 
 ##########################################################################################
-

@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/time_pyparser.py
 ##########################################################################################
-"""Function to generate a PyParsing grammar for arbitrary time strings
 """
-##########################################################################################
+=======================
+Time pyparsing Grammars
+=======================
+"""
 
 import numpy as np
 from julian._TIMEZONES import TIMEZONES
@@ -405,30 +407,41 @@ def time_pyparser(*, leapsecs=False, ampm=False, timezones=False, timesys=False,
                      floating=False, iso_only=False, padding=True, embedded=False):
     """A time pyparser.
 
-    The pyparser interprets a string and returns a pyparsing.ParseResults object. Calling
-    the as_list() method on this object returns a list containing some but not all of
-    these tuples:
-        ("HOUR", hour)      hour if specified, 0-23, an int or possibly a float. Hours
-                            am/pm are converted to the range 0-23 automatically.
-        ("MINUTE", minute)  minute if specified, integer or float.
-        ("SECOND", second)  second if specified, integer or float.
-        ("LEAPSEC", True))  present if this is a leap second.
-        ("TZ", tz_name)     name of the time zone if specified.
-        ("TZMIN", tzmin)    offset of the time zone in minutes.
-        ("TIMESYS", name)   time system if specified: "UTC", "TAI", "TDB", or "TDT".
-        ("~", number)       the last occurrence of this tuple in the list contains the
-                            number of characters matched.
+    Parameters:
+        leapsecs (bool, optional):
+            True to recognize leap seconds.
+        ampm (bool, optional):
+            True to recognize "am" and "pm" suffixes.
+        timezones (bool, optional):
+            True to recognize and interpret time zones. If True, returned values are
+            adjusted to UTC.
+        timesys (bool, optional):
+            True to recognize an embedded time system such as "UTC", "TAI", etc.
+        floating (bool, optional):
+            True to allow times specified using floating-point values of hours or minutes.
+        iso_only (bool, optional):
+            Require an ISO 8601:1988-compatible time string; ignore `ampm`, `timesys`, and
+            `floating` options.
+        padding (bool, optional):
+            True to ignore leading or trailing white space.
+        embedded (bool, optional):
+            True to allow the time to be followed by additional text.
 
-    Input:
-        leapsecs    True to allow leap seconds.
-        ampm        True to allow "am" and "pm" suffixes.
-        timezones   True to allow time zones, e.g, "Z", "PDT", or "+01:00"
-        timesys     True to allow a time system, e.g., "UTC", "TAI", "TDB", or "TT".
-        floating    True to allow time specified using floating-point hours or minutes.
-        iso_only    Require an ISO-compatible time string; ignore ampm and timesys
-                    options.
-        padding     True to ignore leading or trailing white space.
-        embedded    True to allow the time to be followed by additional text.
+    Returns:
+        pyparsing.ParserElement: A parser for the selected syntax. Calling the as_list()
+        method on the returned ParseResult object returns a list containing some but not
+        all of these tuples:
+
+        * ("HOUR", hour): Hour if specified, 0-23, as an int or possibly a float. Hours
+          am/pm are converted to the range 0-23 automatically.
+        * ("MINUTE", minute): Minute if specified, integer or float.
+        * ("SECOND", second): Second if specified, integer or float.
+        * ("LEAPSEC", True): Present and True if this is a leap second.
+        * ("TZ", tz_name): Name of the time zone if specified.
+        * ("TZMIN", tzmin): Offset of the time zone in minutes.
+        * ("TIMESYS", name): Time system if specified: "UTC", "TAI", "TDB", or "TDT".
+        * ("~", number): The last occurrence of this tuple in the list contains the number
+          of characters matched.
     """
 
     if iso_only:
@@ -450,4 +463,3 @@ def time_pyparser(*, leapsecs=False, ampm=False, timezones=False, timesys=False,
     return pyparser
 
 ##########################################################################################
-

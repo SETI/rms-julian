@@ -1,9 +1,11 @@
 ##########################################################################################
 # julian/time_parsers.py
 ##########################################################################################
-"""Functions to parse time strings given in arbitrary formats
 """
-##########################################################################################
+============
+Time Parsers
+============
+"""
 
 import pyparsing
 import re
@@ -23,18 +25,32 @@ _PRE_FILTER = True      # set False for some performance tests
 def sec_from_string(string, leapsecs=True, ampm=True, timezones=False, floating=False):
     """Time of day in seconds, based on the parsing of a free-form string.
 
-    Input:
-        string      string to interpret.
-        leapsecs    True to recognize leap seconds.
-        ampm        True to recognize "am" and "pm" suffixes.
-        timezones   True to recognize and interpret time zones. If True, returned values
-                    are adjusted to UTC.
-        floating    True to allow time specified using floating-point hours or minutes.
+    Parameters:
+        string (str):
+            String to interpret.
+        leapsecs (bool, optional):
+            True to recognize leap seconds.
+        ampm (bool, optional):
+            True to recognize "am" and "pm" suffixes.
+        timezones (bool, optional):
+            True to recognize and interpret time zones. If True, returned values are
+            adjusted to UTC.
+        floating (bool, optional):
+            True to recognize time specified using floating-point hours or minutes.
 
-    Return:         a single count of seconds or a tuple (sec, dday)
-        sec         count of seconds.
-        dday        the offset in days due to the presence of the time zone, included if
-                    the input value of timezones is True.
+    Returns:
+        sec or tuple (sec, dday):
+
+        - **sec** (*int or float*): Elapsed seconds since the beginning of the day, after
+          any time zone offset has been applied.
+        - **dday** (*int*): An offset in days due to the possible presence of the time
+          zone, included if `timezones` is True.
+
+    Raises:
+        JulianParseException:
+            If `string` was not recognized as a valid time expression.
+        JulianParseException:
+            If the time string contains invalid or contradictory information.
     """
 
     parser = time_pyparser(leapsecs=leapsecs, ampm=ampm, timezones=timezones,
@@ -58,34 +74,43 @@ def sec_from_string(string, leapsecs=True, ampm=True, timezones=False, floating=
 ##########################################################################################
 
 def secs_in_strings(strings, leapsecs=True, ampm=True, timezones=False, floating=False,
-                    validate=True, substrings=False, first=False):
+                    substrings=False, first=False):
     """List of second counts representing times of day, obtained by searching one or more
     strings for patterns that look like formatted times.
 
-    Input:
-        strings     list/array/tuple of strings to interpret.
-        leapsecs    True to recognize leap seconds.
-        ampm        True to recognize "am" and "pm" suffixes.
-        timezones   True to recognize and interpret time zones. If True, returned values
-                    are adjusted to UTC.
-        floating    True to recognize time values specified using floating-point hours or
-                    minutes.
-        validate    if True, patterns that look like times but are not valid for other
-                    reasons are ignored.
-        substrings  True to also return the substring containing each identified time.
-        first       True to return when the first time is found, with None on failure;
-                    False to return the full, ordered list of times found.
+    Parameters:
+        strings (list, tuple, or array):
+            Strings to interpret.
+        leapsecs (bool, optional):
+            True to recognize leap seconds.
+        ampm (bool, optional):
+            True to recognize "am" and "pm" suffixes.
+        timezones (bool, optional):
+            True to recognize and interpret time zones. If True, returned values are
+            adjusted to UTC.
+        floating (bool, optional):
+            True to recognize time specified using floating-point hours or minutes.
+        substrings (bool, optional):
+            True to also return the substring containing each identified time.
+        first (bool, optional):
+            True to return the first time value found rather than a list of values. In
+            this case, None is returned if no time is found rather than an empty list.
 
-    Return:         a list containing either second counts or tuples (sec, optional dday,
-                    optional substring).
-        sec         number of seconds into day.
-        dday        the offset in days due to the presence of the time zone, included if
-                    the input value of timezones is True.
-        substring   the substring containing the text that was interpreted to represent
-                    this time; included if the input value of include_text is True.
+    Returns:
+        tuple (sec[, dday][, substring]), list[tuple], or None: If `first` is False, a
+        list of tuples is returned; otherwise, a single tuple is returned or None if no
+        time was found. Within this tuple:
 
-        Note: If the input value of first is True, the returned quantity is not a list,
-        just a single second count or tuple.
+        - **sec** (*int or float*): Elapsed seconds since the beginning of the day, after
+          any time zone offset has been applied.
+        - **dday** (*int*): An offset in days due to the possible presence of a time zone,
+          included if `timezones` is True.
+        - **substring** (*str*): The substring containing the text that was interpreted to
+          represent this time; included if `substrings` is True.
+
+    Raises:
+        JulianValidateFailure:
+            If a matched time string contains invalid or contradictory information.
     """
 
     if isinstance(strings, str):
@@ -107,11 +132,7 @@ def secs_in_strings(strings, leapsecs=True, ampm=True, timezones=False, floating
             if not parse_dict:
                 break
 
-            try:
-                (sec, dday, _) = _sec_from_dict(parse_dict, leapsecs=leapsecs,
-                                                validate=validate)
-            except ValueError:  # pragma: no cover
-                continue
+            (sec, dday, _) = _sec_from_dict(parse_dict, leapsecs=leapsecs, validate=True)
 
             result = [sec]
             if timezones:

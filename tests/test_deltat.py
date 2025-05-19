@@ -550,11 +550,4 @@ class Test_DeltaT(unittest.TestCase):
         dt3 = LeapDeltaT(INFO)
         self.assertRaises(ValueError, MergedDeltaT, dt1, dt2, dt3)
 
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
-
 ##########################################################################################

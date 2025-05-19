@@ -9,7 +9,7 @@ import unittest
 from julian             import leap_seconds
 from julian.calendar    import day_from_ymd
 from julian.iso_parsers import tai_from_iso
-from julian._exceptions import JulianValidateFailure
+from julian._exceptions import JulianValidateFailure as JVF
 
 from julian.leap_seconds import (
     delta_t_from_day,
@@ -37,7 +37,13 @@ class Test_leap_seconds(unittest.TestCase):
         self.assertEqual(leapsecs_from_ym(1971,12), 9)
         self.assertEqual(leapsecs_from_ym(1972, 1), 10)
         self.assertEqual(leapsecs_from_ym(2022, 1), 37)
+        self.assertIs(type(leapsecs_from_ym(1958, 1)), int)
+        self.assertIs(type(leapsecs_from_ym(1964, 1)), int)
+        self.assertIs(type(leapsecs_from_ym(1971,12)), int)
+        self.assertIs(type(leapsecs_from_ym(1972, 1)), int)
+        self.assertIs(type(leapsecs_from_ym(2022, 1)), int)
         self.assertTrue(np.all(leapsecs_from_ym([1971, 1964, 1958], 1) == 9))
+        self.assertEqual(leapsecs_from_ym([1971, 1964, 1958], 1).dtype, np.int64)
 
         self.assertEqual(delta_t_from_ymd(1958, 1), 9)
         self.assertEqual(delta_t_from_ymd(1964, 1), 9)
@@ -229,26 +235,16 @@ class Test_leap_seconds(unittest.TestCase):
             tai = tai_from_iso('2030-01-01T00:00:00')
             self.assertEqual(tai_from_iso('2029-12-31T23:59:58', validate=True), tai-1)
             self.assertEqual(tai_from_iso('2029-12-31T23:59:59', validate=False), tai)
-            self.assertRaises(JulianValidateFailure,
-                              tai_from_iso, '2029-12-31T23:59:59', validate=True)
+            self.assertRaises(JVF, tai_from_iso, '2029-12-31T23:59:59', validate=True)
 
             tai = tai_from_iso('2031-01-01T00:00:00')
             self.assertEqual(tai_from_iso('2030-12-31T23:59:57', validate=True), tai-1)
-            self.assertRaises(JulianValidateFailure,
-                              tai_from_iso, '2030-12-31T23:59:58', validate=True)
-            self.assertRaises(JulianValidateFailure,
-                              tai_from_iso, '2030-12-31T23:59:59', validate=True)
+            self.assertRaises(JVF, tai_from_iso, '2030-12-31T23:59:58', validate=True)
+            self.assertRaises(JVF, tai_from_iso, '2030-12-31T23:59:59', validate=True)
 
             load_lsk()
 
         # Go back to the default
         set_ut_model('LEAPS')
-
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
 
 ##########################################################################################

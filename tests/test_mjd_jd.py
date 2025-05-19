@@ -27,7 +27,7 @@ from julian.mjd_jd import (
     _JD_OF_JAN_1_2000,
 )
 
-from julian.DEPRECATED import (
+from julian._DEPRECATED import (
     jed_from_tai,
     jed_from_tdb,
     mjed_from_tai,
@@ -168,12 +168,5 @@ class Test_mjd_jd(unittest.TestCase):
             self.assertEqual(time_from_mjd(51544.0, timesys='UTC'),
                              0. if origin == 'MIDNIGHT' else -43200)
             self.assertEqual(day_sec_from_mjd(51544.0), (0,0))
-
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
 
 ##########################################################################################

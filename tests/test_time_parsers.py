@@ -9,12 +9,14 @@ from julian.time_parsers import (
     secs_in_strings,
 )
 
-from julian.DEPRECATED import (
+from julian._DEPRECATED import (
     time_in_string,
     times_in_string,
 )
 
-from julian._exceptions    import JulianParseException, JulianValidateFailure
+from julian._exceptions import JulianParseException as JPE
+from julian._exceptions import JulianValidateFailure as JVF
+
 
 class Test_time_parsers(unittest.TestCase):
 
@@ -32,12 +34,16 @@ class Test_time_parsers(unittest.TestCase):
         self.assertEqual(sec_from_string('00:00:59.000'), 59.0)
         self.assertEqual(sec_from_string('00:00:59'), 59)
 
+        self.assertIs(type(sec_from_string('00:00:00.000')), float)
+        self.assertIs(type(sec_from_string('00:00:00')), int)
+        self.assertIs(type(sec_from_string('00:00:59.000')), float)
+        self.assertIs(type(sec_from_string('00:00:59')), int)
+
         # sec_from_string, leapsecs
         self.assertEqual(sec_from_string('23:59:60.000'), 86400.0)
         self.assertEqual(sec_from_string('23:59:69.000'), 86409.0)
-        self.assertRaises(JulianParseException, sec_from_string, '23:59:70.000')
-        self.assertRaises(JulianParseException,
-                          sec_from_string, '23:59:60', leapsecs=False)
+        self.assertRaises(JPE, sec_from_string, '23:59:70.000')
+        self.assertRaises(JPE, sec_from_string, '23:59:60', leapsecs=False)
 
         # sec_from_string, am/pm
         self.assertEqual(sec_from_string('12:00:00 am', ampm=True),     0)
@@ -47,9 +53,8 @@ class Test_time_parsers(unittest.TestCase):
         self.assertEqual(sec_from_string(' 1:00:00 pm', ampm=True), 43200 + 3600)
         self.assertEqual(sec_from_string('11:59:59 pm', ampm=True), 86399)
         self.assertEqual(sec_from_string('11:59:60 pm', ampm=True, leapsecs=True), 86400)
-        self.assertRaises(JulianParseException,
-                          sec_from_string, '11:59:60 pm', ampm=True, leapsecs=False)
-        self.assertRaises(JulianParseException, sec_from_string, '23:00:00 am', ampm=True)
+        self.assertRaises(JPE, sec_from_string, '11:59:60 pm', ampm=True, leapsecs=False)
+        self.assertRaises(JPE, sec_from_string, '23:00:00 am', ampm=True)
 
         # sec_from_string, floating
         self.assertEqual(sec_from_string('12h',    floating=True), 43200)
@@ -59,8 +64,7 @@ class Test_time_parsers(unittest.TestCase):
         self.assertEqual(sec_from_string('1:10.5', floating=True), 70.5 * 60)
         self.assertEqual(sec_from_string('60 M',   floating=True), 60 * 60)
 
-        self.assertRaises(JulianParseException, sec_from_string, '86400s', floating=True,
-                                                                 leapsecs=False)
+        self.assertRaises(JPE, sec_from_string, '86400s', floating=True, leapsecs=False)
 
         # sec_from_string, timezones, am/pm, leapsecs
         self.assertEqual(sec_from_string('00:00 gmt',   timezones=True), (0, 0))
@@ -74,16 +78,13 @@ class Test_time_parsers(unittest.TestCase):
         self.assertEqual(sec_from_string('6:59:60 pm est', timezones=True, leapsecs=True),
                                          (86400, 0))
 
-        self.assertRaises(JulianParseException,
-                          sec_from_string, '10:59:59 pm', ampm=False)
-        self.assertRaises(JulianParseException,
-                          sec_from_string, '7:59:59 pm est', ampm=True, timezones=False)
-        self.assertRaises(JulianParseException,
-                          sec_from_string, '6:59:60 pm est', ampm=True, timezones=True,
-                                                             leapsecs=False)
-        self.assertRaises(JulianValidateFailure,
-                          sec_from_string, '7:59:60 pm est', ampm=True, timezones=True,
-                                                             leapsecs=True)
+        self.assertRaises(JPE, sec_from_string, '10:59:59 pm', ampm=False)
+        self.assertRaises(JPE, sec_from_string, '7:59:59 pm est', ampm=True,
+                          timezones=False)
+        self.assertRaises(JPE, sec_from_string, '6:59:60 pm est', ampm=True,
+                          timezones=True, leapsecs=False)
+        self.assertRaises(JVF, sec_from_string, '7:59:60 pm est', ampm=True,
+                          timezones=True, leapsecs=True)
 
         # secs_in_strings
         self.assertEqual(secs_in_strings('t=00:00:00.000', first=True), 0.0)
@@ -121,12 +122,5 @@ class Test_time_parsers(unittest.TestCase):
         self.assertEqual(times_in_string('End time[23:59:60.000]'), [86400.0])
         self.assertEqual(times_in_string('End time is 23:59:69.000 and later'), [86409.0])
         self.assertEqual(times_in_string('Error 23:5z:00.000:0'), [])
-
-############################################
-# Execute from command line...
-############################################
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
 
 ##########################################################################################
