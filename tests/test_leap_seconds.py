@@ -235,20 +235,17 @@ class Test_leap_seconds(unittest.TestCase):
             tai = tai_from_iso('2030-01-01T00:00:00')
             self.assertEqual(tai_from_iso('2029-12-31T23:59:58', validate=True), tai-1)
             self.assertEqual(tai_from_iso('2029-12-31T23:59:59', validate=False), tai)
-            self.assertRaises(JulianValidateFailure,
-                              tai_from_iso, '2029-12-31T23:59:59', validate=True)
+            self.assertRaises(JVF, tai_from_iso, '2029-12-31T23:59:59', validate=True)
 
             tai = tai_from_iso('2031-01-01T00:00:00')
             self.assertEqual(tai_from_iso('2030-12-31T23:59:57', validate=True), tai-1)
-            self.assertRaises(JulianValidateFailure,
-                              tai_from_iso, '2030-12-31T23:59:58', validate=True)
-            self.assertRaises(JulianValidateFailure,
-                              tai_from_iso, '2030-12-31T23:59:59', validate=True)
+            self.assertRaises(JVF, tai_from_iso, '2030-12-31T23:59:58', validate=True)
+            self.assertRaises(JVF, tai_from_iso, '2030-12-31T23:59:59', validate=True)
 
             load_lsk()
 
-        # Go back to the default
-        set_ut_model('LEAPS')
+            # Go back to the default
+            set_ut_model('LEAPS')
 
             insert_leap_second(2030, 1, -1)
             insert_leap_second(2031, 1, -2)
