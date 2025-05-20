@@ -111,7 +111,8 @@ class Test_utc_tai_tdb_tt(unittest.TestCase):
         self.assertTrue(np.all(test_day == daylist))
         self.assertTrue(np.all(test_sec == 0))
 
-        #### Switch UTC origin to NOON
+        # Switch UTC origin to NOON
+
         set_tai_origin('NOON')
 
         # Check utc_from_day

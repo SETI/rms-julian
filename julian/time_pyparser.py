@@ -173,11 +173,11 @@ second_float_strict.set_parse_action(
 
 # A number 0-86399, no leading zeros or white space
 zero_86399 = (
-    Combine('86' + Word('0123',   nums, exact=3)) | # 86000-86399
-    Combine('8'  + Word('012345', nums, exact=4)) | # 80000-85999
-    Word('1234567', nums, exact=5)    |             # 10000-79999
-    Word(nonzero, nums, min=1, max=4) |             # 1-9999
-    Literal('0')                                    # 0
+    Combine('86' + Word('0123',   nums, exact=3)) |     # 86000-86399
+    Combine('8'  + Word('012345', nums, exact=4)) |     # 80000-85999
+    Word('1234567', nums, exact=5)    |                 # 10000-79999
+    Word(nonzero, nums, min=1, max=4) |                 # 1-9999
+    Literal('0')                                        # 0
 )
 
 second86399 = zero_86399.copy()
@@ -404,7 +404,7 @@ for l in (0,1):
 ##########################################################################################
 
 def time_pyparser(*, leapsecs=False, ampm=False, timezones=False, timesys=False,
-                     floating=False, iso_only=False, padding=True, embedded=False):
+                  floating=False, iso_only=False, padding=True, embedded=False):
     """A time pyparser.
 
     Parameters:

@@ -218,7 +218,7 @@ class Test_Time_of_Day_v1(unittest.TestCase):
 
     def runTest(self):
 
-        #Check hms_from_sec
+        # Check hms_from_sec
         self.assertEqual(j.hms_from_sec(0), (0, 0, 0),
                          "0 is not (0, 0, 0).")
         self.assertEqual(j.hms_from_sec(86400), (23, 59, 60),

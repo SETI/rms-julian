@@ -649,7 +649,6 @@ class Test_date_pyparser(unittest.TestCase):
         self.my_yd_tester(YD_PYPARSERS[0,0,0], YD_PYPARSERS[0,0,1], floating=False)
         self.my_yd_tester(YD_PYPARSERS[0,1,0], YD_PYPARSERS[0,1,1], floating=True)
 
-
     def my_yd_tester(self, parser_loose, parser_strict, *, floating=False, extended=False,
                            padding=False, embedded=False, failure=False):
 
@@ -962,7 +961,6 @@ class Test_date_pyparser(unittest.TestCase):
             self.my_yd_tester(parser_loose, parser_strict,
                               padding=padding, embedded=(not padding))
 
-
     def test_date_pyparser_mjd(self):
 
         from tests.test_mjd_pyparser import Test_mjd_pyparser
@@ -975,7 +973,6 @@ class Test_date_pyparser(unittest.TestCase):
               Test_mjd_pyparser.my_mjd_tester(self, parser, floating=floating,
                                               timesys=floating, padding=padding,
                                               embedded=embedded)
-
 
     def test_date_pyparser_iso_only(self):
 

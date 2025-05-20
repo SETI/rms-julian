@@ -184,7 +184,6 @@ class Test_iso_parsers(unittest.TestCase):
         self.assertEqual(list(day_from_iso(['2000-01-31.25', '2000-01-31.75'])),
                          [30.25, 30.75])
 
-
     def test_sec_from_iso(self):
 
         for c in (':', ''):

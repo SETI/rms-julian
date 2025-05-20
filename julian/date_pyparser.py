@@ -276,8 +276,8 @@ for x in range(2):
 
     # Augment non-strict YMD options with compressed formats
     # Note compressed options must be split, 2-digit year before 4-digit year.
-    compressed_ymd = ( year_2digit + month_2digit + d_parsers[f][1]
-                     | year_4digit + month_2digit + d_parsers[f][1])
+    compressed_ymd = (  year_2digit + month_2digit + d_parsers[f][1]
+                      | year_4digit + month_2digit + d_parsers[f][1])
     if x == 1:
         compressed_ymd |= signed_year + month_2digit + d_parsers[f][1]
     ymd_parser[x,f,0] |= compressed_ymd
@@ -287,8 +287,8 @@ for x in range(2):
   for f in range(3):
     for s in range(2):
         dot_md  = dotless_month + dot + date + dot  # no period in month or date
-        punc_md = month + ( dash  + d_parsers[f][0] + dash
-                          | slash + d_parsers[f][0] + slash)
+        punc_md = month + (  dash  + d_parsers[f][0] + dash
+                           | slash + d_parsers[f][0] + slash)
         space_mdy = m_parsers[s] + white + d_parsers[f][0] + opt_comma + y_extended[0][x]
         mdy_parser[x,f,s] = space_mdy | (dot_md | punc_md) + y_suffixed[0][x]
 
@@ -331,13 +331,13 @@ doy_parsers = [[doy            , doy_3digit                   ],
 YD_PYPARSERS = np.empty((2,3,2), dtype='object')
 for x in range(2):
   for f in range(3):
-    YD_PYPARSERS[x,f,0] = (( y_signed[0][x] + (dash|slash|white) + doy_parsers[f][0]
-                           | y_signed[0][x] + dot                + doy_parsers[0][0]
-                           | year_2digit + doy_parsers[f][1]    # compressed options
-                           | year_4digit + doy_parsers[f][1])
+    YD_PYPARSERS[x,f,0] = ((  y_signed[0][x] + (dash|slash|white) + doy_parsers[f][0]
+                            | y_signed[0][x] + dot                + doy_parsers[0][0]
+                            | year_2digit + doy_parsers[f][1]   # compressed options
+                            | year_4digit + doy_parsers[f][1])
                           + ~FollowedBy(nums))
     YD_PYPARSERS[x,f,1] = (y_signed[1][x] + (dash|slash) + doy_parsers[f][1]
-                          + ~FollowedBy(nums))
+                           + ~FollowedBy(nums))
 
 ##########################################################################################
 # ISO date pyparsers
