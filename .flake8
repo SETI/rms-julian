@@ -1,6 +1,6 @@
 [flake8]
 max-line-length: 90
-exte# nd-ignore =
+extend-ignore =
     # E201 Whitespace after '('
     # E202 Whitespace before ')'
     # E203 Whitespace before ':'
