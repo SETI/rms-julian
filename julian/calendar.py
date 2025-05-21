@@ -65,7 +65,7 @@ def day_from_ymd(y, m, d, *, validate=False, proleptic=False):
             raise JulianValidateFailure('day number cannot exceed days in month')
 
     mm = (m + 9) % 12   # This makes March the first month and February the last
-    yy = y - mm//10     # This subtracts one from the year if the month is January or
+    yy = y - mm // 10   # This subtracts one from the year if the month is January or
                         # February.
 
     # Random notes:

@@ -147,7 +147,6 @@ class Test_DeltaT(unittest.TestCase):
         self.assertEqual(dt.update_count, 3)
         self.assertEqual(dt.last, _MAX_YEAR)
 
-
     def test_SplineDeltaT(self):
 
         dt = SplineDeltaT(INFO, before=9)
@@ -197,7 +196,6 @@ class Test_DeltaT(unittest.TestCase):
         answer = (1 - fracs) * dt_1976 + fracs * dt_1977
         self.assertTrue(np.all(dt.delta_t_from_ymd(y,m,d) == answer))
         self.assertTrue(np.all(dt.leapsecs_from_ymd(y,m,d) == 0))
-
 
     def test_FuncDeltaT(self):
 
@@ -278,7 +276,6 @@ class Test_DeltaT(unittest.TestCase):
         answer[y >= 2201] = 8888
         self.assertLess(np.abs(dt.delta_t_from_ymd(y,1,1) - answer).max(), 1.e-10)
         self.assertTrue(np.all(dt.leapsecs_from_ymd(y,1,1) == 0))
-
 
     def test_MergedDeltaT(self):
 

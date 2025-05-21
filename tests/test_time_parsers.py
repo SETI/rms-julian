@@ -98,7 +98,7 @@ class Test_time_parsers(unittest.TestCase):
                                          timezones=True, substrings=True),
                          [(0, 0, '1:00 am bst')])
 
-        #### DEPRECATED
+        # DEPRECATED
 
         # Check time_in_string
         self.assertEqual(time_in_string('This is the time--00:00:00.000'), 0.0)

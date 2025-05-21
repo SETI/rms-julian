@@ -431,7 +431,7 @@ def set_ut_model(model='LEAPS', future=None):
           future.
         * "SPICE": Replicate the behavior of the SPICE Toolkit, in which TAI-UTC=9 before
           1972. In this system, December 31, 1971 incorrectly contained a leap second.
-        * "PRE-1972": In addition to the "LEAPS" model, iclude the full model for UTC
+        * "PRE-1972": In addition to the "LEAPS" model, include the full model for UTC
           widely used during the period 1958-1972. In these years, the UTC time system was
           defined in terms of a "rubber second", which could expand or shrink as necessary
           to ensure that every UTC day had exactly 86,400 seconds. In addition, several

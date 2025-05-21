@@ -228,8 +228,9 @@ def _day_from_dict(parse_dict, proleptic=True, validate=True):
     return day
 
 
-_DATE_WORDS_REGEX  = re.compile(r'(?<![A-Z])(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|'
-                                            'DEC|MON|TUE|WED|THU|FRI|SAT|SUN)', re.I)
+_DATE_WORDS_REGEX  = re.compile(r'(?<![A-Z])('
+                                'JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|'
+                                'DEC|MON|TUE|WED|THU|FRI|SAT|SUN)', re.I)
 _YEAR12_REGEX      = re.compile(r'(?<!\d)[12]\d\d\d(?!\d)')
 _FOUR_DIGITS       = re.compile(r'(?<!\d)\d\d\d\d(?!\d)')
 _ONE_OR_TWO_DIGITS = re.compile(r'(?<!\d)\d\d?(?!\d)')
