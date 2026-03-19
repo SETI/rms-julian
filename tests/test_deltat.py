@@ -315,7 +315,6 @@ def test_MergedDeltaT():
     assert isinstance(dt.delta_t_from_ymd(9999, 1), numbers.Integral)
 
     day_1976 = day_from_ymd(1976,1,1)
-    day_1976 = day_from_ymd(1976,1,1)
     day_1977 = day_from_ymd(1977,1,1)
     day = 0.5 * (day_1976 + day_1977)
     (y,m,d) = ymd_from_day(0.5 * (day_1976 + day_1977))

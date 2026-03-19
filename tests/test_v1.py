@@ -259,12 +259,12 @@ def test_tdb_tai_v1():
 
     j.set_tai_origin('MIDNIGHT')
 
-    # Check tdb_from_tai
-    assert j.tdb_from_tai(j.tai_from_day(0)) == pytest.approx(64.18391281194636-43200, abs=1e-15)
+    # TDB at midnight day 0 (MIDNIGHT): same instant as tai_from_day(0)
+    tdb_at_midnight = 64.18391281194636 - 43200
+    assert j.tdb_from_tai(j.tai_from_day(0)) == pytest.approx(tdb_at_midnight, abs=1e-15)
 
     # Check tai_from_tdb
-    assert abs(j.tai_from_tdb(64.18391281194636)
-                                     - j.tai_from_day(0)) < 1.e15
+    assert abs(j.tai_from_tdb(tdb_at_midnight) - j.tai_from_day(0)) < 1.e-15
 
     j.set_tai_origin('NOON')
 

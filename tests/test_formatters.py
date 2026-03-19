@@ -2,9 +2,12 @@
 # julian/test_formatters.py
 ##########################################################################################
 
+import warnings
+
 import numpy as np
 import pytest
 
+from julian._warnings import JulianDeprecationWarning
 from julian.formatters import (
     format_day,
     format_day_sec,
@@ -483,22 +486,24 @@ def test_format_sec():
             result = format_sec(FTIME_TESTS[k], digits=digits, kind='S')
             assert answers[k].encode('latin8') == result
 
-    # old tests...
+    # old tests (deprecated hms_format_from_sec)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', JulianDeprecationWarning)
 
-    # Check if one day is 86400 seconds
-    assert hms_format_from_sec(86400) == '23:59:60'
+        # Check if one day is 86400 seconds
+        assert hms_format_from_sec(86400) == '23:59:60'
 
-    # Check if hms_format_from_sec end with 86409
-    assert hms_format_from_sec(86409) == '23:59:69'
+        # Check if hms_format_from_sec end with 86409
+        assert hms_format_from_sec(86409) == '23:59:69'
 
-    # Check if hms_format_from_sec returns the correct format.
-    assert hms_format_from_sec(0.) == '00:00:00'
-    assert hms_format_from_sec(0., digits=3) == '00:00:00.000'
-    assert hms_format_from_sec(0., digits=3, suffix='Z') == '00:00:00.000Z'
+        # Check if hms_format_from_sec returns the correct format.
+        assert hms_format_from_sec(0.) == '00:00:00'
+        assert hms_format_from_sec(0., digits=3) == '00:00:00.000'
+        assert hms_format_from_sec(0., digits=3, suffix='Z') == '00:00:00.000Z'
 
-    # Check if hms_format_from_sec accepts seconds over 86410
-    with pytest.raises(JVF):
-        hms_format_from_sec(86411)
+        # Check if hms_format_from_sec accepts seconds over 86410
+        with pytest.raises(JVF):
+            hms_format_from_sec(86411)
 
     # Errors
     with pytest.raises(ValueError):
@@ -634,47 +639,49 @@ def test_format_day_sec():
             result = format_day_sec(0, 43201, buffer=np.empty((), 'S' + str(l)))
             assert result == b'2000-01-01T12:00:01'
 
-    # old tests...
+    # old tests (deprecated ymdhms/ydhms formatters)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', category=JulianDeprecationWarning)
 
-    # Check if ymdhms_format_from_day_sec returns the correct format.
-    assert ymdhms_format_from_day_sec(0, 0) == '2000-01-01T00:00:00'
-    assert (ymdhms_format_from_day_sec(0, 0, sep='T', digits=3)
-            == '2000-01-01T00:00:00.000')
-    assert (ymdhms_format_from_day_sec(0, 0, sep='T', digits=3, suffix='Z')
-            == '2000-01-01T00:00:00.000Z')
-    assert (ymdhms_format_from_day_sec(0, 0, sep='T', digits=None)
-            == '2000-01-01T00:00:00')
-    assert (ymdhms_format_from_day_sec(0, 0, sep='T', digits=None, suffix='Z')
-            == '2000-01-01T00:00:00Z')
-    assert (ydhms_format_from_day_sec(0, 0, sep='T', digits=None,
-                                            suffix='Z', kind='S')
-            == b'2000-001T00:00:00Z')
+        # Check if ymdhms_format_from_day_sec returns the correct format.
+        assert ymdhms_format_from_day_sec(0, 0) == '2000-01-01T00:00:00'
+        assert (ymdhms_format_from_day_sec(0, 0, sep='T', digits=3)
+                == '2000-01-01T00:00:00.000')
+        assert (ymdhms_format_from_day_sec(0, 0, sep='T', digits=3, suffix='Z')
+                == '2000-01-01T00:00:00.000Z')
+        assert (ymdhms_format_from_day_sec(0, 0, sep='T', digits=None)
+                == '2000-01-01T00:00:00')
+        assert (ymdhms_format_from_day_sec(0, 0, sep='T', digits=None, suffix='Z')
+                == '2000-01-01T00:00:00Z')
+        assert (ydhms_format_from_day_sec(0, 0, sep='T', digits=None,
+                                                suffix='Z', kind='S')
+                == b'2000-001T00:00:00Z')
 
-    assert (ymdhms_format_from_tai(32 - 43200)
-            == '2000-01-01T00:00:00')
-    assert (ymdhms_format_from_tai(32 - 43200, sep='T', digits=3)
-            == '2000-01-01T00:00:00.000')
-    assert (ymdhms_format_from_tai(32 - 43200, sep='T', digits=3, suffix='Z')
-            == '2000-01-01T00:00:00.000Z')
-    assert (ymdhms_format_from_tai(32 - 43200, sep='T', digits=None)
-            == '2000-01-01T00:00:00')
-    assert (ymdhms_format_from_tai(32 - 43200, sep='T', digits=None, suffix='Z')
-            == '2000-01-01T00:00:00Z')
-    assert (ydhms_format_from_tai(32 - 43200, sep='T', digits=None,
-                                                     suffix='Z', kind='S')
-            == b'2000-001T00:00:00Z')
-    assert (iso_from_tai(23456789012.345, ymd=True, digits=3, suffix='Z')
-            == ymdhms_format_from_tai(23456789012.345, digits=3, suffix='Z'))
-    assert (iso_from_tai(-23456789012.345, ymd=False, digits=3, suffix='Z')
-            == ydhms_format_from_tai(-23456789012.345, digits=3, suffix='Z'))
+        assert (ymdhms_format_from_tai(32 - 43200)
+                == '2000-01-01T00:00:00')
+        assert (ymdhms_format_from_tai(32 - 43200, sep='T', digits=3)
+                == '2000-01-01T00:00:00.000')
+        assert (ymdhms_format_from_tai(32 - 43200, sep='T', digits=3, suffix='Z')
+                == '2000-01-01T00:00:00.000Z')
+        assert (ymdhms_format_from_tai(32 - 43200, sep='T', digits=None)
+                == '2000-01-01T00:00:00')
+        assert (ymdhms_format_from_tai(32 - 43200, sep='T', digits=None, suffix='Z')
+                == '2000-01-01T00:00:00Z')
+        assert (ydhms_format_from_tai(32 - 43200, sep='T', digits=None,
+                                                         suffix='Z', kind='S')
+                == b'2000-001T00:00:00Z')
+        assert (iso_from_tai(23456789012.345, ymd=True, digits=3, suffix='Z')
+                == ymdhms_format_from_tai(23456789012.345, digits=3, suffix='Z'))
+        assert (iso_from_tai(-23456789012.345, ymd=False, digits=3, suffix='Z')
+                == ydhms_format_from_tai(-23456789012.345, digits=3, suffix='Z'))
 
-    ymdhms = ymdhms_format_from_day_sec([0,366],[0,43200])
-    assert np.all(ymdhms == ('2000-01-01T00:00:00', '2001-01-01T12:00:00'))
+        ymdhms = ymdhms_format_from_day_sec([0,366],[0,43200])
+        assert np.all(ymdhms == ('2000-01-01T00:00:00', '2001-01-01T12:00:00'))
 
-    # Check TAI formatting
-    # The 32's below are for the offset between TAI and UTC
-    assert np.all(ydhms_format_from_tai([32.-43200,366.*86400.+32.-43200])
-                           == ('2000-001T00:00:00', '2001-001T00:00:00'))
+        # Check TAI formatting
+        # The 32's below are for the offset between TAI and UTC
+        assert np.all(ydhms_format_from_tai([32.-43200,366.*86400.+32.-43200])
+                               == ('2000-001T00:00:00', '2001-001T00:00:00'))
 
     # Buffers
     answer = np.array(['1999-001', '2000-001', '2001-001'])

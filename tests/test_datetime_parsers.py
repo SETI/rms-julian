@@ -104,10 +104,10 @@ def test_datetime_parsers():
     assert day_sec_type_from_string('1998-12-31 23:59:60.99') == \
         (-366, 86400.99, 'UTC')
 
-    assert type(day_sec_from_string('1998-12-31 23:59:60')[0]) == int
-    assert type(day_sec_from_string('1998-12-31 23:59:60')[1]) == int
-    assert type(day_sec_from_string('1998-12-31 23:59:60.99')[0]) == int
-    assert type(day_sec_from_string('1998-12-31 23:59:60.99')[1]) == float
+    assert type(day_sec_from_string('1998-12-31 23:59:60')[0]) is int
+    assert type(day_sec_from_string('1998-12-31 23:59:60')[1]) is int
+    assert type(day_sec_from_string('1998-12-31 23:59:60.99')[0]) is int
+    assert type(day_sec_from_string('1998-12-31 23:59:60.99')[1]) is float
 
     with pytest.raises(JVF):
         day_sec_from_string('2000-01-01 23:59:60', leapsecs=True)

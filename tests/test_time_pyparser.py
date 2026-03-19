@@ -563,7 +563,7 @@ def test_second():
 
     # Success
     assert p.parse_string('0.5')[0][0] == 'SECOND'
-    for s in range(1440):
+    for s in range(86400):
         assert p.parse_string(str(s) + '.5')[0][1] == s + 0.5
 
     # Failure
@@ -577,7 +577,7 @@ def test_second():
     with pytest.raises(ParseException):
         p.parse_string('10')
     with pytest.raises(ParseException):
-        p.parse_string('1440')
+        p.parse_string('86400')
     with pytest.raises(ParseException):
         p.parse_string('1500')
     with pytest.raises(ParseException):
