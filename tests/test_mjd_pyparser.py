@@ -1,61 +1,45 @@
 ##########################################################################################
-# julian/test_mjd_pyparser.py
+# tests/test_mjd_pyparser.py
 ##########################################################################################
 
-import unittest
+from tests._helpers import confirm_failure, confirm_success
 
 
-class Test_mjd_pyparser(unittest.TestCase):
+def mjd_tester(parser, floating, timesys, padding=False, embedded=False):
 
-    def runTest(self):
+    NUMBERS = []
+    for n in ['12345', '-12345', '1']:
+        NUMBERS.append((0, n, int(n)))
+    for n in ['1234.5', '-1.5']:
+        NUMBERS.append((0 if floating else 9, n, float(n)))
+    NUMBERS.append((9, '1.2.5', 0))
 
-        from julian.mjd_pyparser import mjd_pyparser
+    FMTS = []
+    for f in ['MJD %s', '%s  mjd', '%s (MJD)']:
+        FMTS.append((0, f, 'MJD', ''))
+    if floating:
+        for f in ['JD %s', '%s  jd', '%s (JD)']:
+            FMTS.append((0, f, 'JD', ''))
+    if timesys:
+        for j,t in [('MJED', 'TDB'), ('JTD', 'TT')]:
+            FMTS.append((0, f'{j.lower()} %s', j[:-2] + j[-1], t))
+            FMTS.append((0, f'%s {j}',         j[:-2] + j[-1], t))
+            FMTS.append((0, f'%s ({j})',       j[:-2] + j[-1], t))
+    FMTS.append((9, 'JXD %s', '', ''))
 
-        for padding in (False, True):
-          for embedded in (False, True):
-            for floating, timesys in ((False, False), (True, False), (True, True)):
-                parser = mjd_pyparser(floating=floating, timesys=timesys,
-                                      padding=padding, embedded=embedded)
-                self.my_mjd_tester(parser, floating=floating, timesys=timesys,
-                                   padding=padding, embedded=embedded)
+    if padding:
+        before = '  '
+        after = '  '
+    else:
+        before = ''
+        after = ''
 
-    def my_mjd_tester(self, parser, floating, timesys, padding=False, embedded=False):
+    if embedded:
+        after = ' xxx'
 
-        from tests.test_date_pyparser import Test_date_pyparser
-
-        NUMBERS = []
-        for n in ['12345', '-12345', '1']:
-            NUMBERS.append((0, n, int(n)))
-        for n in ['1234.5', '-1.5']:
-            NUMBERS.append((0 if floating else 9, n, float(n)))
-        NUMBERS.append((9, '1.2.5', 0))
-
-        FMTS = []
-        for f in ['MJD %s', '%s  mjd', '%s (MJD)']:
-            FMTS.append((0, f, 'MJD', ''))
-        if floating:
-            for f in ['JD %s', '%s  jd', '%s (JD)']:
-                FMTS.append((0, f, 'JD', ''))
-        if timesys:
-            for j,t in [('MJED', 'TDB'), ('JTD', 'TT')]:
-                FMTS.append((0, f'{j.lower()} %s', j[:-2] + j[-1], t))
-                FMTS.append((0, f'%s {j}',         j[:-2] + j[-1], t))
-                FMTS.append((0, f'%s ({j})',       j[:-2] + j[-1], t))
-        FMTS.append((9, 'JXD %s', '', ''))
-
-        if padding:
-            before = '  '
-            after = '  '
-        else:
-            before = ''
-            after = ''
-
-        if embedded:
-            after = ' xxx'
-
-        count = 0
-        for fstat, fmt, yval, sval in FMTS:
-          for nstat, nword, nval in NUMBERS:
+    count = 0
+    for fstat, fmt, yval, sval in FMTS:
+        for nstat, nword, nval in NUMBERS:
             test = before + fmt % nword + after
             status = fstat + nstat
             expect_failure = status > 0
@@ -65,15 +49,25 @@ class Test_mjd_pyparser(unittest.TestCase):
                    f'floating={floating}, timesys={timesys}, '
                    f'padding={padding}, embedded={embedded}')
 
-            if expect_failure:
-                Test_date_pyparser._confirm_failure(self, parser, test,
-                                                    msg=msg % 'FAILURE')
-            else:
-                success_msg = msg % 'SUCCESS'
-                parse_dict = Test_date_pyparser._confirm_success(self,
-                                                        parser, test, msg=success_msg,
-                                                        values=[('YEAR', yval),
-                                                                ('DAY', nval)])
-                self.assertEqual(parse_dict.get('TIMESYS', ''), sval, msg=success_msg)
+        if expect_failure:
+            confirm_failure(parser, test, msg=msg % 'FAILURE')
+        else:
+            success_msg = msg % 'SUCCESS'
+            parse_dict = confirm_success(parser, test, msg=success_msg,
+                                         values=[('YEAR', yval), ('DAY', nval)])
+            assert parse_dict.get('TIMESYS', '') == sval, success_msg
+
+
+def test_mjd_pyparser():
+
+    from julian.mjd_pyparser import mjd_pyparser
+
+    for padding in (False, True):
+      for embedded in (False, True):
+        for floating, timesys in ((False, False), (True, False), (True, True)):
+            parser = mjd_pyparser(floating=floating, timesys=timesys,
+                                  padding=padding, embedded=embedded)
+            mjd_tester(parser, floating=floating, timesys=timesys,
+                       padding=padding, embedded=embedded)
 
 ##########################################################################################

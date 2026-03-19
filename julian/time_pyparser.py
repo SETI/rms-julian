@@ -280,20 +280,20 @@ opt_iso_timezone = Optional(z_timezone_strict | hhmm_timezone)
 ##########################################################################################
 
 timesys_et = CaselessLiteral('ET')
-timesys_et.setParseAction(lambda s,l,t: _action('TIMESYS', 'TDB', s,l,t))
+timesys_et.set_parse_action(lambda s,l,t: _action('TIMESYS', 'TDB', s,l,t))
 
 timesys_tt = CaselessLiteral('TDT')
-timesys_tt.setParseAction(lambda s,l,t: _action('TIMESYS', 'TT', s,l,t))
+timesys_tt.set_parse_action(lambda s,l,t: _action('TIMESYS', 'TT', s,l,t))
 
 timesys_utc = one_of(['UTC', 'UT1', 'UT'], caseless=True)
-timesys_utc.setParseAction(lambda s,l,t: _action('TIMESYS', 'UTC', s,l,t))
+timesys_utc.set_parse_action(lambda s,l,t: _action('TIMESYS', 'UTC', s,l,t))
 
 timesys_z = CaselessLiteral('Z')    # both a time system and a time zone!
-timesys_z.setParseAction(
+timesys_z.set_parse_action(
     lambda s,l,t: _actions(['TIMESYS', 'UTC', 'TZ', 'Z', 'TZMIN', 0], s,l,t))
 
 timesys_other = one_of(['TAI', 'TDB', 'TT'], caseless=True)
-timesys_other.setParseAction(lambda s,l,t: _action('TIMESYS', t[0].upper(), s,l,t))
+timesys_other.set_parse_action(lambda s,l,t: _action('TIMESYS', t[0].upper(), s,l,t))
 
 timesys = opt_white + (timesys_other | timesys_utc| timesys_z | timesys_et | timesys_tt)
 opt_timesys = Optional(timesys)

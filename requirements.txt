@@ -5,6 +5,8 @@ myst-parser
 numpy
 pyparsing
 pytest
+pytest-cov
+pytest-xdist
 rms-filecache
 rms-textkernel
 sphinx
