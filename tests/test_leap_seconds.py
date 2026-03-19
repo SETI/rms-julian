@@ -222,12 +222,15 @@ def test_negative_leap_seconds():
         tai = tai_from_iso('2030-01-01T00:00:00')
         assert tai_from_iso('2029-12-31T23:59:58', validate=True) == tai-1
         assert tai_from_iso('2029-12-31T23:59:59', validate=False) == tai
-        with pytest.raises(JVF): tai_from_iso('2029-12-31T23:59:59', validate=True)
+        with pytest.raises(JVF):
+            tai_from_iso('2029-12-31T23:59:59', validate=True)
 
         tai = tai_from_iso('2031-01-01T00:00:00')
         assert tai_from_iso('2030-12-31T23:59:57', validate=True) == tai-1
-        with pytest.raises(JVF): tai_from_iso('2030-12-31T23:59:58', validate=True)
-        with pytest.raises(JVF): tai_from_iso('2030-12-31T23:59:59', validate=True)
+        with pytest.raises(JVF):
+            tai_from_iso('2030-12-31T23:59:58', validate=True)
+        with pytest.raises(JVF):
+            tai_from_iso('2030-12-31T23:59:59', validate=True)
 
         load_lsk()
 

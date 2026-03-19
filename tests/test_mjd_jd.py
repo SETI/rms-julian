@@ -48,7 +48,7 @@ def test_mjd_jd():
     assert isinstance(mjd_from_day(0), numbers.Integral)
     assert not isinstance(mjd_from_day(0.), numbers.Integral)
 
-    assert np.all(mjd_from_day([0,1] == [51544, 51545]))
+    assert np.all(mjd_from_day([0,1]) == [51544, 51545])
     assert mjd_from_day([0,1]).dtype.kind == 'i'
     assert mjd_from_day([0,1.]).dtype.kind == 'f'
 
@@ -66,16 +66,6 @@ def test_mjd_jd():
     assert mjd_from_day_sec(0) == mjd_from_day(0)
     assert np.all(mjd_from_day_sec([0,1],[0,43200]) == mjd_from_day([0,1.5]))
 
-    assert day_from_mjd(51545) == 1
-    assert isinstance(day_from_mjd(51545), numbers.Integral)
-    assert not isinstance(day_from_mjd(51545.), numbers.Integral)
-
-    assert day_from_mjd([0,1]).dtype.kind == 'i'
-    assert day_from_mjd([0,1.]).dtype.kind == 'f'
-
-    assert np.all(mjd_from_day(np.arange(10)) == np.arange(10) + 51544)
-    assert np.all(day_from_mjd(np.arange(10)) == np.arange(10) - 51544)
-
     # Test MJD floating-point conversions spanning 1000 years
     span = 1000. * 365.25
     mjdlist = np.arange(-span, span, 5*np.pi) + _MJD_OF_JAN_1_2000
@@ -88,10 +78,10 @@ def test_mjd_jd():
                 test = mjd_from_time(time, timesys=timesys, mjdsys=mjdsys)
                 assert np.abs(test - mjdlist).max() < span * 1.e-15
 
-        for mjd in mjdlist[:100]:
-            time = time_from_mjd(mjd, mjdsys=mjdsys, timesys=timesys)
-            test = mjd_from_time(time, timesys=timesys, mjdsys=mjdsys)
-            assert abs(test - mjd) < span * 1.e-15
+                for mjd in mjdlist[:100]:
+                    time = time_from_mjd(mjd, mjdsys=mjdsys, timesys=timesys)
+                    test = mjd_from_time(time, timesys=timesys, mjdsys=mjdsys)
+                    assert abs(test - mjd) < span * 1.e-15
 
     (day, sec) = day_sec_from_mjd(mjdlist)
     test = mjd_from_day_sec(day, sec)
@@ -114,10 +104,10 @@ def test_mjd_jd():
                 test = jd_from_time(time, timesys=timesys, jdsys=jdsys)
                 assert np.abs(test - jdlist).max() < span * 1.e-15
 
-        for jd in jdlist[:100]:
-            time = time_from_jd(jd, jdsys=jdsys, timesys=timesys)
-            test = jd_from_time(time, timesys=timesys, jdsys=jdsys)
-            assert abs(test - jd) < span * 1.e-15
+                for jd in jdlist[:100]:
+                    time = time_from_jd(jd, jdsys=jdsys, timesys=timesys)
+                    test = jd_from_time(time, timesys=timesys, jdsys=jdsys)
+                    assert abs(test - jd) < span * 1.e-15
 
     (day, sec) = day_sec_from_jd(jdlist)
     test = jd_from_day_sec(day, sec)

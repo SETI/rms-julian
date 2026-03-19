@@ -152,7 +152,7 @@ def test_time_of_day():
     assert test[3].dtype == np.int64
 
     seconds = np.arange(86410) + 0.0000005
-    assert np.all(hms_microsec_from_sec(seconds)[3]) == 0
+    assert np.all(hms_microsec_from_sec(seconds)[3] == 0)
 
     seconds = 86410. * np.random.rand(100,100)
     diff = hms_microsec_from_sec(seconds)[3] - np.floor(1.e6 * (seconds%1.) + 0.5)

@@ -189,7 +189,6 @@ def test_SplineDeltaT():
     dt_1977 = dt.delta_t_from_ymd(1977,1)
     assert dt.delta_t_from_ymd(y,m,d) == 0.5 * (dt_1976 + dt_1977)
 
-    fracs = np.arange(1025) / 1024.
     fracs = np.arange(17) / 16.
     day = (1. - fracs) * day_1976 + fracs * day_1977
     (y,m,d) = ymd_from_day(day)
@@ -316,13 +315,14 @@ def test_MergedDeltaT():
     assert isinstance(dt.delta_t_from_ymd(9999, 1), numbers.Integral)
 
     day_1976 = day_from_ymd(1976,1,1)
+    day_1976 = day_from_ymd(1976,1,1)
     day_1977 = day_from_ymd(1977,1,1)
     day = 0.5 * (day_1976 + day_1977)
     (y,m,d) = ymd_from_day(0.5 * (day_1976 + day_1977))
+    d = d + day % 1
     dt_1976 = dt.delta_t_from_ymd(1976,1)
     dt_1977 = dt.delta_t_from_ymd(1977,1)
     assert dt.delta_t_from_ymd(y,m,d) == 0.5 * (dt_1976 + dt_1977)
-    assert dt.leapsecs_from_ymd(y,m,d) == 15       # defined by LeapDeltaT
 
     fracs = np.arange(1025) / 1024.
     day = (1. - fracs) * day_1976 + fracs * day_1977

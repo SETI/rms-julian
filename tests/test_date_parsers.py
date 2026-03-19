@@ -82,7 +82,7 @@ def test_date_parsers():
     assert day_in_string('Test--02-01-00-00', order='DMY') == day_from_ymd(2000,1,2)
     assert day_in_string('Test 2000-02-29=today', order='DMY') == day_from_ymd(2000,2,29)
     assert day_in_string('Using DOY is 2020-366') == day_from_ymd(2020,12,31)
-    assert day_in_string('Using DOY is 2020-367') == None
+    assert day_in_string('Using DOY is 2020-367') is None
 
     # Check days_in_string
     assert days_in_string('Today is 01-02-2000!', order='MDY') == \
@@ -155,7 +155,6 @@ def test_date_parsers():
     test_path = 'test_files/cpck15Dec2017.tpc'
     with open(test_path, 'r') as f:
         strings = f.readlines()
-    f.close()
 
     PCK_ANSWER = [(6571, '2017-12-28'),
                   (6558, '2017-DEC-15'),

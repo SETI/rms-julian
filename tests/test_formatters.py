@@ -516,112 +516,112 @@ def test_format_day_sec():
       for tkey, t_answers in TIME_ANSWERS.items():
         (colon, suffix) = tkey
 
-      for sep in ('T', ' ', '', '///'):
-        for tbefore in (True, False):
-            if tbefore:
-                answers = [t_answers[k] + sep + d_answers[k] for k in range(2)]
-                order = 'T' + day_order
-            else:
-                answers = [d_answers[k] + sep + t_answers[k] for k in range(2)]
-                order = day_order + 'T'
+        for sep in ('T', ' ', '', '///'):
+          for tbefore in (True, False):
+              if tbefore:
+                  answers = [t_answers[k] + sep + d_answers[k] for k in range(2)]
+                  order = 'T' + day_order
+              else:
+                  answers = [d_answers[k] + sep + t_answers[k] for k in range(2)]
+                  order = day_order + 'T'
 
-            # kind = "U", shape = (3,), buffer=None
-            results = format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
-                                     order=order, ydigits=ydigits, dash=dash,
-                                     proleptic=proleptic, sep=sep, colon=colon,
-                                     suffix=suffix)
-            for k in range(2):
-                assert answers[k] == results[k]
+              # kind = "U", shape = (3,), buffer=None
+              results = format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
+                                       order=order, ydigits=ydigits, dash=dash,
+                                       proleptic=proleptic, sep=sep, colon=colon,
+                                       suffix=suffix)
+              for k in range(2):
+                  assert answers[k] == results[k]
 
-            # kind = "U", shape = (), buffer=None
-            for k in range(2):
-                result = format_day_sec(DAY_TESTS[k], TIME_TESTS[k],
-                                        order=order, ydigits=ydigits, dash=dash,
-                                        proleptic=proleptic, sep=sep, colon=colon,
-                                        suffix=suffix)
-                assert answers[k] == result
+              # kind = "U", shape = (), buffer=None
+              for k in range(2):
+                  result = format_day_sec(DAY_TESTS[k], TIME_TESTS[k],
+                                          order=order, ydigits=ydigits, dash=dash,
+                                          proleptic=proleptic, sep=sep, colon=colon,
+                                          suffix=suffix)
+                  assert answers[k] == result
 
-            # kind = "S", shape = (3,), buffer=None
-            results = format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
-                                     order=order, ydigits=ydigits, dash=dash,
-                                     proleptic=proleptic, sep=sep, colon=colon,
-                                     suffix=suffix, kind='S')
-            for k in range(2):
-                assert answers[k].encode('latin8') == results[k]
+              # kind = "S", shape = (3,), buffer=None
+              results = format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
+                                       order=order, ydigits=ydigits, dash=dash,
+                                       proleptic=proleptic, sep=sep, colon=colon,
+                                       suffix=suffix, kind='S')
+              for k in range(2):
+                  assert answers[k].encode('latin8') == results[k]
 
-            # kind = "S", shape = (), buffer=None
-            for k in range(2):
-                result = format_day_sec(DAY_TESTS[k], TIME_TESTS[k],
-                                        order=order, ydigits=ydigits, dash=dash,
-                                        proleptic=proleptic, sep=sep, colon=colon,
-                                        suffix=suffix, kind='S')
-                assert answers[k].encode('latin8') == result
+              # kind = "S", shape = (), buffer=None
+              for k in range(2):
+                  result = format_day_sec(DAY_TESTS[k], TIME_TESTS[k],
+                                          order=order, ydigits=ydigits, dash=dash,
+                                          proleptic=proleptic, sep=sep, colon=colon,
+                                          suffix=suffix, kind='S')
+                  assert answers[k].encode('latin8') == result
 
-            # kind = "U", shape = (3,), buffer provided
-            buffer = np.empty((4,), dtype='=U50')
-            results = format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
+              # kind = "U", shape = (3,), buffer provided
+              buffer = np.empty((4,), dtype='=U50')
+              results = format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
+                                       order=order, ydigits=ydigits, dash=dash,
+                                       proleptic=proleptic, sep=sep, colon=colon,
+                                       suffix=suffix, buffer=buffer)
+              assert results is buffer
+              for k in range(2):
+                  assert answers[k] == buffer[k]
+              assert buffer[2] == ''
+
+              # kind = "U", shape = (), buffer provided
+              for k in range(2):
+                  result = format_day_sec(DAY_TESTS[k], TIME_TESTS[k],
+                                          order=order, ydigits=ydigits, dash=dash,
+                                          proleptic=proleptic, sep=sep, colon=colon,
+                                          suffix=suffix, buffer=buffer)
+                  assert result is buffer
+                  assert answers[k] == result[k]
+
+              # kind = "S", shape = (3,), buffer provided
+              buffer = np.empty((4,), dtype='|S50')
+              results = format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
+                                       order=order, ydigits=ydigits, dash=dash,
+                                       proleptic=proleptic, sep=sep, colon=colon,
+                                       suffix=suffix, buffer=buffer)
+              assert results is buffer
+              for k in range(2):
+                  assert answers[k].encode('latin8') == buffer[k]
+              assert buffer[2] == b''
+
+              # kind = "S", shape = (), buffer provided
+              for k in range(2):
+                  result = format_day_sec(DAY_TESTS[k], TIME_TESTS[k],
+                                          order=order, ydigits=ydigits, dash=dash,
+                                          proleptic=proleptic, sep=sep, colon=colon,
+                                          suffix=suffix, buffer=buffer)
+                  assert result is buffer
+                  assert answers[k].encode('latin8') == result[k]
+
+              # shape = (3,), buffer too small
+              for buffer in [np.empty((1,), dtype='=U50'),
+                             np.empty((1,), dtype='|S50')]:
+                  with pytest.raises(ValueError):
+                      format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
                                      order=order, ydigits=ydigits, dash=dash,
                                      proleptic=proleptic, sep=sep, colon=colon,
                                      suffix=suffix, buffer=buffer)
-            assert results is buffer
-            for k in range(2):
-                assert answers[k] == buffer[k]
-            assert buffer[2] == ''
 
-            # kind = "U", shape = (), buffer provided
-            for k in range(2):
-                result = format_day_sec(DAY_TESTS[k], TIME_TESTS[k],
-                                        order=order, ydigits=ydigits, dash=dash,
-                                        proleptic=proleptic, sep=sep, colon=colon,
-                                        suffix=suffix, buffer=buffer)
-                assert result is buffer
-                assert answers[k] == result[k]
-
-            # kind = "S", shape = (3,), buffer provided
-            buffer = np.empty((4,), dtype='|S50')
-            results = format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
+              for buffer in [np.empty((4,), dtype='=U4'),
+                             np.empty((4,), dtype='|S4')]:
+                  with pytest.raises(ValueError):
+                      format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
                                      order=order, ydigits=ydigits, dash=dash,
                                      proleptic=proleptic, sep=sep, colon=colon,
                                      suffix=suffix, buffer=buffer)
-            assert results is buffer
-            for k in range(2):
-                assert answers[k].encode('latin8') == buffer[k]
-            assert buffer[2] == b''
 
-            # kind = "S", shape = (), buffer provided
-            for k in range(2):
-                result = format_day_sec(DAY_TESTS[k], TIME_TESTS[k],
-                                        order=order, ydigits=ydigits, dash=dash,
-                                        proleptic=proleptic, sep=sep, colon=colon,
-                                        suffix=suffix, buffer=buffer)
-                assert result is buffer
-                assert answers[k].encode('latin8') == result[k]
-
-            # shape = (3,), buffer too small
-            for buffer in [np.empty((1,), dtype='=U50'),
-                           np.empty((1,), dtype='|S50')]:
-                with pytest.raises(ValueError):
-                    format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
-                                   order=order, ydigits=ydigits, dash=dash,
-                                   proleptic=proleptic, sep=sep, colon=colon,
-                                   suffix=suffix, buffer=buffer)
-
-            for buffer in [np.empty((4,), dtype='=U4'),
-                           np.empty((4,), dtype='|S4')]:
-                with pytest.raises(ValueError):
-                    format_day_sec(DAY_TESTS[:2], TIME_TESTS[:2],
-                                   order=order, ydigits=ydigits, dash=dash,
-                                   proleptic=proleptic, sep=sep, colon=colon,
-                                   suffix=suffix, buffer=buffer)
-
-            # shape = (), buffer too small
-            for buffer in [np.empty((4,), dtype='=U4'),
-                           np.empty((4,), dtype='|S4')]:
-                with pytest.raises(ValueError):
-                    format_day_sec(DAY_TESTS[0], TIME_TESTS[0],
-                                   order=order, ydigits=ydigits, dash=dash,
-                                   proleptic=proleptic, colon=colon, suffix=suffix,
-                                   buffer=buffer)
+              # shape = (), buffer too small
+              for buffer in [np.empty((4,), dtype='=U4'),
+                             np.empty((4,), dtype='|S4')]:
+                  with pytest.raises(ValueError):
+                      format_day_sec(DAY_TESTS[0], TIME_TESTS[0],
+                                     order=order, ydigits=ydigits, dash=dash,
+                                     proleptic=proleptic, colon=colon, suffix=suffix,
+                                     buffer=buffer)
 
         # Check a case with the exact right buffer size so no "extra"
         result = format_day_sec(0, 43201, buffer=None)

@@ -19,7 +19,7 @@ def test_utils_int():
     assert isinstance(_int(3.14), int)
 
     assert _int(-3.14) == -4
-    assert isinstance(_int(3.14), int)
+    assert isinstance(_int(-3.14), int)
 
     test = _int([3.14, -3.14])
     assert isinstance(test, np.ndarray)
@@ -86,7 +86,7 @@ def test_utils_number():
     assert isinstance(_number(3.14), float)
 
     assert _number(-3.14) == -3.14
-    assert isinstance(_number(3.14), float)
+    assert isinstance(_number(-3.14), float)
 
     test = _number([3.14, -3.14])
     assert isinstance(test, np.ndarray)

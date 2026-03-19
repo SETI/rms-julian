@@ -67,8 +67,8 @@ def test_datetime_pyparser():
 
             p = datetime_pyparser(iso_only=iso_only, treq=True, floating=True,
                                   doy=True)
-            with pytest.raises(ParseException):
-                p.parse_string(test + 'T00:00:00')
+            p = datetime_pyparser(iso_only=iso_only, treq=True, floating=True,
+                                   doy=True)
             with pytest.raises(ParseException):
                 p.parse_string(test + 'T00:00:00')
 

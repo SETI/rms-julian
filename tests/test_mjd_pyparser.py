@@ -1,5 +1,5 @@
 ##########################################################################################
-# julian/test_mjd_pyparser.py
+# tests/test_mjd_pyparser.py
 ##########################################################################################
 
 from tests._helpers import confirm_failure, confirm_success
@@ -39,15 +39,15 @@ def mjd_tester(parser, floating, timesys, padding=False, embedded=False):
 
     count = 0
     for fstat, fmt, yval, sval in FMTS:
-      for nstat, nword, nval in NUMBERS:
-        test = before + fmt % nword + after
-        status = fstat + nstat
-        expect_failure = status > 0
+        for nstat, nword, nval in NUMBERS:
+            test = before + fmt % nword + after
+            status = fstat + nstat
+            expect_failure = status > 0
 
-        count += 1
-        msg = (f'**** MJD PYPARSER test {count} expected %s: "{test}"; '
-               f'floating={floating}, timesys={timesys}, '
-               f'padding={padding}, embedded={embedded}')
+            count += 1
+            msg = (f'**** MJD PYPARSER test {count} expected %s: "{test}"; '
+                   f'floating={floating}, timesys={timesys}, '
+                   f'padding={padding}, embedded={embedded}')
 
         if expect_failure:
             confirm_failure(parser, test, msg=msg % 'FAILURE')

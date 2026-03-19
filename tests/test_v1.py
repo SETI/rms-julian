@@ -11,13 +11,20 @@ from julian._exceptions import JulianValidateFailure as JVF
 from julian._warnings import JulianDeprecationWarning as JDW
 import julian._warnings as _warnings
 
+
+@pytest.fixture
+def suppress_julian_deprecation():
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', category=JDW)
+        yield
+    _warnings._reset_warnings()
+
+
 ########################################
 # Calendar conversions
 ########################################
 
-def test_calendar_v1():
-
-    warnings.filterwarnings('ignore', category=JDW)
+def test_calendar_v1(suppress_julian_deprecation):
 
     # day_from_ymd()
     assert j.day_from_ymd(2000,1,1) == 0
@@ -144,9 +151,6 @@ def test_calendar_v1():
     assert j.days_in_year(1752, proleptic=True) == 366
 
     j.set_gregorian_start()
-
-    warnings.resetwarnings()
-    _warnings._reset_warnings()
 
 ########################################
 # Leapsecond routines
@@ -355,9 +359,7 @@ def test_jd_mjd_v1():
 # Time System conversions
 ########################################
 
-def test_conversions_v1():
-
-    warnings.filterwarnings('ignore', category=JDW)
+def test_conversions_v1(suppress_julian_deprecation):
 
     j.set_ut_model('LEAPS')
 
@@ -419,9 +421,6 @@ def test_conversions_v1():
     assert np.all(np.abs(stest - 43200.) < 1.e-6)
 
     j.set_ut_model('LEAPS')
-
-    warnings.resetwarnings()
-    _warnings._reset_warnings()
 
 ########################################
 # Formatting Routines
@@ -636,9 +635,7 @@ def test_iso_parsing_v1():
 # General Parsing Routines
 ########################################
 
-def test_general_parsing_v1():
-
-    warnings.filterwarnings('ignore', category=JDW)
+def test_general_parsing_v1(suppress_julian_deprecation):
 
     # Note: julian_dateparser.py has more extensive unit tests
 
@@ -807,8 +804,6 @@ def test_general_parsing_v1():
     assert j.dates_in_string("Today is [[200z-01-01 0z:00:0z.00 TDB]]") == \
                      []
 
-    warnings.resetwarnings()
-    _warnings._reset_warnings()
 
 
 def test_v1_warnings():
@@ -816,14 +811,13 @@ def test_v1_warnings():
     with pytest.warns(JDW):
         (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
 
-    # This should yield an error
-    warnings.filterwarnings('error')
-    with pytest.raises(JDW):
-        j.times_in_string("End time[23:59:60.000]")
+    with warnings.catch_warnings():
+        warnings.filterwarnings('error', category=JDW)
+        # This should yield an error
+        with pytest.raises(JDW):
+            j.times_in_string("End time[23:59:60.000]")
 
-    # This warning was already raised so it should not be repeated
-    (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
-
-    warnings.resetwarnings()
+        # This warning was already raised so it should not be repeated
+        (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
 
 ##########################################################################################

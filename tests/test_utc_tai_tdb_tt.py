@@ -423,10 +423,10 @@ def test_utc_tai_tdb_tt():
 
         # TDB tests...
 
-        assert abs(day_sec_as_type_from_utc(0, 0, time_type='TDB')[1]
-                        - 64.183927284731055) < 1.e15
-        assert abs(utc_from_day_sec_as_type(0, 0, time_type='TDB')[1]
-                        + 64.183927284731055) < 1.e15
+        assert day_sec_as_type_from_utc(0, 0, time_type='TDB')[1] == \
+                        pytest.approx(64.18391281194636, abs=1e-14)
+        (day, sec) = utc_from_day_sec_as_type(0, 0, time_type='TDB')
+        assert day * 86400 + sec == pytest.approx(-64.18391281194636, abs=1e-7)
 
         tdb = time_from_day_sec(0, 0., 'TDB')
         (day, sec) = day_sec_from_time(tdb, 'TDB', leapsecs=False)

@@ -67,7 +67,7 @@ def test_datetime_parsers():
                      treq=True, first=True) == (0, 60)
 
     # Check day_sec_type_in_string, DEPRECATED
-    for remainder in (True, False):
+    for include_remainder in (True, False):
         for info in [
             ("Time:2000-01-01 00:00:00.00",         0, 0.0, "UTC", ''),
             ("Time[2000-01-01 00:00:00.00 tai]",    0, 0.0, "TAI", ']'),
@@ -75,12 +75,12 @@ def test_datetime_parsers():
             ("2000-01-01 00:00 TDT was today",      0, 0.0, "TT",  ' was today'),
         ]:
 
-            (test, day, sec, tsys, remainder) = info
-            result = day_sec_type_in_string(test, remainder=remainder)
-            answer = info[1:] if remainder else info[1:-1]
+            (test, day, sec, tsys, expected_remainder) = info
+            result = day_sec_type_in_string(test, remainder=include_remainder)
+            answer = info[1:] if include_remainder else info[1:-1]
             assert result == answer
 
-    assert day_sec_type_in_string("[2000-01 00:00:00.00 TDB]]") == None
+    assert day_sec_type_in_string("[2000-01 00:00:00.00 TDB]]") is None
     with pytest.raises(JVF):
         day_sec_type_in_string("d= 2000-02-31 00:00:00.00 TDB]]")
 
@@ -192,7 +192,6 @@ def test_datetime_parsers():
     test_path = 'test_files/cpck15Dec2017.tpc'
     with open(test_path, 'r') as f:
         strings = f.readlines()
-    f.close()
 
     PCK_ANSWER = [(6571, 61767, '2017-12-28T17:09:27'),
                   (6558, 0, '2017-DEC-15'),

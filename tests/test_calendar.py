@@ -153,7 +153,7 @@ def test_calendar():
     # days_in_ym()
     for proleptic in (False, True):
         assert days_in_ym(2000, 2, proleptic=proleptic) == 29
-        assert type(days_in_ym(2000, 2, proleptic=proleptic)) == int
+        assert type(days_in_ym(2000, 2, proleptic=proleptic)) is int
         assert days_in_ym(1999, 2, proleptic=proleptic) == 28
 
         with pytest.raises(JVF):
@@ -181,7 +181,7 @@ def test_calendar():
     # days_in_year()
     for proleptic in (False, True):
         assert days_in_year(2000, proleptic=proleptic) == 366
-        assert type(days_in_year(2000, proleptic=proleptic)) == int
+        assert type(days_in_year(2000, proleptic=proleptic)) is int
         assert np.all(days_in_year(np.arange(2000,2012), proleptic=proleptic)
                                == 3*[366,365,365,365])
 

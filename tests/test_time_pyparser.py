@@ -15,7 +15,7 @@ from tests._helpers import confirm_failure, confirm_success
 def test_hour():
 
     from julian.time_pyparser import hour, hour_strict, hour_float, \
-                                     hour_float_strict, hour_am, hour_pm \
+                                     hour_float_strict, hour_am, hour_pm
 
     ################################
     # hour_strict

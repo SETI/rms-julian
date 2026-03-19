@@ -27,6 +27,7 @@ def confirm_failure(parser, test, msg):
     else:
         parse_dict = {pair[0]: pair[1] for pair in pairs}
         msg += f'; {parse_dict}'
+        assert '~' in parse_dict, msg + '; missing "~" key in parse result'
         remainder = test[parse_dict['~']:].lstrip()
         assert remainder not in ('', 'xxx'), msg
 
@@ -41,7 +42,7 @@ def confirm_success(parser, test, msg, values=()):
     except Exception as e:  # pragma: no cover
         error = e
 
-    assert error is None, msg
+    assert error is None, f'{msg}; Unexpected exception {type(error).__name__}: {error}'
 
     parse_dict = {pair[0]: pair[1] for pair in pairs}
     msg += f'; {parse_dict}'
@@ -50,6 +51,7 @@ def confirm_success(parser, test, msg, values=()):
         assert name in parse_dict, msg
         assert parse_dict[name] == value, msg
 
+    assert '~' in parse_dict, msg + '; missing "~" key in parse result'
     remainder = test[parse_dict['~']:].lstrip()
     assert remainder in ('', 'xxx'), msg
 

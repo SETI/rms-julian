@@ -33,7 +33,7 @@ def test_day_from_iso():
         assert day_from_iso(f'  2001{x}01{x}01', strip=True) == 366
         assert day_from_iso(f'  2001{x}01{x}01.5', strip=True) == 366.5
         with pytest.raises(JPE):
-            day_from_iso('  2001{x}01{x}01')
+            day_from_iso(f'  2001{x}01{x}01')
 
         assert type(day_from_iso(f'2001{x}01{x}01')) is int
         assert type(day_from_iso(f'2001{x}01{x}01.')) is float
@@ -357,34 +357,6 @@ def test_sec_from_iso():
     with pytest.raises(JPE):
         sec_from_iso(strings, strip=True, syntax=True)
 
-    strings = [b'00:00:00', b'00:01:00', b'00:02:00']
-    secs    = [         0 ,         60 ,        120 ]
-    assert np.all(sec_from_iso(strings) == secs)
-
-    strings = [b' 00:00:00', b' 00:01:00', b' 00:02:00']
-    assert np.all(sec_from_iso(strings, strip=True) == secs)
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=False)
-
-    strings = [b' 00:00:00  ', b' 00:01:00  ', b' 00:02:00  ']
-    assert np.all(sec_from_iso(strings, strip=True) == secs)
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=False)
-
-    strings = [b'00:00:00    ', b'00:01:00    ', b'00:02:00    ']
-    assert np.all(sec_from_iso(strings, strip=True) == secs)
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=False)
-
-    strings = [b'00:00:00    ', b'00:01:00    ', b'00:02:00   x']
-    assert np.all(sec_from_iso(strings, strip=True, validate=False) == secs)
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=True, syntax=True)
-
-    strings = [b' 00:00:00', b' 00:01:00', b'x00:02:00']
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=True, syntax=True)
-
     strings = [b' 00:00:00', b' 00:01:00', b' 00:02-00']
     with pytest.raises(JPE):
         sec_from_iso(strings, strip=True, syntax=True)
@@ -402,34 +374,6 @@ def test_sec_from_iso():
     assert sec_from_iso(b'235969.5Z') == 86409.5
     assert sec_from_iso(b'1200') == 43200
     assert sec_from_iso(b'1201.5') == 43290
-
-    strings = [b'000000', b'000100', b'000200']
-    secs    = [       0 ,       60 ,      120 ]
-    assert np.all(sec_from_iso(strings) == secs)
-
-    strings = [b' 000000', b' 000100', b' 000200']
-    assert np.all(sec_from_iso(strings, strip=True) == secs)
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=False)
-
-    strings = [b' 000000  ', b' 000100  ', b' 000200  ']
-    assert np.all(sec_from_iso(strings, strip=True) == secs)
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=False)
-
-    strings = [b'000000    ', b'000100    ', b'000200    ']
-    assert np.all(sec_from_iso(strings, strip=True) == secs)
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=False)
-
-    strings = [b'000000    ', b'000100    ', b'000200   x']
-    assert np.all(sec_from_iso(strings, strip=True, validate=False) == secs)
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=True, syntax=True)
-
-    strings = [b' 000000', b' 000100', b'x000200']
-    with pytest.raises(JPE):
-        sec_from_iso(strings, strip=True, syntax=True)
 
     strings = [b'000000', b'000100', b'000200']
     secs    = [       0 ,       60 ,      120 ]

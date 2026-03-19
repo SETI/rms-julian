@@ -655,7 +655,7 @@ def test_date():
             assert p.parse_string(test).as_list()[0][1] == d + 0.5
 
     for d in range(1, 9):
-        tests = [' ' + str(d) + '1.', ' ' + str(d) + '1.', '0' + str(d) + '1.']
+        tests = [' ' + str(d) + '1.', '0' + str(d) + '1.']
         for test in tests:
             with pytest.raises(ParseException): p.parse_string(test)
 
