@@ -7,6 +7,7 @@ import numpy as np
 import os
 import pytest
 import sys
+from contextlib import suppress
 
 from julian.utc_tai_tdb_tt import (
     day_sec_from_tai,
@@ -460,10 +461,8 @@ def test_utc_tai_tdb_tt():
                 assert np.abs(stest - 43200.).max() < 2.e-7
 
     finally:
-        try:
+        with suppress(NameError):
             cspyce.kclear()
-        except NameError:
-            pass
         set_ut_model('LEAPS')
         set_tai_origin('MIDNIGHT')
 

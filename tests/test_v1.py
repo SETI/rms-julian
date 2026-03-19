@@ -140,17 +140,18 @@ def test_calendar_v1(suppress_julian_deprecation):
     assert j.days_in_year(1582, proleptic=False) == 355
     assert j.days_in_year(1582, proleptic=True) == 365
 
-    j.set_gregorian_start(None)
-    assert j.day_from_ymd(-4713,11,24, proleptic=True) == -2451545
-    assert j.day_from_ymd(-4713,11,24, proleptic=False) == -2451545
+    try:
+        j.set_gregorian_start(None)
+        assert j.day_from_ymd(-4713,11,24, proleptic=True) == -2451545
+        assert j.day_from_ymd(-4713,11,24, proleptic=False) == -2451545
 
-    j.set_gregorian_start(1752, 9, 14)
-    assert j.days_in_year(1582, proleptic=False) == 365
-    assert j.days_in_year(1582, proleptic=True) == 365
-    assert j.days_in_year(1752, proleptic=False) == 355
-    assert j.days_in_year(1752, proleptic=True) == 366
-
-    j.set_gregorian_start()
+        j.set_gregorian_start(1752, 9, 14)
+        assert j.days_in_year(1582, proleptic=False) == 365
+        assert j.days_in_year(1582, proleptic=True) == 365
+        assert j.days_in_year(1752, proleptic=False) == 355
+        assert j.days_in_year(1752, proleptic=True) == 366
+    finally:
+        j.set_gregorian_start()
 
 ########################################
 # Leapsecond routines
@@ -178,35 +179,36 @@ def test_leapseconds_v1():
 
 def test_tai_utc_v1():
 
-    j.set_tai_origin('MIDNIGHT')
+    try:
+        j.set_tai_origin('MIDNIGHT')
 
-    # Check tai_from_day
-    assert j.tai_from_day(0) == 32
-    assert j.tai_from_day([0,1])[0] == 32
-    assert j.tai_from_day([0,1])[1] == 86432
+        # Check tai_from_day
+        assert j.tai_from_day(0) == 32
+        assert j.tai_from_day([0,1])[0] == 32
+        assert j.tai_from_day([0,1])[1] == 86432
 
-    # Check day_sec_from_tai
-    assert j.day_sec_from_tai(32.) == (0, 0.)
-    assert j.day_sec_from_tai([35.,86435.])[0][0] == 0
-    assert j.day_sec_from_tai([35.,86435.])[0][1] == 1
-    assert j.day_sec_from_tai([35.,86435.])[1][0] == 3.
-    assert j.day_sec_from_tai([35.,86435.])[1][1] == 3.
+        # Check day_sec_from_tai
+        assert j.day_sec_from_tai(32.) == (0, 0.)
+        assert j.day_sec_from_tai([35.,86435.])[0][0] == 0
+        assert j.day_sec_from_tai([35.,86435.])[0][1] == 1
+        assert j.day_sec_from_tai([35.,86435.])[1][0] == 3.
+        assert j.day_sec_from_tai([35.,86435.])[1][1] == 3.
 
-    # A large number of dates, spanning > 200 years
-    daylist = np.arange(-40000,40000,83)
+        # A large number of dates, spanning > 200 years
+        daylist = np.arange(-40000,40000,83)
 
-    # Test as a loop
-    for day in daylist:
-        (test_day, test_sec) = j.day_sec_from_tai(j.tai_from_day(day))
-        assert test_day == day, "Day mismatch at " + str(day)
-        assert test_sec == 0,   "Sec mismatch at " + str(day)
+        # Test as a loop
+        for day in daylist:
+            (test_day, test_sec) = j.day_sec_from_tai(j.tai_from_day(day))
+            assert test_day == day, "Day mismatch at " + str(day)
+            assert test_sec == 0,   "Sec mismatch at " + str(day)
 
-    # Test as an array operation
-    (test_day, test_sec) = j.day_sec_from_tai(j.tai_from_day(daylist))
-    assert np.all(test_day == daylist)
-    assert np.all(test_sec == 0)
-
-    j.set_tai_origin('NOON')
+        # Test as an array operation
+        (test_day, test_sec) = j.day_sec_from_tai(j.tai_from_day(daylist))
+        assert np.all(test_day == daylist)
+        assert np.all(test_sec == 0)
+    finally:
+        j.set_tai_origin('NOON')
 
 ########################################
 # Time-of-day conversions
@@ -257,16 +259,17 @@ def test_time_of_day_v1():
 
 def test_tdb_tai_v1():
 
-    j.set_tai_origin('MIDNIGHT')
+    try:
+        j.set_tai_origin('MIDNIGHT')
 
-    # TDB at midnight day 0 (MIDNIGHT): same instant as tai_from_day(0)
-    tdb_at_midnight = 64.18391281194636 - 43200
-    assert j.tdb_from_tai(j.tai_from_day(0)) == pytest.approx(tdb_at_midnight, abs=1e-15)
+        # TDB at midnight day 0 (MIDNIGHT): same instant as tai_from_day(0)
+        tdb_at_midnight = 64.18391281194636 - 43200
+        assert j.tdb_from_tai(j.tai_from_day(0)) == pytest.approx(tdb_at_midnight, abs=1e-15)
 
-    # Check tai_from_tdb
-    assert abs(j.tai_from_tdb(tdb_at_midnight) - j.tai_from_day(0)) < 1.e-15
-
-    j.set_tai_origin('NOON')
+        # Check tai_from_tdb
+        assert abs(j.tai_from_tdb(tdb_at_midnight) - j.tai_from_day(0)) < 1.e-15
+    finally:
+        j.set_tai_origin('NOON')
 
     # Test inversions around tdb = 0.
     # A list of two million small numbers spanning 2 sec
@@ -476,12 +479,14 @@ def test_formatting_v1():
 
     # Check TAI formatting
 
-    j.set_tai_origin('MIDNIGHT')
+    try:
+        j.set_tai_origin('MIDNIGHT')
 
-    # The 32's below are for the offset between TAI and UTC
-    assert np.all(j.ydhms_format_from_tai([32.,366.*86400.+32.]) ==
-                    ("2000-001T00:00:00", "2001-001T00:00:00"))
-    j.set_tai_origin('NOON')
+        # The 32's below are for the offset between TAI and UTC
+        assert np.all(j.ydhms_format_from_tai([32.,366.*86400.+32.]) ==
+                        ("2000-001T00:00:00", "2001-001T00:00:00"))
+    finally:
+        j.set_tai_origin('NOON')
 
 ########################################
 # ISO format parsers
@@ -807,16 +812,21 @@ def test_general_parsing_v1(suppress_julian_deprecation):
 
 def test_v1_warnings():
 
-    with pytest.warns(JDW):
-        (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
+    saved = set(_warnings._WARNING_MESSAGES)
+    _warnings._reset_warnings()
+    try:
+        with pytest.warns(JDW):
+            (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings('error', category=JDW)
-        # This should yield an error
-        with pytest.raises(JDW):
-            j.times_in_string("End time[23:59:60.000]")
+        with warnings.catch_warnings():
+            warnings.filterwarnings('error', category=JDW)
+            # This should yield an error
+            with pytest.raises(JDW):
+                j.times_in_string("End time[23:59:60.000]")
 
-        # This warning was already raised so it should not be repeated
-        (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
+            # This warning was already raised so it should not be repeated
+            (day, sec) = j.day_sec_as_type_from_utc((-366,0,366), 0., "TAI")
+    finally:
+        _warnings._WARNING_MESSAGES = saved
 
 ##########################################################################################

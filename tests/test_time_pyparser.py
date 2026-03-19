@@ -2,6 +2,7 @@
 # julian/test_time_pyparser.py
 ##########################################################################################
 
+import warnings
 import pytest
 
 from pyparsing import ParseException, StringEnd
@@ -486,6 +487,12 @@ def test_second():
         p.parse_string('a')
     with pytest.raises(ParseException):
         p.parse_string('000.5')
+    with pytest.raises(ParseException):
+        p.parse_string('0.5')
+    with pytest.raises(ParseException):
+        p.parse_string(' 0.5')
+    with pytest.raises(ParseException):
+        p.parse_string('.5')
 
     ################################
     # second_float
@@ -834,24 +841,26 @@ def test_timesys():
 
     p = timesys + StringEnd()
 
-    # Success
-    for space in ('', ' '):
-        assert p.parse_string(space + 'UTC')[0][1] == 'UTC'
-        assert p.parse_string(space + 'utc')[0][1] == 'UTC'
-        assert p.parse_string(space + 'UT') [0][1] == 'UTC'
-        assert p.parse_string(space + 'UT1')[0][1] == 'UTC'
-        assert p.parse_string(space + 'TAI')[0][1] == 'TAI'
-        assert p.parse_string(space + 'tai')[0][1] == 'TAI'
-        assert p.parse_string(space + 'TDB')[0][1] == 'TDB'
-        assert p.parse_string(space + 'ET') [0][1] == 'TDB'
-        assert p.parse_string(space + 'TDT')[0][1] == 'TT'
-        assert p.parse_string(space + 'TT') [0][1] == 'TT'
-        assert p.parse_string(space + 'tt') [0][1] == 'TT'
-        assert p.parse_string(space + 'Z')  [0][1] == 'UTC'
+    with warnings.catch_warnings():
+        warnings.simplefilter('error', DeprecationWarning)
+        # Success
+        for space in ('', ' '):
+            assert p.parse_string(space + 'UTC')[0][1] == 'UTC'
+            assert p.parse_string(space + 'utc')[0][1] == 'UTC'
+            assert p.parse_string(space + 'UT') [0][1] == 'UTC'
+            assert p.parse_string(space + 'UT1')[0][1] == 'UTC'
+            assert p.parse_string(space + 'TAI')[0][1] == 'TAI'
+            assert p.parse_string(space + 'tai')[0][1] == 'TAI'
+            assert p.parse_string(space + 'TDB')[0][1] == 'TDB'
+            assert p.parse_string(space + 'ET') [0][1] == 'TDB'
+            assert p.parse_string(space + 'TDT')[0][1] == 'TT'
+            assert p.parse_string(space + 'TT') [0][1] == 'TT'
+            assert p.parse_string(space + 'tt') [0][1] == 'TT'
+            assert p.parse_string(space + 'Z')  [0][1] == 'UTC'
 
-    # Failure
-    with pytest.raises(ParseException):
-        p.parse_string('PST')
+        # Failure
+        with pytest.raises(ParseException):
+            p.parse_string('PST')
 
 ####################################################################
 # time_pyparser

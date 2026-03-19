@@ -211,8 +211,6 @@ FTIME_ANSWERS = {
 
 def test_format_day():
 
-    import warnings
-    from julian._warnings import JulianDeprecationWarning
     warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
 
     for key, answers in DAY_ANSWERS.items():
