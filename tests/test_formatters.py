@@ -209,9 +209,8 @@ FTIME_ANSWERS = {
 }
 
 
+@pytest.mark.filterwarnings('ignore::julian._warnings.JulianDeprecationWarning')
 def test_format_day():
-
-    warnings.filterwarnings('ignore', category=JulianDeprecationWarning)
 
     for key, answers in DAY_ANSWERS.items():
         (order, ydigits, dash, proleptic) = key
