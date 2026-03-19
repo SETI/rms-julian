@@ -58,7 +58,7 @@ jobs:
 
       - name: Test with coverage
         run: |
-          coverage run -m pytest
+          python -m pytest --cov=src -n auto tests
 
       - name: Print coverage report
         run: |

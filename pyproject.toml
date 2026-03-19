@@ -50,3 +50,9 @@ packages = ["julian"]
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
 write_to = "julian/_version.py"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "julian"
+]
+addopts = ["-n", "auto", "--cov=julian"]

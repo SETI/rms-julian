@@ -3,7 +3,6 @@
 ##########################################################################################
 
 import numpy as np
-import unittest
 
 from julian._utils import (
     _float,
@@ -14,142 +13,140 @@ from julian._utils import (
 )
 
 
-class Test_utils(unittest.TestCase):
+def test_utils_int():
 
-    def test_utils_int(self):
+    assert _int(3.14) == 3
+    assert isinstance(_int(3.14), int)
 
-        self.assertEqual(_int(3.14), 3)
-        self.assertIsInstance(_int(3.14), int)
+    assert _int(-3.14) == -4
+    assert isinstance(_int(3.14), int)
 
-        self.assertEqual(_int(-3.14), -4)
-        self.assertIsInstance(_int(3.14), int)
+    test = _int([3.14, -3.14])
+    assert isinstance(test, np.ndarray)
+    assert test.dtype == np.dtype('int64')
+    assert list(test) == [3, -4]
 
-        test = _int([3.14, -3.14])
-        self.assertTrue(isinstance(test, np.ndarray))
-        self.assertEqual(test.dtype, np.dtype('int64'))
-        self.assertEqual(list(test), [3, -4])
+    test = _int(np.array([3.14, -3.14]))
+    assert isinstance(test, np.ndarray)
+    assert test.dtype == np.dtype('int64')
+    assert list(test) == [3, -4]
 
-        test = _int(np.array([3.14, -3.14]))
-        self.assertTrue(isinstance(test, np.ndarray))
-        self.assertEqual(test.dtype, np.dtype('int64'))
-        self.assertEqual(list(test), [3, -4])
+    test = _int(np.array(7))
+    assert not isinstance(test, np.ndarray)
+    assert isinstance(test, int)
 
-        test = _int(np.array(7))
-        self.assertNotIsInstance(test, np.ndarray)
-        self.assertIsInstance(test, int)
+    test = _int(np.array(7.))
+    assert not isinstance(test, np.ndarray)
+    assert isinstance(test, int)
 
-        test = _int(np.array(7.))
-        self.assertNotIsInstance(test, np.ndarray)
-        self.assertIsInstance(test, int)
+    for dtype in ('int8', 'uint8', 'int16', 'uint16', 'uint64', 'float32', 'float64'):
+        digits = np.arange(10, dtype=dtype)
+        test = _int(digits)
+        assert isinstance(test, np.ndarray)
+        assert test.dtype == np.dtype('int64')
 
-        for dtype in ('int8', 'uint8', 'int16', 'uint16', 'uint64', 'float32', 'float64'):
-            digits = np.arange(10, dtype=dtype)
-            test = _int(digits)
-            self.assertIsInstance(test, np.ndarray)
-            self.assertEqual(test.dtype, np.dtype('int64'))
+        test = _int(digits[0])
+        assert isinstance(test, int)
 
-            test = _int(digits[0])
-            self.assertIsInstance(test, int)
+def test_utils_float():
 
-    def test_utils_float(self):
+    assert _float(3) == 3.
+    assert isinstance(_float(3), float)
 
-        self.assertEqual(_float(3), 3.)
-        self.assertIsInstance(_float(3), float)
+    test = _float([3, -4])
+    assert isinstance(test, np.ndarray)
+    assert test.dtype == np.dtype('float64')
+    assert list(test) == [3., -4.]
 
-        test = _float([3, -4])
-        self.assertTrue(isinstance(test, np.ndarray))
-        self.assertEqual(test.dtype, np.dtype('float64'))
-        self.assertEqual(list(test), [3., -4.])
+    test = _float(np.array([3, -4]))
+    assert isinstance(test, np.ndarray)
+    assert test.dtype == np.dtype('float64')
+    assert list(test) == [3., -4.]
 
-        test = _float(np.array([3, -4]))
-        self.assertTrue(isinstance(test, np.ndarray))
-        self.assertEqual(test.dtype, np.dtype('float64'))
-        self.assertEqual(list(test), [3., -4.])
+    test = _float(np.array(7))
+    assert not isinstance(test, np.ndarray)
+    assert isinstance(test, float)
 
-        test = _float(np.array(7))
-        self.assertNotIsInstance(test, np.ndarray)
-        self.assertIsInstance(test, float)
+    test = _float(np.array(7.))
+    assert not isinstance(test, np.ndarray)
+    assert isinstance(test, float)
 
-        test = _float(np.array(7.))
-        self.assertNotIsInstance(test, np.ndarray)
-        self.assertIsInstance(test, float)
+    for dtype in ('int8', 'uint8', 'uint16', 'int32', 'uint64', 'float32', 'float64'):
+        digits = np.arange(10, dtype=dtype)
+        test = _float(digits)
+        assert isinstance(test, np.ndarray)
+        assert test.dtype == np.dtype('float64')
 
-        for dtype in ('int8', 'uint8', 'uint16', 'int32', 'uint64', 'float32', 'float64'):
-            digits = np.arange(10, dtype=dtype)
-            test = _float(digits)
-            self.assertIsInstance(test, np.ndarray)
-            self.assertEqual(test.dtype, np.dtype('float64'))
+        test = _float(digits[0])
+        assert isinstance(test, float)
 
-            test = _float(digits[0])
-            self.assertIsInstance(test, float)
+def test_utils_number():
 
-    def test_utils_number(self):
+    assert _number(3.14) == 3.14
+    assert isinstance(_number(3.14), float)
 
-        self.assertEqual(_number(3.14), 3.14)
-        self.assertIsInstance(_number(3.14), float)
+    assert _number(-3.14) == -3.14
+    assert isinstance(_number(3.14), float)
 
-        self.assertEqual(_number(-3.14), -3.14)
-        self.assertIsInstance(_number(3.14), float)
+    test = _number([3.14, -3.14])
+    assert isinstance(test, np.ndarray)
+    assert test.dtype == np.dtype('float64')
+    assert list(test) == [3.14, -3.14]
 
-        test = _number([3.14, -3.14])
-        self.assertIsInstance(test, np.ndarray)
-        self.assertEqual(test.dtype, np.dtype('float64'))
-        self.assertEqual(list(test), [3.14, -3.14])
+    test = _number(np.array([3.14, -3.14]))
+    assert isinstance(test, np.ndarray)
+    assert test.dtype == np.dtype('float64')
+    assert list(test) == [3.14, -3.14]
 
-        test = _number(np.array([3.14, -3.14]))
-        self.assertIsInstance(test, np.ndarray)
-        self.assertEqual(test.dtype, np.dtype('float64'))
-        self.assertEqual(list(test), [3.14, -3.14])
+    assert _number(3) == 3
+    assert isinstance(_number(3), int)
 
-        self.assertEqual(_number(3), 3)
-        self.assertIsInstance(_number(3), int)
+    test = _number([3, -4])
+    assert isinstance(test, np.ndarray)
+    assert test.dtype == np.dtype('int64')
+    assert list(test) == [3, -4]
 
-        test = _number([3, -4])
-        self.assertIsInstance(test, np.ndarray)
-        self.assertEqual(test.dtype, np.dtype('int64'))
-        self.assertEqual(list(test), [3, -4])
+    test = _number(np.array(7))
+    assert isinstance(test, int)
 
-        test = _number(np.array(7))
-        self.assertIsInstance(test, int)
+    test = _number(np.array(7.))
+    assert isinstance(test, float)
 
-        test = _number(np.array(7.))
-        self.assertIsInstance(test, float)
+    for dtype in ('int8', 'uint8', 'uint16', 'int32', 'uint64', 'float32', 'float64'):
+        digits = np.arange(10, dtype=dtype)
+        test = _number(digits)
+        assert isinstance(test, np.ndarray)
+        if dtype[0] == 'f':
+            assert test.dtype == np.dtype(dtype)
+        else:
+            assert test.dtype == np.dtype('int64')
 
-        for dtype in ('int8', 'uint8', 'uint16', 'int32', 'uint64', 'float32', 'float64'):
-            digits = np.arange(10, dtype=dtype)
-            test = _number(digits)
-            self.assertIsInstance(test, np.ndarray)
-            if dtype[0] == 'f':
-                self.assertEqual(test.dtype, np.dtype(dtype))
-            else:
-                self.assertEqual(test.dtype, np.dtype('int64'))
+        test = _number(digits[0])
+        if dtype[0] == 'f':
+            assert isinstance(test, float)
+        else:
+            assert isinstance(test, int)
 
-            test = _number(digits[0])
-            if dtype[0] == 'f':
-                self.assertIsInstance(test, float)
-            else:
-                self.assertIsInstance(test, int)
+def test_utils_is_int():
 
-    def test_utils_is_int(self):
+    assert _is_int(3)
+    assert not _is_int(3.)
 
-        self.assertTrue(_is_int(3))
-        self.assertFalse(_is_int(3.))
+    assert _is_int([3,4])
+    assert not _is_int([3,4.])
 
-        self.assertTrue(_is_int([3,4]))
-        self.assertFalse(_is_int([3,4.]))
+    assert _is_int(np.array([3,4]))
+    assert not _is_int(np.array([3,4.]))
 
-        self.assertTrue(_is_int(np.array([3,4])))
-        self.assertFalse(_is_int(np.array([3,4.])))
+def test_utils_is_float():
 
-    def test_utils_is_float(self):
+    assert _is_float(3.)
+    assert not _is_float(3)
 
-        self.assertTrue(_is_float(3.))
-        self.assertFalse(_is_float(3))
+    assert _is_float([3.,4])
+    assert not _is_float([3,4])
 
-        self.assertTrue(_is_float([3.,4]))
-        self.assertFalse(_is_float([3,4]))
-
-        self.assertTrue(_is_float(np.array([3.,4])))
-        self.assertFalse(_is_float(np.array([3,4])))
+    assert _is_float(np.array([3.,4]))
+    assert not _is_float(np.array([3,4]))
 
 ##########################################################################################
