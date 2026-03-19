@@ -40,8 +40,10 @@ def test_time_parsers():
     # sec_from_string, leapsecs
     assert sec_from_string('23:59:60.000') == 86400.0
     assert sec_from_string('23:59:69.000') == 86409.0
-    with pytest.raises(JPE): sec_from_string('23:59:70.000')
-    with pytest.raises(JPE): sec_from_string('23:59:60', leapsecs=False)
+    with pytest.raises(JPE):
+        sec_from_string('23:59:70.000')
+    with pytest.raises(JPE):
+        sec_from_string('23:59:60', leapsecs=False)
 
     # sec_from_string, am/pm
     assert sec_from_string('12:00:00 am', ampm=True) == 0
@@ -51,8 +53,10 @@ def test_time_parsers():
     assert sec_from_string(' 1:00:00 pm', ampm=True) == 43200 + 3600
     assert sec_from_string('11:59:59 pm', ampm=True) == 86399
     assert sec_from_string('11:59:60 pm', ampm=True, leapsecs=True) == 86400
-    with pytest.raises(JPE): sec_from_string('11:59:60 pm', ampm=True, leapsecs=False)
-    with pytest.raises(JPE): sec_from_string('23:00:00 am', ampm=True)
+    with pytest.raises(JPE):
+        sec_from_string('11:59:60 pm', ampm=True, leapsecs=False)
+    with pytest.raises(JPE):
+        sec_from_string('23:00:00 am', ampm=True)
 
     # sec_from_string, floating
     assert sec_from_string('12h',    floating=True) == 43200
@@ -62,7 +66,8 @@ def test_time_parsers():
     assert sec_from_string('1:10.5', floating=True) == 70.5 * 60
     assert sec_from_string('60 M',   floating=True) == 60 * 60
 
-    with pytest.raises(JPE): sec_from_string('86400s', floating=True, leapsecs=False)
+    with pytest.raises(JPE):
+        sec_from_string('86400s', floating=True, leapsecs=False)
 
     # sec_from_string, timezones, am/pm, leapsecs
     assert sec_from_string('00:00 gmt',   timezones=True) == (0, 0)
@@ -75,13 +80,17 @@ def test_time_parsers():
     assert sec_from_string('1:00 am bst', timezones=True) == (0, 0)
     assert sec_from_string('6:59:60 pm est', timezones=True, leapsecs=True) == (86400, 0)
 
-    with pytest.raises(JPE): sec_from_string('10:59:59 pm', ampm=False)
-    with pytest.raises(JPE): sec_from_string('7:59:59 pm est', ampm=True,
-                      timezones=False)
-    with pytest.raises(JPE): sec_from_string('6:59:60 pm est', ampm=True,
-                      timezones=True, leapsecs=False)
-    with pytest.raises(JVF): sec_from_string('7:59:60 pm est', ampm=True,
-                      timezones=True, leapsecs=True)
+    with pytest.raises(JPE):
+        sec_from_string('10:59:59 pm', ampm=False)
+    with pytest.raises(JPE):
+        sec_from_string('7:59:59 pm est', ampm=True,
+                        timezones=False)
+    with pytest.raises(JPE):
+        sec_from_string('6:59:60 pm est', ampm=True,
+                        timezones=True, leapsecs=False)
+    with pytest.raises(JVF):
+        sec_from_string('7:59:60 pm est', ampm=True,
+                        timezones=True, leapsecs=True)
 
     # secs_in_strings
     assert secs_in_strings('t=00:00:00.000', first=True) == 0.0

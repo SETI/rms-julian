@@ -38,11 +38,11 @@ def test_date_parsers():
     assert _date_pattern_filter('abcdefg1 2 3456hijkl')
     assert _date_pattern_filter('abcdefg1000hijkl')
 
-    assert  _date_pattern_filter('abcdefg3000 399hijkl', doy=True)
+    assert _date_pattern_filter('abcdefg3000 399hijkl', doy=True)
     assert not _date_pattern_filter('abcdefg3000 399hijkl', doy=False)
     assert not _date_pattern_filter('abcdefg3000 400hijkl', doy=False)
 
-    assert  _date_pattern_filter('abcdefg MJTd hijkl', mjd=True)
+    assert _date_pattern_filter('abcdefg MJTd hijkl', mjd=True)
     assert not _date_pattern_filter('abcdefg Jed hijkl', mjd=False)
     assert not _date_pattern_filter('abcdefgJd hijkl',  mjd=True)
     assert not _date_pattern_filter('abcdefg mJdhijkl', mjd=True)
@@ -62,16 +62,23 @@ def test_date_parsers():
     assert day_from_string('1582-10-01', proleptic=True) == -152398
     assert day_from_string('1582-10-01', proleptic=False) == -152388
 
-    with pytest.raises(JPE): day_from_string('whatever')
-    with pytest.raises(JPE): day_from_string('01-02-2000 cE', extended=False)
+    with pytest.raises(JPE):
+        day_from_string('whatever')
+    with pytest.raises(JPE):
+        day_from_string('01-02-2000 cE', extended=False)
 
     # Check date validator, weekdays
-    with pytest.raises(JVF): day_from_string('2001-11-31')
-    with pytest.raises(JVF): day_from_string('2001-02-29')
-    with pytest.raises(JPE): day_from_string('2001-02-ab')
+    with pytest.raises(JVF):
+        day_from_string('2001-11-31')
+    with pytest.raises(JVF):
+        day_from_string('2001-02-29')
+    with pytest.raises(JPE):
+        day_from_string('2001-02-ab')
 
-    with pytest.raises(JVF): day_from_string('Monday, 2000-01-01', weekdays=True)
-    with pytest.raises(JVF): day_from_string('Monday, 2000-001', weekdays=True)
+    with pytest.raises(JVF):
+        day_from_string('Monday, 2000-01-01', weekdays=True)
+    with pytest.raises(JVF):
+        day_from_string('Monday, 2000-001', weekdays=True)
     # because it was a Saturday
 
     # Check day_in_string
@@ -117,7 +124,7 @@ def test_date_parsers():
     assert days_in_strings(['Is this today?02-01-2000-0', '2000-01-03!'],
                            order='DMY', first=True) == day_from_ymd(2000,1,2)
     assert days_in_strings(['Is this today?02-01-xxx0-0', '2000-xx-03!'],
-                           order='DMY', first=True) == None
+                           order='DMY', first=True) is None
     assert days_in_strings(['Is this today?02-01-2000-0', '2000-01-03!'],
                            order='DMY', substrings=True) == \
         [(day_from_ymd(2000,1,2), '02-01-2000'),
@@ -144,10 +151,14 @@ def test_date_parsers():
         [(day_from_yd(1001,1), '1001-001')]
 
     # Check date validator
-    with pytest.raises(JVF): days_in_strings('Today=(2001-11-31)', first=True)
-    with pytest.raises(JVF): days_in_strings('Today=(2001-11-31)', first=False)
-    with pytest.raises(JVF): days_in_strings('Today 2001-02-29T12:34:56', first=True)
-    with pytest.raises(JVF): days_in_strings('Today 2001-02-29T12:34:56', first=False)
+    with pytest.raises(JVF):
+        days_in_strings('Today=(2001-11-31)', first=True)
+    with pytest.raises(JVF):
+        days_in_strings('Today=(2001-11-31)', first=False)
+    with pytest.raises(JVF):
+        days_in_strings('Today 2001-02-29T12:34:56', first=True)
+    with pytest.raises(JVF):
+        days_in_strings('Today 2001-02-29T12:34:56', first=False)
     assert day_in_string('Today 2001-01-01, not tomorrow', remainder=True) == \
         (366, ', not tomorrow')
 

@@ -109,9 +109,12 @@ def test_datetime_parsers():
     assert type(day_sec_from_string('1998-12-31 23:59:60.99')[0]) == int
     assert type(day_sec_from_string('1998-12-31 23:59:60.99')[1]) == float
 
-    with pytest.raises(JVF): day_sec_from_string('2000-01-01 23:59:60', leapsecs=True)
-    with pytest.raises(JVF): day_sec_from_string('1999-12-31 23:59:61', leapsecs=True)
-    with pytest.raises(JPE): day_sec_from_string('whatever')
+    with pytest.raises(JVF):
+        day_sec_from_string('2000-01-01 23:59:60', leapsecs=True)
+    with pytest.raises(JVF):
+        day_sec_from_string('1999-12-31 23:59:61', leapsecs=True)
+    with pytest.raises(JPE):
+        day_sec_from_string('whatever')
 
     # MJD on a day with a leap second
     # MJD 51178 is December 31, 1998

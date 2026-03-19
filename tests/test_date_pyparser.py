@@ -404,16 +404,26 @@ def test_year():
     assert p.parse_string('17760704')[0][1] == 1776
 
     # Failure
-    with pytest.raises(ParseException): p.parse_string('00')
-    with pytest.raises(ParseException): p.parse_string('50')
-    with pytest.raises(ParseException): p.parse_string('3000')
-    with pytest.raises(ParseException): p.parse_string('0300')
-    with pytest.raises(ParseException): p.parse_string(' 2000')
-    with pytest.raises(ParseException): p.parse_string('   00')
-    with pytest.raises(ParseException): p.parse_string(' ')
-    with pytest.raises(ParseException): p.parse_string('a')
-    with pytest.raises(ParseException): p.parse_string('0')
-    with pytest.raises(ParseException): p.parse_string('000')
+    with pytest.raises(ParseException):
+        p.parse_string('00')
+    with pytest.raises(ParseException):
+        p.parse_string('50')
+    with pytest.raises(ParseException):
+        p.parse_string('3000')
+    with pytest.raises(ParseException):
+        p.parse_string('0300')
+    with pytest.raises(ParseException):
+        p.parse_string(' 2000')
+    with pytest.raises(ParseException):
+        p.parse_string('   00')
+    with pytest.raises(ParseException):
+        p.parse_string(' ')
+    with pytest.raises(ParseException):
+        p.parse_string('a')
+    with pytest.raises(ParseException):
+        p.parse_string('0')
+    with pytest.raises(ParseException):
+        p.parse_string('000')
 
     ################################
     # year
@@ -437,12 +447,18 @@ def test_year():
     assert p.parse_string('100')[0][1] == 2010
 
     # Failure
-    with pytest.raises(ParseException): p.parse_string(' 300')
-    with pytest.raises(ParseException): p.parse_string('  30')
-    with pytest.raises(ParseException): p.parse_string(' 2000')
-    with pytest.raises(ParseException): p.parse_string(' ')
-    with pytest.raises(ParseException): p.parse_string('a')
-    with pytest.raises(ParseException): p.parse_string('0')
+    with pytest.raises(ParseException):
+        p.parse_string(' 300')
+    with pytest.raises(ParseException):
+        p.parse_string('  30')
+    with pytest.raises(ParseException):
+        p.parse_string(' 2000')
+    with pytest.raises(ParseException):
+        p.parse_string(' ')
+    with pytest.raises(ParseException):
+        p.parse_string('a')
+    with pytest.raises(ParseException):
+        p.parse_string('0')
 
 
 def test_month():
@@ -468,19 +484,27 @@ def test_month():
     for m in range(1, 9):
         tests = [str(m), ' ' + str(m), '0' + str(m) + '1']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
     for m in range(10, 13):
         tests = [' ' + str(m), '0' + str(m), str(m) + '1']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('0')
-    with pytest.raises(ParseException): p.parse_string(' 0')
-    with pytest.raises(ParseException): p.parse_string('13')
-    with pytest.raises(ParseException): p.parse_string('00')
-    with pytest.raises(ParseException): p.parse_string(' 01')
-    with pytest.raises(ParseException): p.parse_string('001')
+    with pytest.raises(ParseException):
+        p.parse_string('0')
+    with pytest.raises(ParseException):
+        p.parse_string(' 0')
+    with pytest.raises(ParseException):
+        p.parse_string('13')
+    with pytest.raises(ParseException):
+        p.parse_string('00')
+    with pytest.raises(ParseException):
+        p.parse_string(' 01')
+    with pytest.raises(ParseException):
+        p.parse_string('001')
 
     ################################
     # numeric_month
@@ -499,14 +523,21 @@ def test_month():
     for m in range(1, 9):
         tests = [' ' + str(m) + '1', '0' + str(m) + '1']
         for test in tests:
-            with pytest.raises(ParseException): pp.parse_string(test)
+            with pytest.raises(ParseException):
+                pp.parse_string(test)
 
-    with pytest.raises(ParseException): pp.parse_string('0')
-    with pytest.raises(ParseException): pp.parse_string(' 0')
-    with pytest.raises(ParseException): pp.parse_string('13')
-    with pytest.raises(ParseException): pp.parse_string('00')
-    with pytest.raises(ParseException): pp.parse_string(' 01')
-    with pytest.raises(ParseException): pp.parse_string('001')
+    with pytest.raises(ParseException):
+        pp.parse_string('0')
+    with pytest.raises(ParseException):
+        pp.parse_string(' 0')
+    with pytest.raises(ParseException):
+        pp.parse_string('13')
+    with pytest.raises(ParseException):
+        pp.parse_string('00')
+    with pytest.raises(ParseException):
+        pp.parse_string(' 01')
+    with pytest.raises(ParseException):
+        pp.parse_string('001')
 
     ################################
     # month
@@ -530,15 +561,23 @@ def test_month():
         tests = [' ' + str(m) + '1', '0' + str(m) + '1',
                  NAMES[m-1] + 'x', NAMES[m-1][:3] + 'x']
         for test in tests:
-            with pytest.raises(ParseException): pp.parse_string(test)
+            with pytest.raises(ParseException):
+                pp.parse_string(test)
 
-    with pytest.raises(ParseException): pp.parse_string('xxx')
-    with pytest.raises(ParseException): pp.parse_string('JANU')
-    with pytest.raises(ParseException): pp.parse_string(' 0')
-    with pytest.raises(ParseException): pp.parse_string('13')
-    with pytest.raises(ParseException): pp.parse_string('00')
-    with pytest.raises(ParseException): pp.parse_string(' 01')
-    with pytest.raises(ParseException): pp.parse_string('001')
+    with pytest.raises(ParseException):
+        pp.parse_string('xxx')
+    with pytest.raises(ParseException):
+        pp.parse_string('JANU')
+    with pytest.raises(ParseException):
+        pp.parse_string(' 0')
+    with pytest.raises(ParseException):
+        pp.parse_string('13')
+    with pytest.raises(ParseException):
+        pp.parse_string('00')
+    with pytest.raises(ParseException):
+        pp.parse_string(' 01')
+    with pytest.raises(ParseException):
+        pp.parse_string('001')
 
     ################################
     # month_strict
@@ -561,15 +600,23 @@ def test_month():
                  ' ' + str(m) + '1', '0' + str(m) + '1',
                  NAMES[m-1] + 'x', NAMES[m-1][:3] + 'x']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('xxx')
-    with pytest.raises(ParseException): p.parse_string('JANU')
-    with pytest.raises(ParseException): p.parse_string(' 0')
-    with pytest.raises(ParseException): p.parse_string('13')
-    with pytest.raises(ParseException): p.parse_string('00')
-    with pytest.raises(ParseException): p.parse_string(' 01')
-    with pytest.raises(ParseException): p.parse_string('001')
+    with pytest.raises(ParseException):
+        p.parse_string('xxx')
+    with pytest.raises(ParseException):
+        p.parse_string('JANU')
+    with pytest.raises(ParseException):
+        p.parse_string(' 0')
+    with pytest.raises(ParseException):
+        p.parse_string('13')
+    with pytest.raises(ParseException):
+        p.parse_string('00')
+    with pytest.raises(ParseException):
+        p.parse_string(' 01')
+    with pytest.raises(ParseException):
+        p.parse_string('001')
 
 
 def test_date():
@@ -592,19 +639,27 @@ def test_date():
     for d in range(1, 9):
         tests = [str(d), ' ' + str(d), '0' + str(d) + '1']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
     for d in range(10, 32):
         tests = [' ' + str(d), '0' + str(d), str(d) + '1']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('0')
-    with pytest.raises(ParseException): p.parse_string(' 0')
-    with pytest.raises(ParseException): p.parse_string('32')
-    with pytest.raises(ParseException): p.parse_string('00')
-    with pytest.raises(ParseException): p.parse_string(' 01')
-    with pytest.raises(ParseException): p.parse_string('001')
+    with pytest.raises(ParseException):
+        p.parse_string('0')
+    with pytest.raises(ParseException):
+        p.parse_string(' 0')
+    with pytest.raises(ParseException):
+        p.parse_string('32')
+    with pytest.raises(ParseException):
+        p.parse_string('00')
+    with pytest.raises(ParseException):
+        p.parse_string(' 01')
+    with pytest.raises(ParseException):
+        p.parse_string('001')
 
     ################################
     # date
@@ -622,19 +677,27 @@ def test_date():
     for d in range(1, 9):
         tests = [' ' + str(d) + '1', '0' + str(d) + '1']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
     for d in range(10, 32):
         tests = [str(d) + '1', '0' + str(d) + '1']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('0')
-    with pytest.raises(ParseException): p.parse_string(' 0')
-    with pytest.raises(ParseException): p.parse_string('32')
-    with pytest.raises(ParseException): p.parse_string('00')
-    with pytest.raises(ParseException): p.parse_string(' 01')
-    with pytest.raises(ParseException): p.parse_string('001')
+    with pytest.raises(ParseException):
+        p.parse_string('0')
+    with pytest.raises(ParseException):
+        p.parse_string(' 0')
+    with pytest.raises(ParseException):
+        p.parse_string('32')
+    with pytest.raises(ParseException):
+        p.parse_string('00')
+    with pytest.raises(ParseException):
+        p.parse_string(' 01')
+    with pytest.raises(ParseException):
+        p.parse_string('001')
 
     ################################
     # date_float
@@ -657,19 +720,27 @@ def test_date():
     for d in range(1, 9):
         tests = [' ' + str(d) + '1.', '0' + str(d) + '1.']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
     for d in range(10, 32):
         tests = [str(d) + '1.', '0' + str(d) + '1.']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('0.')
-    with pytest.raises(ParseException): p.parse_string(' 0.')
-    with pytest.raises(ParseException): p.parse_string('32.')
-    with pytest.raises(ParseException): p.parse_string('00.')
-    with pytest.raises(ParseException): p.parse_string(' 01.')
-    with pytest.raises(ParseException): p.parse_string('001.')
+    with pytest.raises(ParseException):
+        p.parse_string('0.')
+    with pytest.raises(ParseException):
+        p.parse_string(' 0.')
+    with pytest.raises(ParseException):
+        p.parse_string('32.')
+    with pytest.raises(ParseException):
+        p.parse_string('00.')
+    with pytest.raises(ParseException):
+        p.parse_string(' 01.')
+    with pytest.raises(ParseException):
+        p.parse_string('001.')
 
 
 def test_doy():
@@ -692,15 +763,19 @@ def test_doy():
     for d in range(1, 100):
         tests = [str(d), '%2d'%d, '%3d'%d, '%02d'%d]
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
     for d in range(100, 367):
         tests = [str(d) + '1', ' ' + str(d), '0' + str(d)]
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('000')
-    with pytest.raises(ParseException): p.parse_string('367')
+    with pytest.raises(ParseException):
+        p.parse_string('000')
+    with pytest.raises(ParseException):
+        p.parse_string('367')
 
     ################################
     # doy_3digit_float
@@ -723,15 +798,19 @@ def test_doy():
     for d in range(1, 100):
         tests = [str(d) + '.', '%2d.'%d, '%3d.'%d, '%02d.'%d]
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
     for d in range(100, 367):
         tests = [str(d) + '1.', ' ' + str(d) + '.', '0' + str(d) + '.']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('000.')
-    with pytest.raises(ParseException): p.parse_string('367.')
+    with pytest.raises(ParseException):
+        p.parse_string('000.')
+    with pytest.raises(ParseException):
+        p.parse_string('367.')
 
     ################################
     # doy
@@ -749,15 +828,19 @@ def test_doy():
     for d in range(1, 10):
         tests = ['%2d' % d, '%02d' % d]
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
     for d in range(100, 367):
         tests = [str(d) + '1', ' ' + str(d), '0' + str(d)]
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('000')
-    with pytest.raises(ParseException): p.parse_string('367')
+    with pytest.raises(ParseException):
+        p.parse_string('000')
+    with pytest.raises(ParseException):
+        p.parse_string('367')
 
     ################################
     # doy_float
@@ -776,15 +859,19 @@ def test_doy():
     for d in range(1, 10):
         tests = ['%2d.' % d, '%02d.' % d]
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
     for d in range(100, 367):
         tests = [str(d) + '1.', ' ' + str(d) + '.', '0' + str(d) + '.']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
-    with pytest.raises(ParseException): p.parse_string('000.')
-    with pytest.raises(ParseException): p.parse_string('367.')
+    with pytest.raises(ParseException):
+        p.parse_string('000.')
+    with pytest.raises(ParseException):
+        p.parse_string('367.')
 
 
 def test_weekday():
@@ -808,7 +895,8 @@ def test_weekday():
     for name in NAMES:
         tests = [' ' + name, name + 'x', name[:4], name[:3] + 'x']
         for test in tests:
-            with pytest.raises(ParseException): p.parse_string(test)
+            with pytest.raises(ParseException):
+                p.parse_string(test)
 
 
 ##########################################################################################

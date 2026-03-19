@@ -32,9 +32,12 @@ def test_time_of_day():
     assert hms_from_sec(86400) == (23, 59, 60)
     small = 2.**-20
     assert hms_from_sec(86410 - small) == (23, 59, 70 - small)
-    with pytest.raises(JVF): hms_from_sec(86410, validate=True, leapsecs=True)
-    with pytest.raises(JVF): hms_from_sec(86400, validate=True, leapsecs=False)
-    with pytest.raises(JVF): hms_from_sec(-1.e-30, validate=True)
+    with pytest.raises(JVF):
+        hms_from_sec(86410, validate=True, leapsecs=True)
+    with pytest.raises(JVF):
+        hms_from_sec(86400, validate=True, leapsecs=False)
+    with pytest.raises(JVF):
+        hms_from_sec(-1.e-30, validate=True)
 
     assert hms_from_sec(43200, validate=True,  leapsecs=True ) == (12, 0, 0)
     assert hms_from_sec(43200, validate=True,  leapsecs=False) == (12, 0, 0)
@@ -86,22 +89,36 @@ def test_time_of_day():
     assert sec_from_hms(0, 0, [10.,10]).dtype.kind == 'f'
 
     # Check errors
-    with pytest.raises(JVF): sec_from_hms(-1,  0,  0, validate=True)
-    with pytest.raises(JVF): sec_from_hms(24,  0,  0, validate=True)
-    with pytest.raises(JVF): sec_from_hms( 1, -1,  0, validate=True)
-    with pytest.raises(JVF): sec_from_hms( 1, 60,  0, validate=True)
-    with pytest.raises(JVF): sec_from_hms( 1,  1, -1, validate=True)
-    with pytest.raises(JVF): sec_from_hms( 1,  1, 60, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms(-1,  0,  0, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms(24,  0,  0, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms( 1, -1,  0, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms( 1, 60,  0, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms( 1,  1, -1, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms( 1,  1, 60, validate=True)
 
-    with pytest.raises(JVF): sec_from_hms(-0.001,  0,  0, validate=True)
-    with pytest.raises(JVF): sec_from_hms(24.000,  0,  0, validate=True)
-    with pytest.raises(JVF): sec_from_hms( 1, -0.001,  0, validate=True)
-    with pytest.raises(JVF): sec_from_hms( 1, 60.000,  0, validate=True)
-    with pytest.raises(JVF): sec_from_hms( 1,  1, -0.001, validate=True)
-    with pytest.raises(JVF): sec_from_hms( 1,  1, 60.000, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms(-0.001,  0,  0, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms(24.000,  0,  0, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms( 1, -0.001,  0, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms( 1, 60.000,  0, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms( 1,  1, -0.001, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms( 1,  1, 60.000, validate=True)
 
-    with pytest.raises(JVF): sec_from_hms(23, 59, 70, validate=True, leapsecs=True)
-    with pytest.raises(JVF): sec_from_hms(23, 59, 60, validate=True, leapsecs=False)
+    with pytest.raises(JVF):
+        sec_from_hms(23, 59, 70, validate=True, leapsecs=True)
+    with pytest.raises(JVF):
+        sec_from_hms(23, 59, 60, validate=True, leapsecs=False)
 
     # ...but these should be fine
     _ = sec_from_hms(23, 59, 59, validate=True, leapsecs=True)
@@ -133,14 +150,19 @@ def test_time_of_day():
     assert hms_microsec_from_sec(1.2345678) == (0, 0, 1, 234568)
     assert hms_microsec_from_sec(86409.9999995) == (23, 59, 69, 999999)
     assert hms_microsec_from_sec(-0.0000004999) == (0, 0, 0, 0)
-    with pytest.raises(JVF): hms_microsec_from_sec(86410, validate=True, leapsecs=True)
-    with pytest.raises(JVF): hms_microsec_from_sec(86409.99999950001, validate=True,
-                      leapsecs=True)
-    with pytest.raises(JVF): hms_microsec_from_sec(86400, validate=True,
-                      leapsecs=False)
-    with pytest.raises(JVF): hms_microsec_from_sec(86399.99999950001, validate=True,
-                      leapsecs=False)
-    with pytest.raises(JVF): hms_microsec_from_sec(-0.0000005, validate=True)
+    with pytest.raises(JVF):
+        hms_microsec_from_sec(86410, validate=True, leapsecs=True)
+    with pytest.raises(JVF):
+        hms_microsec_from_sec(86409.99999950001, validate=True,
+                              leapsecs=True)
+    with pytest.raises(JVF):
+        hms_microsec_from_sec(86400, validate=True,
+                              leapsecs=False)
+    with pytest.raises(JVF):
+        hms_microsec_from_sec(86399.99999950001, validate=True,
+                              leapsecs=False)
+    with pytest.raises(JVF):
+        hms_microsec_from_sec(-0.0000005, validate=True)
 
     # float arrays
     # This makes about 3300 non-uniformly spaced transcendental numbers
@@ -171,7 +193,9 @@ def test_time_of_day():
     assert np.all(microsec / 1.e6 == sec)
     assert sec.shape == microsec.shape
 
-    with pytest.raises(JVF): sec_from_hms(0,  0,  0, -1, validate=True)
-    with pytest.raises(JVF): sec_from_hms(0,  0,  0, 1000000, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms(0,  0,  0, -1, validate=True)
+    with pytest.raises(JVF):
+        sec_from_hms(0,  0,  0, 1000000, validate=True)
 
 ##########################################################################################

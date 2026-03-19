@@ -40,10 +40,14 @@ def test_calendar():
     assert day_from_ymd(2000,[1,2,3],1).tolist() == [ 0,31,60]
     assert day_from_ymd([2000,2001,2002],1,1).tolist() == [0,366,731]
 
-    with pytest.raises(JVF): day_from_ymd(2000, 1,  0, validate=True)
-    with pytest.raises(JVF): day_from_ymd(2000, 2, 30, validate=True)
-    with pytest.raises(JVF): day_from_ymd(2000, 0,  1, validate=True)
-    with pytest.raises(JVF): day_from_ymd(2000, 13, 1, validate=True)
+    with pytest.raises(JVF):
+        day_from_ymd(2000, 1,  0, validate=True)
+    with pytest.raises(JVF):
+        day_from_ymd(2000, 2, 30, validate=True)
+    with pytest.raises(JVF):
+        day_from_ymd(2000, 0,  1, validate=True)
+    with pytest.raises(JVF):
+        day_from_ymd(2000, 13, 1, validate=True)
 
     with pytest.raises(JVF):
         day_from_ymd([2000,2000], [1, 1], [ 1, 0], validate=True)
@@ -68,10 +72,12 @@ def test_calendar():
                      proleptic=False).tolist() == [-152386,-152385]
 
     _ = day_from_ymd(1582, 10, 7, validate=False)
-    with pytest.raises(JVF): day_from_ymd(1582, 10, 7, validate=True)
+    with pytest.raises(JVF):
+        day_from_ymd(1582, 10, 7, validate=True)
 
     _ = day_from_ymd(1582, 10, np.arange(1,32), validate=False)
-    with pytest.raises(JVF): day_from_ymd(1582, 10, np.arange(1,32), validate=True)
+    with pytest.raises(JVF):
+        day_from_ymd(1582, 10, np.arange(1,32), validate=True)
 
     # ymd_from_day()
     assert ymd_from_day(0) == (2000, 1, 1)
@@ -125,10 +131,13 @@ def test_calendar():
     assert day_from_yd([2000,2001],1).tolist() == [ 0,366]
     assert day_from_yd([2000,2001,2002],[1,2,3]).tolist() == [0,367,733]
 
-    with pytest.raises(JVF): day_from_yd(2000,  0, validate=True)
+    with pytest.raises(JVF):
+        day_from_yd(2000,  0, validate=True)
     assert day_from_yd(2000, 366, validate=True) == 365
-    with pytest.raises(JVF): day_from_yd(2000, 367, validate=True)
-    with pytest.raises(JVF): day_from_yd(1582, 360, validate=True, proleptic=False)
+    with pytest.raises(JVF):
+        day_from_yd(2000, 367, validate=True)
+    with pytest.raises(JVF):
+        day_from_yd(1582, 360, validate=True, proleptic=False)
     with pytest.raises(JVF):
         day_from_yd(1582, [300,355,360], validate=True, proleptic=False)
 
@@ -145,10 +154,14 @@ def test_calendar():
     # month_from_ym()
     assert month_from_ym(2000, 1, validate=False) == 0
     assert month_from_ym(2000, 1, validate=True) == 0
-    with pytest.raises(JVF): month_from_ym(2000, 0, validate=True)
-    with pytest.raises(JVF): month_from_ym(2000, 13, validate=True)
-    with pytest.raises(JVF): month_from_ym(2000, [12,14], validate=True)
-    with pytest.raises(JVF): month_from_ym([2000, 2001], [12,14], validate=True)
+    with pytest.raises(JVF):
+        month_from_ym(2000, 0, validate=True)
+    with pytest.raises(JVF):
+        month_from_ym(2000, 13, validate=True)
+    with pytest.raises(JVF):
+        month_from_ym(2000, [12,14], validate=True)
+    with pytest.raises(JVF):
+        month_from_ym([2000, 2001], [12,14], validate=True)
 
     # days_in_ym()
     for proleptic in (False, True):

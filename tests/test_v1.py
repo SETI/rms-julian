@@ -805,7 +805,6 @@ def test_general_parsing_v1(suppress_julian_deprecation):
                      []
 
 
-
 def test_v1_warnings():
 
     with pytest.warns(JDW):
